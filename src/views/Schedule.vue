@@ -5,9 +5,7 @@
         <div class="card-header">
           <span>课表管理</span>
           <div class="header-actions">
-            <el-button type="primary" @click="handleGenerate">
-              自动排课
-            </el-button>
+            <el-button type="primary" @click="handleGenerate"> 自动排课 </el-button>
           </div>
         </div>
       </template>

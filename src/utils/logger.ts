@@ -69,8 +69,9 @@ interface LogEntry {
 
 // 默认配置
 const defaultConfig: LoggerConfig = {
-  level: (import.meta.env.VITE_LOG_LEVEL as LogLevel) ||
-         (import.meta.env.DEV ? LogLevel.DEBUG : LogLevel.INFO),
+  level:
+    (import.meta.env.VITE_LOG_LEVEL as LogLevel) ||
+    (import.meta.env.DEV ? LogLevel.DEBUG : LogLevel.INFO),
   enableConsole: import.meta.env.VITE_LOG_ENABLE_CONSOLE !== 'false',
   enableStorage: import.meta.env.VITE_LOG_ENABLE_STORAGE !== 'false',
   maxStorageSize: Number(import.meta.env.VITE_LOG_MAX_STORAGE_SIZE) || 1000,
@@ -133,13 +134,13 @@ class Logger {
 
     if (typeof data === 'object' && data !== null) {
       if (Array.isArray(data)) {
-        return data.map(item => this.sanitize(item));
+        return data.map((item) => this.sanitize(item));
       }
 
       const sanitized: any = {};
       for (const [key, value] of Object.entries(data)) {
         // 检查键名是否包含敏感关键词
-        const isSensitiveKey = SENSITIVE_KEYWORDS.some(keyword =>
+        const isSensitiveKey = SENSITIVE_KEYWORDS.some((keyword) =>
           key.toLowerCase().includes(keyword.toLowerCase()),
         );
 
@@ -165,13 +166,13 @@ class Logger {
     let result = str;
 
     // 匹配 key=value 格式
-    SENSITIVE_KEYWORDS.forEach(keyword => {
+    SENSITIVE_KEYWORDS.forEach((keyword) => {
       const regex = new RegExp(`${keyword}=[^&\\s]*`, 'gi');
       result = result.replace(regex, `${keyword}=***`);
     });
 
     // 匹配 "key": "value" 格式（JSON）
-    SENSITIVE_KEYWORDS.forEach(keyword => {
+    SENSITIVE_KEYWORDS.forEach((keyword) => {
       const regex = new RegExp(`"${keyword}"\\s*:\\s*"[^"]*"`, 'gi');
       result = result.replace(regex, `"${keyword}": "***"`);
     });
@@ -345,7 +346,7 @@ class Logger {
    */
   getHistory(level?: LogLevel): LogEntry[] {
     if (level) {
-      return this.logHistory.filter(entry => entry.level === level);
+      return this.logHistory.filter((entry) => entry.level === level);
     }
     return [...this.logHistory];
   }
@@ -380,7 +381,7 @@ class Logger {
    */
   exportLogsAsText(): string {
     return this.logHistory
-      .map(entry => {
+      .map((entry) => {
         const dataStr = entry.data ? ` | ${JSON.stringify(entry.data)}` : '';
         return `[${entry.timestamp}] [${entry.level}] [${entry.module}] ${entry.message}${dataStr}`;
       })
@@ -394,7 +395,9 @@ class Logger {
    */
   downloadLogs(format: 'json' | 'text' = 'text'): void {
     const content = format === 'json' ? this.exportLogs() : this.exportLogsAsText();
-    const blob = new Blob([content], { type: format === 'json' ? 'application/json' : 'text/plain' });
+    const blob = new Blob([content], {
+      type: format === 'json' ? 'application/json' : 'text/plain',
+    });
     const url = URL.createObjectURL(blob);
     const link = document.createElement('a');
     const timestamp = new Date().toISOString().replace(/[:.]/g, '-');

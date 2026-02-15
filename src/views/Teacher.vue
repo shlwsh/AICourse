@@ -5,9 +5,7 @@
         <div class="card-header">
           <span>教师管理</span>
           <div class="header-actions">
-            <el-button type="primary">
-              添加教师
-            </el-button>
+            <el-button type="primary"> 添加教师 </el-button>
           </div>
         </div>
       </template>

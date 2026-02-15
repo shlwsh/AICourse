@@ -47,12 +47,8 @@
         </el-row>
 
         <div class="quick-actions">
-          <el-button type="primary" size="large" @click="goToSchedule">
-            开始排课
-          </el-button>
-          <el-button size="large" @click="goToSettings">
-            系统设置
-          </el-button>
+          <el-button type="primary" size="large" @click="goToSchedule"> 开始排课 </el-button>
+          <el-button size="large" @click="goToSettings"> 系统设置 </el-button>
         </div>
       </div>
     </el-card>

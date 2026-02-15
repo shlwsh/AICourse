@@ -6,9 +6,7 @@
       <el-header class="app-header">
         <div class="header-content">
           <div class="logo-section">
-            <h1 class="app-title">
-              排课系统
-            </h1>
+            <h1 class="app-title">排课系统</h1>
             <span class="app-subtitle">智能课程调度</span>
           </div>
           <el-menu
@@ -17,18 +15,10 @@
             :ellipsis="false"
             @select="handleMenuSelect"
           >
-            <el-menu-item index="/">
-              首页
-            </el-menu-item>
-            <el-menu-item index="/schedule">
-              课表管理
-            </el-menu-item>
-            <el-menu-item index="/teacher">
-              教师管理
-            </el-menu-item>
-            <el-menu-item index="/settings">
-              系统设置
-            </el-menu-item>
+            <el-menu-item index="/"> 首页 </el-menu-item>
+            <el-menu-item index="/schedule"> 课表管理 </el-menu-item>
+            <el-menu-item index="/teacher"> 教师管理 </el-menu-item>
+            <el-menu-item index="/settings"> 系统设置 </el-menu-item>
           </el-menu>
         </div>
       </el-header>
