@@ -181,25 +181,73 @@ export class GitService {
   }
 
   /**
+   * 获取当前分支名
+   */
+  async getCurrentBranch(): Promise<string> {
+    logger.debug('获取当前分支名');
+
+    try {
+      const proc = Bun.spawn(['git', 'rev-parse', '--abbrev-ref', 'HEAD'], {
+        stdout: 'pipe',
+        stderr: 'pipe',
+      });
+
+      const output = await new Response(proc.stdout).text();
+      const exitCode = await proc.exited;
+
+      if (exitCode !== 0) {
+        throw new Error('获取当前分支名失败');
+      }
+
+      return output.trim();
+    } catch (error) {
+      logger.error('获取当前分支名失败', error as Error);
+      throw error;
+    }
+  }
+
+  /**
    * 推送到远程仓库
    */
   async push(): Promise<void> {
     logger.info('执行 git push');
 
     try {
-      const proc = Bun.spawn(['git', 'push'], {
+      // 先尝试普通推送
+      let proc = Bun.spawn(['git', 'push'], {
         stdout: 'pipe',
         stderr: 'pipe',
       });
 
-      const exitCode = await proc.exited;
+      let exitCode = await proc.exited;
 
       if (exitCode !== 0) {
         const error = await new Response(proc.stderr).text();
-        throw new Error(`git push 失败: ${error}`);
-      }
 
-      logger.info('git push 执行成功');
+        // 如果是因为没有设置上游分支，尝试设置上游分支并推送
+        if (error.includes('no upstream branch') || error.includes('set-upstream')) {
+          logger.info('首次推送，设置上游分支');
+          const branch = await this.getCurrentBranch();
+
+          proc = Bun.spawn(['git', 'push', '-u', 'origin', branch], {
+            stdout: 'pipe',
+            stderr: 'pipe',
+          });
+
+          exitCode = await proc.exited;
+
+          if (exitCode !== 0) {
+            const pushError = await new Response(proc.stderr).text();
+            throw new Error(`git push 失败: ${pushError}`);
+          }
+
+          logger.info('git push 执行成功（已设置上游分支）');
+        } else {
+          throw new Error(`git push 失败: ${error}`);
+        }
+      } else {
+        logger.info('git push 执行成功');
+      }
     } catch (error) {
       logger.error('git push 执行失败', error as Error);
       throw error;

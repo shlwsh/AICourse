@@ -168,7 +168,30 @@ async function main() {
   console.log('💾 正在创建提交...');
   await execCommand(['git', 'commit', '-m', commitMessage, '--no-verify']);
 
-  console.log('\n✨ 提交成功！');
+  // 6. 推送到远程仓库
+  console.log('🚀 正在推送到远程仓库...');
+  try {
+    // 获取当前分支名
+    const branch = (await execCommand(['git', 'rev-parse', '--abbrev-ref', 'HEAD'])).trim();
+
+    // 尝试推送到远程仓库
+    await execCommand(['git', 'push', 'origin', branch]);
+
+    console.log('\n✨ 提交并推送成功！');
+  } catch (error: any) {
+    // 如果推送失败，尝试设置上游分支并推送
+    console.log('⚠️  首次推送，正在设置上游分支...');
+    try {
+      const branch = (await execCommand(['git', 'rev-parse', '--abbrev-ref', 'HEAD'])).trim();
+      await execCommand(['git', 'push', '-u', 'origin', branch]);
+      console.log('\n✨ 提交并推送成功！');
+    } catch (pushError: any) {
+      console.error('\n❌ 推送失败:', pushError.message);
+      console.error('提示：本地提交已完成，但推送到远程仓库失败');
+      console.error('你可以稍后手动执行: git push');
+      process.exit(1);
+    }
+  }
 }
 
 // 执行
