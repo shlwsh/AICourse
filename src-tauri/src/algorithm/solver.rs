@@ -24,7 +24,6 @@
 // ============================================================================
 
 use serde::{Deserialize, Serialize};
-use std::collections::HashMap;
 use thiserror::Error;
 use tracing::{debug, error, info, warn};
 
@@ -1011,11 +1010,13 @@ mod tests {
             periods_per_day: 10,
             max_iterations: 5000,
             timeout_seconds: 60,
+            enable_cost_cache: true,
         };
         assert_eq!(config.cycle_days, 7);
         assert_eq!(config.periods_per_day, 10);
         assert_eq!(config.max_iterations, 5000);
         assert_eq!(config.timeout_seconds, 60);
+        assert_eq!(config.enable_cost_cache, true);
     }
 
     #[test]
@@ -1132,6 +1133,7 @@ mod tests {
             periods_per_day: 10,
             max_iterations: 5000,
             timeout_seconds: 60,
+            enable_cost_cache: true,
         };
         let solver = ConstraintSolver::new(config.clone()).unwrap();
         assert_eq!(solver.config(), &config);
@@ -2599,6 +2601,71 @@ impl ConstraintSolver {
 
         cost
     }
+
+    /// 带缓存的代价计算方法
+    ///
+    /// 使用缓存避免重复计算相同课表的代价值。
+    ///
+    /// # 参数
+    /// - `schedule`: 课表引用
+    /// - `constraint_graph`: 约束图引用
+    /// - `cache`: 代价缓存（可变引用）
+    ///
+    /// # 返回
+    /// 课表的总代价值
+    ///
+    /// # 示例
+    ///
+    /// ```
+    /// use course_scheduling::algorithm::{ConstraintSolver, SolverConfig, CostCache};
+    /// use course_scheduling::algorithm::types::{Schedule, ConstraintGraph};
+    ///
+    /// let config = SolverConfig::default();
+    /// let solver = ConstraintSolver::new(config).unwrap();
+    /// let schedule = Schedule::new(5, 8);
+    /// let constraint_graph = ConstraintGraph::new(
+    ///     HashMap::new(),
+    ///     HashMap::new(),
+    ///     HashMap::new(),
+    ///     vec![],
+    /// );
+    /// let mut cache = CostCache::new(1000);
+    ///
+    /// let cost = solver.calculate_cost_with_cache(&schedule, &constraint_graph, &mut cache);
+    /// ```
+    pub fn calculate_cost_with_cache(
+        &self,
+        schedule: &crate::algorithm::types::Schedule,
+        constraint_graph: &crate::algorithm::types::ConstraintGraph,
+        cache: &mut crate::algorithm::cost_cache::CostCache,
+    ) -> u32 {
+        use crate::algorithm::schedule_hash::calculate_schedule_hash;
+        use tracing::{debug, info};
+
+        // 如果未启用缓存，直接计算
+        if !self.config.enable_cost_cache {
+            return self.calculate_cost(schedule, constraint_graph);
+        }
+
+        // 计算课表哈希值
+        let schedule_hash = calculate_schedule_hash(schedule);
+
+        // 尝试从缓存获取
+        if let Some(cached_cost) = cache.get(schedule_hash) {
+            debug!("代价缓存命中，哈希值: {}, 代价: {}", schedule_hash, cached_cost);
+            return cached_cost;
+        }
+
+        // 缓存未命中，计算代价值
+        info!("代价缓存未命中，计算新的代价值");
+        let cost = self.calculate_cost(schedule, constraint_graph);
+
+        // 将结果存入缓存
+        cache.insert(schedule_hash, cost);
+        debug!("代价值已缓存，哈希值: {}, 代价: {}", schedule_hash, cost);
+
+        cost
+    }
 }
 
 // ============================================================================
@@ -3057,6 +3124,7 @@ mod backtrack_tests {
             periods_per_day: 1,
             max_iterations: 10000,
             timeout_seconds: 30,
+            enable_cost_cache: true,
         };
         let solver = ConstraintSolver::new(config).unwrap();
 

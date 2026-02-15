@@ -187,18 +187,19 @@ pub fn count_occupied_slots(mask: TimeSlotMask) -> u32 {
     mask.count_ones()
 }
 
-// 子模块声明（将在后续任务中实现）
-// pub mod constraint_solver;
-// pub mod cost_function;
-// pub mod conflict_detector;
-// pub mod swap_suggester;
-// pub mod constraint_graph;
-// pub mod validator;
+// 子模块声明
+// pub mod constraint_solver; // 将在后续任务中实现
+// pub mod cost_function; // 将在后续任务中实现
+pub mod conflict_detector;
+// pub mod swap_suggester; // 将在后续任务中实现
+// pub mod validator; // 将在后续任务中实现
 
-// 重新导出核心类型（将在后续任务中实现）
-// pub use constraint_solver::ConstraintSolver;
-// pub use cost_function::CostCalculator;
-// pub use conflict_detector::ConflictDetector;
-// pub use swap_suggester::SwapSuggester;
-// pub use constraint_graph::ConstraintGraph;
-// pub use validator::ScheduleValidator;
+// 重新导出核心类型
+// pub use constraint_solver::ConstraintSolver; // 将在后续任务中实现
+// pub use cost_function::CostCalculator; // 将在后续任务中实现
+pub use conflict_detector::{
+    ConflictDetector, ConflictInfo, ConflictSeverity, ConflictType, ConstraintGraph,
+    HardConstraintViolation, SoftConstraintViolation,
+};
+// pub use swap_suggester::SwapSuggester; // 将在后续任务中实现
+// pub use validator::ScheduleValidator; // 将在后续任务中实现

@@ -19,10 +19,14 @@
 // ```
 // ============================================================================
 
+pub mod cost_cache;
+pub mod schedule_hash;
 pub mod solver;
 pub mod types;
 
 // 重新导出常用类型
+pub use cost_cache::{CacheStats, CostCache};
+pub use schedule_hash::{calculate_incremental_hash, calculate_schedule_hash};
 pub use solver::{ConstraintSolver, SolverConfig, SolverError};
 pub use types::{
     clear_slot, count_slots, is_slot_set, set_slot, ExtendedTimeSlotMask, TimeSlot, TimeSlotMask,
