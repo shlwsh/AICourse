@@ -117,11 +117,7 @@ pub fn calculate_incremental_hash(
     }
 
     let new_hash = hasher.finish();
-    trace!(
-        "增量计算哈希值: old={}, new={}",
-        old_hash,
-        new_hash
-    );
+    trace!("增量计算哈希值: old={}, new={}", old_hash, new_hash);
     new_hash
 }
 
@@ -246,10 +242,7 @@ mod tests {
 
         // 注意：增量哈希可能与完整重新计算的哈希不完全相同
         // 这里只验证增量哈希确实发生了变化
-        assert_ne!(
-            incremental_hash, hash_before,
-            "增量哈希应该与原哈希不同"
-        );
+        assert_ne!(incremental_hash, hash_before, "增量哈希应该与原哈希不同");
     }
 
     #[test]

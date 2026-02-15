@@ -2652,7 +2652,10 @@ impl ConstraintSolver {
 
         // 尝试从缓存获取
         if let Some(cached_cost) = cache.get(schedule_hash) {
-            debug!("代价缓存命中，哈希值: {}, 代价: {}", schedule_hash, cached_cost);
+            debug!(
+                "代价缓存命中，哈希值: {}, 代价: {}",
+                schedule_hash, cached_cost
+            );
             return cached_cost;
         }
 

@@ -20,8 +20,8 @@ use std::collections::HashMap;
 use tracing::{debug, info, trace};
 
 use crate::algorithm::types::{
-    ClassCurriculum, SubjectConfig, TeacherMutualExclusion, TeacherPreference,
-    TimeSlot, Venue, WeekType,
+    ClassCurriculum, SubjectConfig, TeacherMutualExclusion, TeacherPreference, TimeSlot, Venue,
+    WeekType,
 };
 
 // Schedule 相关类型需要单独定义或从其他模块导入
@@ -331,11 +331,7 @@ impl ConflictDetector {
     ///
     /// # 返回
     /// 冲突检测器实例
-    pub fn new(
-        schedule: Schedule,
-        constraint_graph: ConstraintGraph,
-        periods_per_day: u8,
-    ) -> Self {
+    pub fn new(schedule: Schedule, constraint_graph: ConstraintGraph, periods_per_day: u8) -> Self {
         info!(
             "创建冲突检测器: 课表条目数={}, 每天节次数={}",
             schedule.entries.len(),
@@ -391,11 +387,7 @@ impl ConflictDetector {
     ///
     /// # 返回
     /// 冲突信息
-    fn check_slot_conflicts(
-        &self,
-        curriculum: &ClassCurriculum,
-        slot: &TimeSlot,
-    ) -> ConflictInfo {
+    fn check_slot_conflicts(&self, curriculum: &ClassCurriculum, slot: &TimeSlot) -> ConflictInfo {
         trace!(
             "检查时间槽位冲突: slot=({}, {}), class_id={}, subject_id={}",
             slot.day,
@@ -449,7 +441,11 @@ impl ConflictDetector {
         slot: &TimeSlot,
     ) -> Option<HardConstraintViolation> {
         // 1. 检查课程禁止时段
-        if let Some(subject_config) = self.constraint_graph.subject_configs.get(&curriculum.subject_id) {
+        if let Some(subject_config) = self
+            .constraint_graph
+            .subject_configs
+            .get(&curriculum.subject_id)
+        {
             if subject_config.is_slot_forbidden(slot, self.periods_per_day) {
                 trace!("违反硬约束: 课程禁止时段");
                 return Some(HardConstraintViolation::ForbiddenSlot);
@@ -457,7 +453,11 @@ impl ConflictDetector {
         }
 
         // 2. 检查教师不排课时段
-        if let Some(teacher_pref) = self.constraint_graph.teacher_prefs.get(&curriculum.teacher_id) {
+        if let Some(teacher_pref) = self
+            .constraint_graph
+            .teacher_prefs
+            .get(&curriculum.teacher_id)
+        {
             if teacher_pref.is_slot_blocked(slot, self.periods_per_day) {
                 trace!("违反硬约束: 教师不排课时段");
                 return Some(HardConstraintViolation::TeacherBlocked);
@@ -487,7 +487,11 @@ impl ConflictDetector {
         }
 
         // 6. 检查场地容量
-        if let Some(subject_config) = self.constraint_graph.subject_configs.get(&curriculum.subject_id) {
+        if let Some(subject_config) = self
+            .constraint_graph
+            .subject_configs
+            .get(&curriculum.subject_id)
+        {
             if let Some(venue_id) = &subject_config.venue_id {
                 if let Some(venue) = self.constraint_graph.venues.get(venue_id) {
                     let venue_usage = self.count_venue_usage(venue_id, slot);
@@ -532,7 +536,11 @@ impl ConflictDetector {
         }
 
         // 8. 检查连堂限制
-        if let Some(subject_config) = self.constraint_graph.subject_configs.get(&curriculum.subject_id) {
+        if let Some(subject_config) = self
+            .constraint_graph
+            .subject_configs
+            .get(&curriculum.subject_id)
+        {
             if !subject_config.allow_double_session {
                 if self.has_adjacent_same_subject(curriculum, slot) {
                     trace!("违反硬约束: 不允许连堂");
@@ -558,7 +566,11 @@ impl ConflictDetector {
         slot: &TimeSlot,
     ) -> Option<SoftConstraintViolation> {
         // 1. 检查教师早晚偏好（优先级最高）
-        if let Some(teacher_pref) = self.constraint_graph.teacher_prefs.get(&curriculum.teacher_id) {
+        if let Some(teacher_pref) = self
+            .constraint_graph
+            .teacher_prefs
+            .get(&curriculum.teacher_id)
+        {
             if teacher_pref.time_bias == 1 && slot.period == 0 {
                 trace!("违反软约束: 教师厌恶早课但被安排第1节");
                 return Some(SoftConstraintViolation::TimeBias);
@@ -570,23 +582,30 @@ impl ConflictDetector {
         }
 
         // 2. 检查主科连续3节
-        if let Some(subject_config) = self.constraint_graph.subject_configs.get(&curriculum.subject_id) {
+        if let Some(subject_config) = self
+            .constraint_graph
+            .subject_configs
+            .get(&curriculum.subject_id)
+        {
             if subject_config.is_major_subject {
                 let consecutive_count = self.count_consecutive_sessions_at(curriculum, slot);
                 if consecutive_count >= 3 {
-                    trace!(
-                        "违反软约束: 主科连续{}节",
-                        consecutive_count
-                    );
+                    trace!("违反软约束: 主科连续{}节", consecutive_count);
                     return Some(SoftConstraintViolation::ConsecutiveMajorSubject);
                 }
             }
         }
 
         // 3. 检查教师时段偏好（优先级较低）
-        if let Some(teacher_pref) = self.constraint_graph.teacher_prefs.get(&curriculum.teacher_id) {
+        if let Some(teacher_pref) = self
+            .constraint_graph
+            .teacher_prefs
+            .get(&curriculum.teacher_id)
+        {
             // 如果偏好掩码不为0（即设置了偏好），才检查
-            if teacher_pref.preferred_slots != 0 && !teacher_pref.is_slot_preferred(slot, self.periods_per_day) {
+            if teacher_pref.preferred_slots != 0
+                && !teacher_pref.is_slot_preferred(slot, self.periods_per_day)
+            {
                 trace!("违反软约束: 不在教师偏好时段");
                 return Some(SoftConstraintViolation::TeacherPreference);
             }
@@ -658,9 +677,10 @@ impl ConflictDetector {
     /// # 返回
     /// 如果教师在该时段有课返回 true，否则返回 false
     fn is_teacher_busy(&self, teacher_id: u32, slot: &TimeSlot) -> bool {
-        self.schedule.entries.iter().any(|entry| {
-            entry.teacher_id == teacher_id && entry.time_slot == *slot
-        })
+        self.schedule
+            .entries
+            .iter()
+            .any(|entry| entry.teacher_id == teacher_id && entry.time_slot == *slot)
     }
 
     /// 检查班级是否在指定时段忙碌
@@ -672,9 +692,10 @@ impl ConflictDetector {
     /// # 返回
     /// 如果班级在该时段有课返回 true，否则返回 false
     fn is_class_busy(&self, class_id: u32, slot: &TimeSlot) -> bool {
-        self.schedule.entries.iter().any(|entry| {
-            entry.class_id == class_id && entry.time_slot == *slot
-        })
+        self.schedule
+            .entries
+            .iter()
+            .any(|entry| entry.class_id == class_id && entry.time_slot == *slot)
     }
 
     /// 统计场地在指定时段的使用数量
@@ -686,14 +707,21 @@ impl ConflictDetector {
     /// # 返回
     /// 场地使用数量
     fn count_venue_usage(&self, venue_id: &str, slot: &TimeSlot) -> u8 {
-        let count = self.schedule.entries.iter().filter(|entry| {
-            if let Some(subject_config) = self.constraint_graph.subject_configs.get(&entry.subject_id) {
-                if let Some(entry_venue_id) = &subject_config.venue_id {
-                    return entry_venue_id == venue_id && entry.time_slot == *slot;
+        let count = self
+            .schedule
+            .entries
+            .iter()
+            .filter(|entry| {
+                if let Some(subject_config) =
+                    self.constraint_graph.subject_configs.get(&entry.subject_id)
+                {
+                    if let Some(entry_venue_id) = &subject_config.venue_id {
+                        return entry_venue_id == venue_id && entry.time_slot == *slot;
+                    }
                 }
-            }
-            false
-        }).count() as u8;
+                false
+            })
+            .count() as u8;
 
         trace!(
             "统计场地使用: venue_id={}, slot=({}, {}), count={}",
@@ -767,9 +795,7 @@ impl ConflictDetector {
             HardConstraintViolation::TeacherBlocked => {
                 format!("教师 {} 在该时段不排课", curriculum.teacher_id)
             }
-            HardConstraintViolation::VenueOverCapacity => {
-                "场地容量已满".to_string()
-            }
+            HardConstraintViolation::VenueOverCapacity => "场地容量已满".to_string(),
             HardConstraintViolation::TeacherMutualExclusion => {
                 format!("教师 {} 与其他教师存在互斥约束", curriculum.teacher_id)
             }
@@ -820,16 +846,14 @@ mod tests {
     /// 创建测试用的课表
     fn create_test_schedule() -> Schedule {
         Schedule {
-            entries: vec![
-                ScheduleEntry {
-                    class_id: 101,
-                    subject_id: "math".to_string(),
-                    teacher_id: 1,
-                    time_slot: TimeSlot::new(0, 0),
-                    is_fixed: false,
-                    week_type: WeekType::Every,
-                },
-            ],
+            entries: vec![ScheduleEntry {
+                class_id: 101,
+                subject_id: "math".to_string(),
+                teacher_id: 1,
+                time_slot: TimeSlot::new(0, 0),
+                is_fixed: false,
+                week_type: WeekType::Every,
+            }],
             cost: 0,
             metadata: ScheduleMetadata {
                 cycle_days: 5,
@@ -922,11 +946,13 @@ mod tests {
         };
 
         // 检查禁止时段（第1节）
-        let violation = detector.check_hard_constraint_violations(&curriculum, &TimeSlot::new(0, 0));
+        let violation =
+            detector.check_hard_constraint_violations(&curriculum, &TimeSlot::new(0, 0));
         assert_eq!(violation, Some(HardConstraintViolation::ForbiddenSlot));
 
         // 检查非禁止时段（第2节）
-        let violation = detector.check_hard_constraint_violations(&curriculum, &TimeSlot::new(0, 1));
+        let violation =
+            detector.check_hard_constraint_violations(&curriculum, &TimeSlot::new(0, 1));
         assert_eq!(violation, None);
     }
 }
