@@ -1,0 +1,38 @@
+# Rustfmt 配置文件
+# 用于格式化 Rust 代码
+# 仅使用稳定特性，兼容 stable 和 nightly 版本
+
+# 基础配置
+edition = "2021"
+max_width = 100
+hard_tabs = false
+tab_spaces = 4
+
+# 代码风格
+use_small_heuristics = "Default"
+newline_style = "Unix"
+remove_nested_parens = true
+use_field_init_shorthand = true
+use_try_shorthand = true
+force_explicit_abi = true
+reorder_imports = true
+
+# 链式调用
+chain_width = 60
+single_line_if_else_max_width = 50
+
+# 以下是稳定版本支持的所有配置项
+# 更多高级配置需要 nightly 版本，可以在需要时启用
+
+# 如果使用 nightly 版本，可以取消注释以下配置：
+# unstable_features = true
+# imports_granularity = "Crate"
+# group_imports = "StdExternalCrate"
+# wrap_comments = true
+# comment_width = 80
+# normalize_comments = true
+# normalize_doc_attributes = true
+# format_code_in_doc_comments = true
+# format_strings = true
+# format_macro_matchers = true
+# format_macro_bodies = true

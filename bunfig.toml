@@ -1,0 +1,110 @@
+# Bun 运行时配置文件
+# 用于配置 Bun 的运行时行为、包管理和构建选项
+
+# ============================================
+# 运行时配置 (Runtime Configuration)
+# ============================================
+[runtime]
+# 启用 Bun 的快速刷新功能（开发模式）
+hot = true
+
+# 启用源码映射，便于调试
+sourcemap = "inline"
+
+# 预加载模块（可选，用于提升启动性能）
+# preload = ["./src-service/utils/logger.ts"]
+
+# ============================================
+# 包管理器配置 (Package Manager)
+# ============================================
+[install]
+# 使用全局缓存目录
+cache = true
+
+# 自动安装 peer dependencies
+auto = true
+
+# 使用精确版本（不使用 ^ 或 ~）
+exact = false
+
+# 生产环境安装（排除 devDependencies）
+production = false
+
+# 冻结 lockfile（CI 环境推荐）
+frozen = false
+
+# 并发安装的最大数量
+concurrent = 10
+
+# ============================================
+# 开发服务器配置 (Development Server)
+# ============================================
+[dev]
+# 开发服务器端口
+port = 3000
+
+# 监听地址
+host = "localhost"
+
+# 启用 HTTPS（可选）
+# https = false
+
+# ============================================
+# 构建配置 (Build Configuration)
+# ============================================
+[build]
+# 目标运行时
+target = "bun"
+
+# 输出格式
+format = "esm"
+
+# 代码分割
+splitting = true
+
+# 压缩代码
+minify = true
+
+# 生成源码映射
+sourcemap = "external"
+
+# 外部依赖（不打包进最终文件）
+# external = ["@tauri-apps/api"]
+
+# ============================================
+# 测试配置 (Test Configuration)
+# ============================================
+[test]
+# 测试超时时间（毫秒）
+timeout = 5000
+
+# 测试覆盖率
+coverage = true
+
+# 测试环境
+# environment = "node"
+
+# ============================================
+# 日志配置 (Logging)
+# ============================================
+[log]
+# 日志级别: "debug" | "info" | "warn" | "error"
+level = "info"
+
+# ============================================
+# 性能优化配置 (Performance)
+# ============================================
+[performance]
+# 启用 JIT 编译
+jit = true
+
+# 内存限制（MB）
+# heap-size = 2048
+
+# ============================================
+# 环境变量配置 (Environment Variables)
+# ============================================
+# 可以在这里定义默认的环境变量
+# [env]
+# NODE_ENV = "development"
+# LOG_LEVEL = "info"

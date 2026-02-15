@@ -1,0 +1,32 @@
+# 依赖目录
+node_modules/
+dist/
+dist-service/
+
+# Tauri 构建产物
+src-tauri/target/
+src-tauri/gen/
+
+# 测试覆盖率报告
+coverage/
+.nyc_output/
+
+# 构建产物
+*.min.js
+*.bundle.js
+
+# 日志文件
+*.log
+
+# 临时文件
+.DS_Store
+Thumbs.db
+
+# Markdown 文件（保留原始格式）
+*.md
+
+# 锁文件
+package-lock.json
+yarn.lock
+pnpm-lock.yaml
+bun.lockb

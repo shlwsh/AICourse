@@ -1,0 +1,48 @@
+# 依赖
+node_modules/
+dist/
+dist-service/
+
+# 日志
+logs/
+*.log
+
+# 环境变量
+.env
+.env.local
+.env.*.local
+.env.mygit
+
+# 编辑器
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# 操作系统
+.DS_Store
+Thumbs.db
+
+# 构建产物
+*.tsbuildinfo
+
+# 测试
+coverage/
+.nyc_output/
+tests/reports/
+
+# Tauri
+src-tauri/target/
+
+# 数据
+data/*.db
+data/*.db-*
+
+# 备份
+backups/*
+!backups/.gitkeep
+
+# 临时文件
+*.tmp
+*.temp

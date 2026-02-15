@@ -1,0 +1,18 @@
+#!/usr/bin/env sh
+. "$(dirname -- "$0")/_/husky.sh"
+
+echo "🧪 运行 pre-push 检查..."
+
+# 运行单元测试
+echo "🔬 运行单元测试..."
+bun run test:unit
+
+# 运行 Rust 测试
+echo "🦀 运行 Rust 测试..."
+cd src-tauri && cargo test && cd ..
+
+# 检查代码格式
+echo "🎨 检查代码格式..."
+bun run format:check
+
+echo "✅ pre-push 检查通过！"

@@ -1,0 +1,18 @@
+# 测试报告
+reports/
+!reports/.gitkeep
+
+# 测试结果
+test-results/
+playwright-report/
+
+# 追踪文件
+trace.zip
+
+# 截图和视频
+screenshots/
+videos/
+
+# 临时文件
+*.tmp
+*.log

@@ -1,0 +1,10 @@
+echo "🔍 运行 pre-commit 检查..."
+
+# 运行 lint-staged 进行代码格式化和 lint 检查
+bunx lint-staged
+
+# 检查 TypeScript 类型
+echo "📝 检查 TypeScript 类型..."
+bun run type-check
+
+echo "✅ pre-commit 检查通过！"
