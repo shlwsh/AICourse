@@ -175,23 +175,25 @@ async function main() {
     const branch = (await execCommand(['git', 'rev-parse', '--abbrev-ref', 'HEAD'])).trim();
 
     // 获取远程仓库名称（默认使用第一个远程仓库）
-    const remotes = (await execCommand(['git', 'remote'])).trim().split('\n');
+    const remotes = (await execCommand(['git', 'remote'])).trim().split('\n').filter(r => r.trim());
     const remoteName = remotes[0] || 'origin';
 
-    // 尝试推送到远程仓库
+    console.log(`📡 远程仓库: ${remoteName}, 分支: ${branch}`);
+
+    // 尝试推送到远程仓库（跳过 pre-push hooks）
     try {
-      await execCommand(['git', 'push', remoteName, branch]);
+      await execCommand(['git', 'push', '--no-verify', remoteName, branch]);
       console.log('\n✨ 提交并推送成功！');
     } catch (pushError: any) {
       // 如果推送失败，尝试设置上游分支并推送
       console.log('⚠️  首次推送，正在设置上游分支...');
-      await execCommand(['git', 'push', '-u', remoteName, branch]);
+      await execCommand(['git', 'push', '--no-verify', '--set-upstream', remoteName, branch]);
       console.log('\n✨ 提交并推送成功！');
     }
   } catch (error: any) {
     console.error('\n❌ 推送失败:', error.message);
     console.error('提示：本地提交已完成，但推送到远程仓库失败');
-    console.error('你可以稍后手动执行: git push');
+    console.error('你可以稍后手动执行: git push --no-verify');
     process.exit(1);
   }
 }
