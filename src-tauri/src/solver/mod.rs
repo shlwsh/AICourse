@@ -191,7 +191,7 @@ pub fn count_occupied_slots(mask: TimeSlotMask) -> u32 {
 // pub mod constraint_solver; // 将在后续任务中实现
 // pub mod cost_function; // 将在后续任务中实现
 pub mod conflict_detector;
-// pub mod swap_suggester; // 将在后续任务中实现
+pub mod swap_suggester;
 // pub mod validator; // 将在后续任务中实现
 
 // 重新导出核心类型
@@ -201,5 +201,5 @@ pub use conflict_detector::{
     ConflictDetector, ConflictInfo, ConflictSeverity, ConflictType, ConstraintGraph,
     HardConstraintViolation, SoftConstraintViolation,
 };
-// pub use swap_suggester::SwapSuggester; // 将在后续任务中实现
+pub use swap_suggester::{CourseMove, SwapOption, SwapSuggester, SwapType};
 // pub use validator::ScheduleValidator; // 将在后续任务中实现

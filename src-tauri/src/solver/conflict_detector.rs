@@ -955,4 +955,275 @@ mod tests {
             detector.check_hard_constraint_violations(&curriculum, &TimeSlot::new(0, 1));
         assert_eq!(violation, None);
     }
+
+    // ============================================================================
+    // 冲突严重程度判断测试
+    // ============================================================================
+
+    #[test]
+    fn test_conflict_severity_blocked_for_hard_constraint() {
+        // 测试硬约束冲突返回 ConflictSeverity::Blocked
+        let schedule = create_test_schedule();
+        let constraint_graph = create_test_constraint_graph();
+        let detector = ConflictDetector::new(schedule, constraint_graph, 8);
+
+        let curriculum = ClassCurriculum {
+            id: 1,
+            class_id: 102,
+            subject_id: "math".to_string(),
+            teacher_id: 2,
+            target_sessions: 5,
+            is_combined_class: false,
+            combined_class_ids: vec![],
+            week_type: WeekType::Every,
+        };
+
+        // 检查禁止时段（第1节），应该返回 Blocked
+        let conflict_info = detector.check_slot_conflicts(&curriculum, &TimeSlot::new(0, 0));
+        assert!(matches!(conflict_info.severity, ConflictSeverity::Blocked));
+        assert!(matches!(
+            conflict_info.conflict_type,
+            ConflictType::HardConstraint(HardConstraintViolation::ForbiddenSlot)
+        ));
+        assert!(conflict_info.description.contains("禁止"));
+    }
+
+    #[test]
+    fn test_conflict_severity_blocked_for_teacher_busy() {
+        // 测试教师时间冲突返回 ConflictSeverity::Blocked
+        let mut schedule = create_test_schedule();
+        // 添加教师1在(0,1)时段的课程
+        schedule.entries.push(ScheduleEntry {
+            class_id: 103,
+            subject_id: "english".to_string(),
+            teacher_id: 1,
+            time_slot: TimeSlot::new(0, 1),
+            is_fixed: false,
+            week_type: WeekType::Every,
+        });
+
+        let constraint_graph = create_test_constraint_graph();
+        let detector = ConflictDetector::new(schedule, constraint_graph, 8);
+
+        let curriculum = ClassCurriculum {
+            id: 2,
+            class_id: 102,
+            subject_id: "math".to_string(),
+            teacher_id: 1, // 教师1在(0,1)时段已有课
+            target_sessions: 5,
+            is_combined_class: false,
+            combined_class_ids: vec![],
+            week_type: WeekType::Every,
+        };
+
+        // 检查教师已占用的时段，应该返回 Blocked
+        let conflict_info = detector.check_slot_conflicts(&curriculum, &TimeSlot::new(0, 1));
+        assert!(matches!(conflict_info.severity, ConflictSeverity::Blocked));
+        assert!(matches!(
+            conflict_info.conflict_type,
+            ConflictType::HardConstraint(HardConstraintViolation::TeacherBusy)
+        ));
+        assert!(conflict_info.description.contains("教师"));
+    }
+
+    #[test]
+    fn test_conflict_severity_blocked_for_class_busy() {
+        // 测试班级时间冲突返回 ConflictSeverity::Blocked
+        let mut schedule = create_test_schedule();
+        // 添加班级102在(0,1)时段的课程
+        schedule.entries.push(ScheduleEntry {
+            class_id: 102,
+            subject_id: "english".to_string(),
+            teacher_id: 2,
+            time_slot: TimeSlot::new(0, 1),
+            is_fixed: false,
+            week_type: WeekType::Every,
+        });
+
+        let constraint_graph = create_test_constraint_graph();
+        let detector = ConflictDetector::new(schedule, constraint_graph, 8);
+
+        let curriculum = ClassCurriculum {
+            id: 2,
+            class_id: 102, // 班级102在(0,1)时段已有课
+            subject_id: "math".to_string(),
+            teacher_id: 3,
+            target_sessions: 5,
+            is_combined_class: false,
+            combined_class_ids: vec![],
+            week_type: WeekType::Every,
+        };
+
+        // 检查班级已占用的时段，应该返回 Blocked
+        let conflict_info = detector.check_slot_conflicts(&curriculum, &TimeSlot::new(0, 1));
+        assert!(matches!(conflict_info.severity, ConflictSeverity::Blocked));
+        assert!(matches!(
+            conflict_info.conflict_type,
+            ConflictType::HardConstraint(HardConstraintViolation::ClassBusy)
+        ));
+        assert!(conflict_info.description.contains("班级"));
+    }
+
+    #[test]
+    fn test_conflict_severity_warning_for_soft_constraint() {
+        // 测试软约束冲突返回 ConflictSeverity::Warning
+        let schedule = create_test_schedule();
+        let mut constraint_graph = create_test_constraint_graph();
+
+        // 添加英语科目配置（没有禁止时段）
+        let english_config = SubjectConfig {
+            id: "english".to_string(),
+            name: "英语".to_string(),
+            forbidden_slots: 0,
+            allow_double_session: true,
+            venue_id: None,
+            is_major_subject: false,
+        };
+        constraint_graph.add_subject_config(english_config);
+
+        // 添加教师偏好，使第1节（位置0）不在偏好范围内
+        let teacher_pref = TeacherPreference {
+            teacher_id: 2,
+            preferred_slots: 0xFFFFFFFFFFFFFFFE, // 第1节（位置0）不在偏好范围内
+            time_bias: 0,
+            weight: 1,
+            blocked_slots: 0,
+            teaching_group_id: None,
+        };
+        constraint_graph.add_teacher_preference(teacher_pref);
+
+        let detector = ConflictDetector::new(schedule, constraint_graph, 8);
+
+        let curriculum = ClassCurriculum {
+            id: 2,
+            class_id: 102,
+            subject_id: "english".to_string(), // 使用英语课，避免触发数学课的禁止时段
+            teacher_id: 2,
+            target_sessions: 5,
+            is_combined_class: false,
+            combined_class_ids: vec![],
+            week_type: WeekType::Every,
+        };
+
+        // 检查不在教师偏好时段的槽位（第1节，位置0），应该返回 Warning
+        let conflict_info = detector.check_slot_conflicts(&curriculum, &TimeSlot::new(0, 0));
+        assert!(matches!(conflict_info.severity, ConflictSeverity::Warning));
+        assert!(matches!(
+            conflict_info.conflict_type,
+            ConflictType::SoftConstraint(SoftConstraintViolation::TeacherPreference)
+        ));
+    }
+
+    #[test]
+    fn test_conflict_severity_warning_for_time_bias() {
+        // 测试教师早晚偏好冲突返回 ConflictSeverity::Warning
+        let schedule = create_test_schedule();
+        let mut constraint_graph = create_test_constraint_graph();
+
+        // 添加英语科目配置（没有禁止时段）
+        let english_config = SubjectConfig {
+            id: "english".to_string(),
+            name: "英语".to_string(),
+            forbidden_slots: 0,
+            allow_double_session: true,
+            venue_id: None,
+            is_major_subject: false,
+        };
+        constraint_graph.add_subject_config(english_config);
+
+        // 添加厌恶早课的教师
+        let teacher_pref = TeacherPreference {
+            teacher_id: 3,
+            preferred_slots: 0, // 设置为0表示没有特定偏好时段，只检查早晚偏好
+            time_bias: 1,       // 厌恶早课
+            weight: 1,
+            blocked_slots: 0,
+            teaching_group_id: None,
+        };
+        constraint_graph.add_teacher_preference(teacher_pref);
+
+        let detector = ConflictDetector::new(schedule, constraint_graph, 8);
+
+        let curriculum = ClassCurriculum {
+            id: 3,
+            class_id: 103,
+            subject_id: "english".to_string(), // 使用英语课
+            teacher_id: 3,
+            target_sessions: 5,
+            is_combined_class: false,
+            combined_class_ids: vec![],
+            week_type: WeekType::Every,
+        };
+
+        // 检查第1节（早课），应该返回 Warning
+        let conflict_info = detector.check_slot_conflicts(&curriculum, &TimeSlot::new(0, 0));
+        assert!(matches!(conflict_info.severity, ConflictSeverity::Warning));
+        assert!(matches!(
+            conflict_info.conflict_type,
+            ConflictType::SoftConstraint(SoftConstraintViolation::TimeBias)
+        ));
+    }
+
+    #[test]
+    fn test_conflict_severity_available_for_no_conflict() {
+        // 测试无冲突返回 ConflictSeverity::Available
+        let schedule = create_test_schedule();
+        let constraint_graph = create_test_constraint_graph();
+        let detector = ConflictDetector::new(schedule, constraint_graph, 8);
+
+        let curriculum = ClassCurriculum {
+            id: 2,
+            class_id: 102,
+            subject_id: "math".to_string(),
+            teacher_id: 2,
+            target_sessions: 5,
+            is_combined_class: false,
+            combined_class_ids: vec![],
+            week_type: WeekType::Every,
+        };
+
+        // 检查空闲时段（第2节），应该返回 Available
+        let conflict_info = detector.check_slot_conflicts(&curriculum, &TimeSlot::new(0, 1));
+        assert!(matches!(conflict_info.severity, ConflictSeverity::Available));
+        assert_eq!(conflict_info.description, "可以安排");
+    }
+
+    #[test]
+    fn test_conflict_severity_blocked_for_teacher_blocked_slot() {
+        // 测试教师不排课时段返回 ConflictSeverity::Blocked
+        let schedule = create_test_schedule();
+        let mut constraint_graph = create_test_constraint_graph();
+
+        // 添加有不排课时段的教师
+        let teacher_pref = TeacherPreference {
+            teacher_id: 4,
+            preferred_slots: 0xFFFFFFFFFFFFFFFF,
+            time_bias: 0,
+            weight: 1,
+            blocked_slots: 1u64 << 1, // 第2节不排课
+            teaching_group_id: None,
+        };
+        constraint_graph.add_teacher_preference(teacher_pref);
+
+        let detector = ConflictDetector::new(schedule, constraint_graph, 8);
+
+        let curriculum = ClassCurriculum {
+            id: 4,
+            class_id: 104,
+            subject_id: "math".to_string(),
+            teacher_id: 4,
+            target_sessions: 5,
+            is_combined_class: false,
+            combined_class_ids: vec![],
+            week_type: WeekType::Every,
+        };
+
+        // 检查教师不排课时段，应该返回 Blocked
+        let conflict_info = detector.check_slot_conflicts(&curriculum, &TimeSlot::new(0, 1));
+        assert!(matches!(conflict_info.severity, ConflictSeverity::Blocked));
+        assert!(matches!(
+            conflict_info.conflict_type,
+            ConflictType::HardConstraint(HardConstraintViolation::TeacherBlocked)
+        ));
+    }
 }
