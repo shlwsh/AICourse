@@ -205,52 +205,86 @@ export class GitService {
       throw error;
     }
   }
-
   /**
-   * 推送到远程仓库
+   * 获取远程仓库名称
    */
-  async push(): Promise<void> {
-    logger.info('执行 git push');
+  async getRemoteName(): Promise<string> {
+    logger.debug('获取远程仓库名称');
 
     try {
-      // 先尝试普通推送
-      let proc = Bun.spawn(['git', 'push'], {
+      const proc = Bun.spawn(['git', 'remote'], {
         stdout: 'pipe',
         stderr: 'pipe',
       });
 
-      let exitCode = await proc.exited;
+      const output = await new Response(proc.stdout).text();
+      const exitCode = await proc.exited;
 
       if (exitCode !== 0) {
-        const error = await new Response(proc.stderr).text();
-
-        // 如果是因为没有设置上游分支，尝试设置上游分支并推送
-        if (error.includes('no upstream branch') || error.includes('set-upstream')) {
-          logger.info('首次推送，设置上游分支');
-          const branch = await this.getCurrentBranch();
-
-          proc = Bun.spawn(['git', 'push', '-u', 'origin', branch], {
-            stdout: 'pipe',
-            stderr: 'pipe',
-          });
-
-          exitCode = await proc.exited;
-
-          if (exitCode !== 0) {
-            const pushError = await new Response(proc.stderr).text();
-            throw new Error(`git push 失败: ${pushError}`);
-          }
-
-          logger.info('git push 执行成功（已设置上游分支）');
-        } else {
-          throw new Error(`git push 失败: ${error}`);
-        }
-      } else {
-        logger.info('git push 执行成功');
+        throw new Error('获取远程仓库名称失败');
       }
+
+      const remotes = output.trim().split('\n').filter(r => r.length > 0);
+      return remotes[0] || 'origin';
     } catch (error) {
-      logger.error('git push 执行失败', error as Error);
-      throw error;
+      logger.error('获取远程仓库名称失败', error as Error);
+      return 'origin'; // 默认返回 origin
     }
   }
+
+  /**
+   * 推送到远程仓库
+   */
+  /**
+     * 推送到远程仓库
+     */
+    async push(): Promise<void> {
+      logger.info('执行 git push');
+
+      try {
+        // 获取远程仓库名称和当前分支
+        const remoteName = await this.getRemoteName();
+        const branch = await this.getCurrentBranch();
+
+        logger.debug('推送信息', { remoteName, branch });
+
+        // 先尝试普通推送
+        let proc = Bun.spawn(['git', 'push', remoteName, branch], {
+          stdout: 'pipe',
+          stderr: 'pipe',
+        });
+
+        let exitCode = await proc.exited;
+
+        if (exitCode !== 0) {
+          const error = await new Response(proc.stderr).text();
+
+          // 如果是因为没有设置上游分支，尝试设置上游分支并推送
+          if (error.includes('no upstream branch') || error.includes('set-upstream')) {
+            logger.info('首次推送，设置上游分支');
+
+            proc = Bun.spawn(['git', 'push', '-u', remoteName, branch], {
+              stdout: 'pipe',
+              stderr: 'pipe',
+            });
+
+            exitCode = await proc.exited;
+
+            if (exitCode !== 0) {
+              const pushError = await new Response(proc.stderr).text();
+              throw new Error(`git push 失败: ${pushError}`);
+            }
+
+            logger.info('git push 执行成功（已设置上游分支）');
+          } else {
+            throw new Error(`git push 失败: ${error}`);
+          }
+        } else {
+          logger.info('git push 执行成功');
+        }
+      } catch (error) {
+        logger.error('git push 执行失败', error as Error);
+        throw error;
+      }
+    }
 }
