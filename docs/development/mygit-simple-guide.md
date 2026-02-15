@@ -10,6 +10,7 @@ MyGit 简化版是一个轻量级的 AI Git 提交工具，可以自动分析代
 - ✅ 使用 AI 生成中文提交信息
 - ✅ 自动执行 git add 和 git commit
 - ✅ 简化流程，无需交互确认
+- ✅ 跳过 pre-commit hooks（使用 --no-verify）
 - ✅ 轻量级实现，代码简洁
 
 ## 使用方法
