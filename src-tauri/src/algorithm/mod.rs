@@ -24,6 +24,10 @@ pub mod schedule_hash;
 pub mod solver;
 pub mod types;
 
+// 测试模块
+#[cfg(test)]
+mod solver_performance_tests;
+
 // 重新导出常用类型
 pub use cost_cache::{CacheStats, CostCache};
 pub use schedule_hash::{calculate_incremental_hash, calculate_schedule_hash};

@@ -20,40 +20,9 @@ use std::collections::HashMap;
 use tracing::{debug, info, trace};
 
 use crate::algorithm::types::{
-    ClassCurriculum, SubjectConfig, TeacherMutualExclusion, TeacherPreference, TimeSlot, Venue,
-    WeekType,
+    ClassCurriculum, Schedule, ScheduleEntry, ScheduleMetadata, SubjectConfig,
+    TeacherMutualExclusion, TeacherPreference, TimeSlot, Venue, WeekType,
 };
-
-// Schedule 相关类型需要单独定义或从其他模块导入
-// 暂时使用占位符结构体，后续任务会完善
-
-/// 课表元数据（临时定义）
-#[derive(Debug, Clone, Serialize, Deserialize)]
-pub struct ScheduleMetadata {
-    pub cycle_days: u8,
-    pub periods_per_day: u8,
-    pub generated_at: String,
-    pub version: u32,
-}
-
-/// 课表条目（临时定义）
-#[derive(Debug, Clone, Serialize, Deserialize)]
-pub struct ScheduleEntry {
-    pub class_id: u32,
-    pub subject_id: String,
-    pub teacher_id: u32,
-    pub time_slot: TimeSlot,
-    pub is_fixed: bool,
-    pub week_type: WeekType,
-}
-
-/// 课表（临时定义）
-#[derive(Debug, Clone, Serialize, Deserialize)]
-pub struct Schedule {
-    pub entries: Vec<ScheduleEntry>,
-    pub cost: u32,
-    pub metadata: ScheduleMetadata,
-}
 
 // ============================================================================
 // 冲突严重程度枚举
@@ -1230,3 +1199,8 @@ mod tests {
         ));
     }
 }
+
+// 引入完整的测试套件
+#[cfg(test)]
+#[path = "conflict_detector_tests.rs"]
+mod conflict_detector_tests;

@@ -18,16 +18,13 @@
 // 5. 所有命令都应该记录日志
 // ============================================================================
 
-// 子模块声明（将在后续任务中实现）
-// pub mod schedule;
-// pub mod teacher;
-// pub mod import_export;
-// pub mod venue;
-// pub mod config;
+// 子模块声明
+pub mod schedule;
+pub mod teacher;
+// pub mod import_export; // 将在后续任务中实现
+// pub mod venue;        // 将在后续任务中实现
+// pub mod config;       // 将在后续任务中实现
 
-// 重新导出命令函数（将在后续任务中实现）
-// pub use schedule::*;
-// pub use teacher::*;
-// pub use import_export::*;
-// pub use venue::*;
-// pub use config::*;
+// 重新导出命令函数
+pub use schedule::*;
+pub use teacher::*;

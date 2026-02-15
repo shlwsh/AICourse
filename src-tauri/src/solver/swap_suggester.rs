@@ -26,8 +26,8 @@
 use serde::{Deserialize, Serialize};
 use tracing::{debug, info, trace, warn};
 
-use crate::algorithm::types::TimeSlot;
-use crate::solver::conflict_detector::{ConstraintGraph, Schedule, ScheduleEntry};
+use crate::algorithm::types::{Schedule, ScheduleEntry, TimeSlot};
+use crate::solver::conflict_detector::ConstraintGraph;
 
 // ============================================================================
 // 交换类型枚举
@@ -740,8 +740,7 @@ impl SwapSuggester {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::algorithm::types::WeekType;
-    use crate::solver::conflict_detector::ScheduleMetadata;
+    use crate::algorithm::types::{ScheduleMetadata, WeekType};
 
     /// 创建测试用的课表
     fn create_test_schedule() -> Schedule {
@@ -1028,5 +1027,608 @@ mod tests {
 
         // 应该有3节连续课程
         assert_eq!(count, 3, "应该有3节连续课程");
+    }
+}
+
+// ============================================================================
+// 扩展测试套件 - 硬约束验证
+// ============================================================================
+
+#[cfg(test)]
+mod extended_tests {
+    use super::*;
+    use crate::algorithm::types::{
+        ExclusionScope, ScheduleMetadata, SubjectConfig, TeacherMutualExclusion, TeacherPreference,
+        Venue, WeekType,
+    };
+
+    /// 创建空课表
+    fn create_empty_schedule() -> Schedule {
+        Schedule {
+            entries: vec![],
+            cost: 0,
+            metadata: ScheduleMetadata {
+                cycle_days: 5,
+                periods_per_day: 8,
+                generated_at: "2024-01-01".to_string(),
+                version: 1,
+            },
+        }
+    }
+
+    /// 创建基础约束图
+    fn create_basic_constraint_graph() -> ConstraintGraph {
+        let mut graph = ConstraintGraph::new();
+
+        // 添加基础科目配置
+        graph.add_subject_config(SubjectConfig {
+            id: "math".to_string(),
+            name: "数学".to_string(),
+            forbidden_slots: 0,
+            allow_double_session: true,
+            venue_id: None,
+            is_major_subject: true,
+        });
+
+        graph.add_subject_config(SubjectConfig {
+            id: "english".to_string(),
+            name: "英语".to_string(),
+            forbidden_slots: 0,
+            allow_double_session: true,
+            venue_id: None,
+            is_major_subject: true,
+        });
+
+        // 添加教师偏好
+        graph.add_teacher_preference(TeacherPreference {
+            teacher_id: 1,
+            preferred_slots: 0xFFFFFFFFFFFFFFFF,
+            time_bias: 0,
+            weight: 1,
+            blocked_slots: 0,
+            teaching_group_id: None,
+        });
+
+        graph.add_teacher_preference(TeacherPreference {
+            teacher_id: 2,
+            preferred_slots: 0xFFFFFFFFFFFFFFFF,
+            time_bias: 0,
+            weight: 1,
+            blocked_slots: 0,
+            teaching_group_id: None,
+        });
+
+        graph
+    }
+
+    // ========================================================================
+    // 测试 1：验证交换后不违反硬约束 - 教师时间冲突
+    // ========================================================================
+
+    #[test]
+    fn test_swap_respects_teacher_conflict() {
+        let mut schedule = create_empty_schedule();
+
+        // 班级101：星期一第1节数学（教师1）
+        schedule.entries.push(ScheduleEntry {
+            class_id: 101,
+            subject_id: "math".to_string(),
+            teacher_id: 1,
+            time_slot: TimeSlot::new(0, 0),
+            is_fixed: false,
+            week_type: WeekType::Every,
+        });
+
+        // 班级102：星期一第2节数学（教师1）
+        schedule.entries.push(ScheduleEntry {
+            class_id: 102,
+            subject_id: "math".to_string(),
+            teacher_id: 1,
+            time_slot: TimeSlot::new(0, 1),
+            is_fixed: false,
+            week_type: WeekType::Every,
+        });
+
+        let constraint_graph = create_basic_constraint_graph();
+        let suggester = SwapSuggester::new(schedule, constraint_graph, 8);
+
+        // 尝试将班级101的课移到星期一第1节
+        let result = suggester.suggest_swaps(101, 2, TimeSlot::new(0, 0));
+        assert!(result.is_ok());
+
+        let options = result.unwrap();
+
+        // 验证建议的交换方案不会将课程移到教师1已占用的第2节
+        for option in &options {
+            for move_info in &option.moves {
+                if move_info.teacher_id == 1 {
+                    assert_ne!(
+                        move_info.to_slot,
+                        TimeSlot::new(0, 1),
+                        "不应该将教师1的课移到已被占用的第2节"
+                    );
+                }
+            }
+        }
+    }
+
+    // ========================================================================
+    // 测试 2：验证交换后不违反硬约束 - 班级时间冲突
+    // ========================================================================
+
+    #[test]
+    fn test_swap_respects_class_conflict() {
+        let mut schedule = create_empty_schedule();
+
+        // 班级101：星期一第1节数学，第2节英语
+        schedule.entries.push(ScheduleEntry {
+            class_id: 101,
+            subject_id: "math".to_string(),
+            teacher_id: 1,
+            time_slot: TimeSlot::new(0, 0),
+            is_fixed: false,
+            week_type: WeekType::Every,
+        });
+
+        schedule.entries.push(ScheduleEntry {
+            class_id: 101,
+            subject_id: "english".to_string(),
+            teacher_id: 2,
+            time_slot: TimeSlot::new(0, 1),
+            is_fixed: false,
+            week_type: WeekType::Every,
+        });
+
+        let constraint_graph = create_basic_constraint_graph();
+        let suggester = SwapSuggester::new(schedule, constraint_graph, 8);
+
+        let result = suggester.suggest_swaps(101, 3, TimeSlot::new(0, 0));
+        assert!(result.is_ok());
+
+        let options = result.unwrap();
+
+        // 验证建议的交换方案不会将数学课移到班级101已占用的第2节
+        for option in &options {
+            for move_info in &option.moves {
+                if move_info.class_id == 101 && move_info.subject_id == "math" {
+                    assert_ne!(
+                        move_info.to_slot,
+                        TimeSlot::new(0, 1),
+                        "不应该将班级101的数学课移到已被英语课占用的第2节"
+                    );
+                }
+            }
+        }
+    }
+
+    // ========================================================================
+    // 测试 3：验证交换后不违反硬约束 - 课程禁止时段
+    // ========================================================================
+
+    #[test]
+    fn test_swap_respects_forbidden_slots() {
+        let mut schedule = create_empty_schedule();
+
+        // 添加体育课
+        schedule.entries.push(ScheduleEntry {
+            class_id: 101,
+            subject_id: "pe".to_string(),
+            teacher_id: 1,
+            time_slot: TimeSlot::new(0, 3),
+            is_fixed: false,
+            week_type: WeekType::Every,
+        });
+
+        let mut constraint_graph = create_basic_constraint_graph();
+
+        // 体育课禁止前3节（第0、1、2节）
+        let forbidden_mask = (1u64 << 0) | (1u64 << 1) | (1u64 << 2);
+        constraint_graph.add_subject_config(SubjectConfig {
+            id: "pe".to_string(),
+            name: "体育".to_string(),
+            forbidden_slots: forbidden_mask,
+            allow_double_session: false,
+            venue_id: None,
+            is_major_subject: false,
+        });
+
+        constraint_graph.add_teacher_preference(TeacherPreference {
+            teacher_id: 1,
+            preferred_slots: 0xFFFFFFFFFFFFFFFF,
+            time_bias: 0,
+            weight: 1,
+            blocked_slots: 0,
+            teaching_group_id: None,
+        });
+
+        let suggester = SwapSuggester::new(schedule, constraint_graph, 8);
+
+        let result = suggester.suggest_swaps(101, 2, TimeSlot::new(0, 3));
+        assert!(result.is_ok());
+
+        let options = result.unwrap();
+
+        // 验证建议的交换方案不会将体育课移到禁止时段
+        for option in &options {
+            for move_info in &option.moves {
+                if move_info.subject_id == "pe" {
+                    let slot = &move_info.to_slot;
+                    assert!(
+                        slot.period >= 3,
+                        "体育课不应该被移到禁止的前3节，实际移到了第{}节",
+                        slot.period
+                    );
+                }
+            }
+        }
+    }
+
+    // ========================================================================
+    // 测试 4：验证交换后不违反硬约束 - 教师不排课时段
+    // ========================================================================
+
+    #[test]
+    fn test_swap_respects_teacher_blocked_slots() {
+        let mut schedule = create_empty_schedule();
+
+        schedule.entries.push(ScheduleEntry {
+            class_id: 101,
+            subject_id: "math".to_string(),
+            teacher_id: 1,
+            time_slot: TimeSlot::new(0, 3),
+            is_fixed: false,
+            week_type: WeekType::Every,
+        });
+
+        let mut constraint_graph = create_basic_constraint_graph();
+
+        // 教师1在星期一第1、2节不排课
+        let blocked_mask = (1u64 << 0) | (1u64 << 1);
+        constraint_graph.add_teacher_preference(TeacherPreference {
+            teacher_id: 1,
+            preferred_slots: 0xFFFFFFFFFFFFFFFF,
+            time_bias: 0,
+            weight: 1,
+            blocked_slots: blocked_mask,
+            teaching_group_id: None,
+        });
+
+        let suggester = SwapSuggester::new(schedule, constraint_graph, 8);
+
+        let result = suggester.suggest_swaps(101, 2, TimeSlot::new(0, 3));
+        assert!(result.is_ok());
+
+        let options = result.unwrap();
+
+        // 验证建议的交换方案不会将教师1的课移到不排课时段
+        for option in &options {
+            for move_info in &option.moves {
+                if move_info.teacher_id == 1 {
+                    let slot = &move_info.to_slot;
+                    assert!(
+                        !(slot.day == 0 && (slot.period == 0 || slot.period == 1)),
+                        "教师1的课不应该被移到不排课时段"
+                    );
+                }
+            }
+        }
+    }
+
+    // ========================================================================
+    // 测试 5：验证交换后不违反硬约束 - 场地容量限制
+    // ========================================================================
+
+    #[test]
+    fn test_swap_respects_venue_capacity() {
+        let mut schedule = create_empty_schedule();
+
+        // 班级101：星期一第1节微机课
+        schedule.entries.push(ScheduleEntry {
+            class_id: 101,
+            subject_id: "computer".to_string(),
+            teacher_id: 1,
+            time_slot: TimeSlot::new(0, 0),
+            is_fixed: false,
+            week_type: WeekType::Every,
+        });
+
+        // 班级102：星期一第2节微机课（占用微机室）
+        schedule.entries.push(ScheduleEntry {
+            class_id: 102,
+            subject_id: "computer".to_string(),
+            teacher_id: 2,
+            time_slot: TimeSlot::new(0, 1),
+            is_fixed: false,
+            week_type: WeekType::Every,
+        });
+
+        let mut constraint_graph = create_basic_constraint_graph();
+
+        // 添加微机室场地（容量为1）
+        constraint_graph.add_venue(Venue {
+            id: "computer_lab".to_string(),
+            name: "微机室".to_string(),
+            capacity: 1,
+        });
+
+        // 微机课关联到微机室
+        constraint_graph.add_subject_config(SubjectConfig {
+            id: "computer".to_string(),
+            name: "微机".to_string(),
+            forbidden_slots: 0,
+            allow_double_session: false,
+            venue_id: Some("computer_lab".to_string()),
+            is_major_subject: false,
+        });
+
+        constraint_graph.add_teacher_preference(TeacherPreference {
+            teacher_id: 1,
+            preferred_slots: 0xFFFFFFFFFFFFFFFF,
+            time_bias: 0,
+            weight: 1,
+            blocked_slots: 0,
+            teaching_group_id: None,
+        });
+
+        constraint_graph.add_teacher_preference(TeacherPreference {
+            teacher_id: 2,
+            preferred_slots: 0xFFFFFFFFFFFFFFFF,
+            time_bias: 0,
+            weight: 1,
+            blocked_slots: 0,
+            teaching_group_id: None,
+        });
+
+        let suggester = SwapSuggester::new(schedule, constraint_graph, 8);
+
+        let result = suggester.suggest_swaps(101, 3, TimeSlot::new(0, 0));
+        assert!(result.is_ok());
+
+        let options = result.unwrap();
+
+        // 验证建议的交换方案不会将微机课移到场地已满的第2节
+        for option in &options {
+            for move_info in &option.moves {
+                if move_info.subject_id == "computer" {
+                    assert_ne!(
+                        move_info.to_slot,
+                        TimeSlot::new(0, 1),
+                        "微机课不应该被移到场地已满的第2节"
+                    );
+                }
+            }
+        }
+    }
+
+    // ========================================================================
+    // 测试 6：验证交换后不违反硬约束 - 教师互斥约束
+    // ========================================================================
+
+    #[test]
+    fn test_swap_respects_teacher_mutual_exclusion() {
+        let mut schedule = create_empty_schedule();
+
+        // 教师1：星期一第1节
+        schedule.entries.push(ScheduleEntry {
+            class_id: 101,
+            subject_id: "math".to_string(),
+            teacher_id: 1,
+            time_slot: TimeSlot::new(0, 0),
+            is_fixed: false,
+            week_type: WeekType::Every,
+        });
+
+        // 教师2：星期一第2节
+        schedule.entries.push(ScheduleEntry {
+            class_id: 102,
+            subject_id: "english".to_string(),
+            teacher_id: 2,
+            time_slot: TimeSlot::new(0, 1),
+            is_fixed: false,
+            week_type: WeekType::Every,
+        });
+
+        let mut constraint_graph = create_basic_constraint_graph();
+
+        // 添加教师互斥约束：教师1和教师2不能同时上课
+        constraint_graph.add_exclusion(TeacherMutualExclusion {
+            teacher_a_id: 1,
+            teacher_b_id: 2,
+            scope: ExclusionScope::AllTime,
+        });
+
+        let suggester = SwapSuggester::new(schedule, constraint_graph, 8);
+
+        let result = suggester.suggest_swaps(101, 3, TimeSlot::new(0, 0));
+        assert!(result.is_ok());
+
+        let options = result.unwrap();
+
+        // 验证建议的交换方案不会将教师1的课移到教师2上课的第2节
+        for option in &options {
+            for move_info in &option.moves {
+                if move_info.teacher_id == 1 {
+                    assert_ne!(
+                        move_info.to_slot,
+                        TimeSlot::new(0, 1),
+                        "教师1的课不应该被移到教师2上课的第2节（违反互斥约束）"
+                    );
+                }
+            }
+        }
+    }
+
+    // ========================================================================
+    // 测试 7：验证交换后不违反硬约束 - 不允许连堂
+    // ========================================================================
+
+    #[test]
+    fn test_swap_respects_no_double_session() {
+        let mut schedule = create_empty_schedule();
+
+        // 班级101：星期一第3节体育，第5节体育
+        schedule.entries.push(ScheduleEntry {
+            class_id: 101,
+            subject_id: "pe".to_string(),
+            teacher_id: 1,
+            time_slot: TimeSlot::new(0, 3),
+            is_fixed: false,
+            week_type: WeekType::Every,
+        });
+
+        schedule.entries.push(ScheduleEntry {
+            class_id: 101,
+            subject_id: "pe".to_string(),
+            teacher_id: 1,
+            time_slot: TimeSlot::new(0, 5),
+            is_fixed: false,
+            week_type: WeekType::Every,
+        });
+
+        let mut constraint_graph = create_basic_constraint_graph();
+
+        // 体育课不允许连堂
+        constraint_graph.add_subject_config(SubjectConfig {
+            id: "pe".to_string(),
+            name: "体育".to_string(),
+            forbidden_slots: 0,
+            allow_double_session: false,
+            venue_id: None,
+            is_major_subject: false,
+        });
+
+        constraint_graph.add_teacher_preference(TeacherPreference {
+            teacher_id: 1,
+            preferred_slots: 0xFFFFFFFFFFFFFFFF,
+            time_bias: 0,
+            weight: 1,
+            blocked_slots: 0,
+            teaching_group_id: None,
+        });
+
+        let suggester = SwapSuggester::new(schedule, constraint_graph, 8);
+
+        let result = suggester.suggest_swaps(101, 2, TimeSlot::new(0, 3));
+        assert!(result.is_ok());
+
+        let options = result.unwrap();
+
+        // 验证建议的交换方案不会将体育课移到相邻节次
+        for option in &options {
+            for move_info in &option.moves {
+                if move_info.subject_id == "pe" {
+                    let to_slot = &move_info.to_slot;
+                    // 不应该移到第4节（第5节已有体育课）或第6节（第5节已有体育课）
+                    assert!(
+                        !(to_slot.day == 0 && (to_slot.period == 4 || to_slot.period == 6)),
+                        "体育课不应该被移到相邻节次（违反不允许连堂约束）"
+                    );
+                }
+            }
+        }
+    }
+
+    // ========================================================================
+    // 测试 8：无可行方案时返回空列表
+    // ========================================================================
+
+    #[test]
+    fn test_no_feasible_swap_options() {
+        // 创建一个所有槽位都被占满的课表
+        let mut schedule = create_empty_schedule();
+
+        // 填满所有时间槽位
+        for day in 0..5 {
+            for period in 0..8 {
+                schedule.entries.push(ScheduleEntry {
+                    class_id: 101,
+                    subject_id: "math".to_string(),
+                    teacher_id: 1,
+                    time_slot: TimeSlot::new(day, period),
+                    is_fixed: false,
+                    week_type: WeekType::Every,
+                });
+            }
+        }
+
+        let constraint_graph = create_basic_constraint_graph();
+        let suggester = SwapSuggester::new(schedule, constraint_graph, 8);
+
+        // 尝试交换，但没有可用槽位
+        let result = suggester.suggest_swaps(101, 2, TimeSlot::new(0, 0));
+
+        assert!(result.is_ok(), "即使没有可行方案也应该返回Ok");
+
+        let options = result.unwrap();
+        assert!(options.is_empty(), "没有可行方案时应该返回空列表");
+    }
+
+    // ========================================================================
+    // 测试 9：交换方案描述清晰性
+    // ========================================================================
+
+    #[test]
+    fn test_swap_description_clarity() {
+        let mut schedule = create_empty_schedule();
+
+        schedule.entries.push(ScheduleEntry {
+            class_id: 101,
+            subject_id: "math".to_string(),
+            teacher_id: 1,
+            time_slot: TimeSlot::new(0, 0),
+            is_fixed: false,
+            week_type: WeekType::Every,
+        });
+
+        let constraint_graph = create_basic_constraint_graph();
+        let suggester = SwapSuggester::new(schedule, constraint_graph, 8);
+
+        let result = suggester.suggest_swaps(101, 3, TimeSlot::new(0, 0));
+        assert!(result.is_ok());
+
+        let options = result.unwrap();
+        assert!(!options.is_empty());
+
+        let description = &options[0].description;
+
+        // 验证描述包含关键信息
+        assert!(description.contains("班级"), "描述应包含'班级'");
+        assert!(description.contains("移至"), "描述应包含'移至'");
+        assert!(description.contains("星期"), "描述应包含'星期'");
+        assert!(description.contains("节"), "描述应包含'节'");
+    }
+
+    // ========================================================================
+    // 测试 10：按代价影响排序
+    // ========================================================================
+
+    #[test]
+    fn test_options_sorted_by_cost_impact() {
+        let mut schedule = create_empty_schedule();
+
+        schedule.entries.push(ScheduleEntry {
+            class_id: 101,
+            subject_id: "math".to_string(),
+            teacher_id: 1,
+            time_slot: TimeSlot::new(0, 0),
+            is_fixed: false,
+            week_type: WeekType::Every,
+        });
+
+        let constraint_graph = create_basic_constraint_graph();
+        let suggester = SwapSuggester::new(schedule, constraint_graph, 8);
+
+        let result = suggester.suggest_swaps(101, 3, TimeSlot::new(0, 0));
+        assert!(result.is_ok());
+
+        let options = result.unwrap();
+
+        // 验证选项按代价影响排序（从小到大）
+        for i in 1..options.len() {
+            assert!(
+                options[i - 1].cost_impact <= options[i].cost_impact,
+                "选项应该按代价影响从小到大排序"
+            );
+        }
     }
 }

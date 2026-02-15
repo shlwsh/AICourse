@@ -35,6 +35,7 @@ pub mod solver;
 
 // 重新导出常用类型，方便外部使用
 pub use algorithm::{TimeSlot, TimeSlotMask};
+pub use commands::schedule::generate_schedule;
 pub use db::DatabaseManager;
 pub use logging::{init_default_logging, init_logging, sanitize_sensitive_data, LogConfig};
 pub use models::WeekType;

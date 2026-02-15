@@ -169,3 +169,7 @@ impl Default for WeekType {
 // pub use conflict::*;
 // pub use swap::*;
 // pub use statistics::*;
+
+// 测试模块
+#[cfg(test)]
+mod timeslot_tests;

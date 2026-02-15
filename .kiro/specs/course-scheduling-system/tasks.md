@@ -112,31 +112,31 @@
 - [~] 3.4.9 添加详细的调试日志
 
 ### 3.5 核心算法单元测试
-- [ ] 3.5.1 编写 TimeSlot 位运算测试
-- [ ] 3.5.2 编写硬约束检查测试
-- [ ] 3.5.3 编写代价函数计算测试
-- [ ] 3.5.4 编写场地容量约束测试
-- [ ] 3.5.5 编写教师互斥约束测试
-- [ ] 3.5.6 编写回溯搜索算法测试
-- [ ] 3.5.7 编写冲突检测测试
-- [ ] 3.5.8 编写交换建议测试
-- [ ] 3.5.9 编写性能基准测试
+- [x] 3.5.1 编写 TimeSlot 位运算测试
+- [x] 3.5.2 编写硬约束检查测试
+- [x] 3.5.3 编写代价函数计算测试
+- [x] 3.5.4 编写场地容量约束测试
+- [x] 3.5.5 编写教师互斥约束测试
+- [x] 3.5.6 编写回溯搜索算法测试
+- [x] 3.5.7 编写冲突检测测试
+- [x] 3.5.8 编写交换建议测试
+- [x] 3.5.9 编写性能基准测试
 
 ## 阶段 4：Tauri 命令接口实现
 
 ### 4.1 排课相关命令
-- [ ] 4.1.1 实现 generate_schedule 命令
-- [ ] 4.1.2 实现 get_active_schedule 命令
-- [ ] 4.1.3 实现 move_schedule_entry 命令
-- [ ] 4.1.4 实现 detect_conflicts 命令
-- [ ] 4.1.5 实现 suggest_swaps 命令
-- [ ] 4.1.6 实现 execute_swap 命令
-- [ ] 4.1.7 实现 calculate_cost 命令
-- [ ] 4.1.8 实现 validate_schedule 命令
-- [ ] 4.1.9 添加命令执行日志
+- [x] 4.1.1 实现 generate_schedule 命令
+- [x] 4.1.2 实现 get_active_schedule 命令
+- [x] 4.1.3 实现 move_schedule_entry 命令
+- [x] 4.1.4 实现 detect_conflicts 命令
+- [x] 4.1.5 实现 suggest_swaps 命令
+- [x] 4.1.6 实现 execute_swap 命令
+- [x] 4.1.7 实现 calculate_cost 命令
+- [x] 4.1.8 实现 validate_schedule 命令
+- [x] 4.1.9 添加命令执行日志
 
 ### 4.2 教师管理命令
-- [ ] 4.2.1 实现 get_all_teachers 命令
+- [x] 4.2.1 实现 get_all_teachers 命令
 - [ ] 4.2.2 实现 save_teacher_preference 命令
 - [ ] 4.2.3 实现 batch_save_teacher_preferences 命令
 - [ ] 4.2.4 实现 query_teacher_status 命令

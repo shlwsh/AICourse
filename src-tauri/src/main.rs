@@ -9,8 +9,11 @@
 
 use tracing::{error, info};
 
-// 使用库模块（将在后续任务中实现具体功能）
+// 使用库模块
 use course_scheduling_system::{init_logging, LogConfig, DESCRIPTION, NAME, VERSION};
+
+// 重新导出命令以供 Tauri 宏使用
+pub use course_scheduling_system::commands::schedule::*;
 
 // 健康检查命令
 #[tauri::command]
@@ -75,6 +78,7 @@ fn main() {
             health_check,
             get_system_info,
             log_frontend_error,
+            generate_schedule,
         ])
         // 设置应用启动回调
         .setup(|app| {

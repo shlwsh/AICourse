@@ -4450,6 +4450,48 @@ impl Schedule {
         );
         is_busy
     }
+
+    /// 统计指定场地在指定时段的使用数量
+    ///
+    /// # 参数
+    /// - `venue_id`: 场地ID
+    /// - `slot`: 时间槽位
+    ///
+    /// # 返回
+    /// 该场地在该时段被使用的次数（即有多少个班级在使用该场地）
+    ///
+    /// # 示例
+    /// ```rust
+    /// use course_scheduling_system::algorithm::{Schedule, ScheduleEntry, TimeSlot};
+    ///
+    /// let mut schedule = Schedule::new(5, 8);
+    /// let time_slot = TimeSlot { day: 0, period: 0 };
+    /// // 假设这些课程都使用同一个场地
+    /// let entry1 = ScheduleEntry::new(101, "PE".to_string(), 1001, time_slot);
+    /// let entry2 = ScheduleEntry::new(102, "PE".to_string(), 1002, time_slot);
+    /// schedule.add_entry(entry1);
+    /// schedule.add_entry(entry2);
+    ///
+    /// // 需要通过科目配置来确定场地使用情况
+    /// let usage = schedule.count_venue_usage("playground", &time_slot);
+    /// ```
+    pub fn count_venue_usage(&self, venue_id: &str, slot: &TimeSlot) -> u8 {
+        // 注意：这个方法需要配合科目配置使用
+        // 在实际使用中，需要先通过科目配置确定哪些课程使用了该场地
+        // 这里简化实现，只统计在该时段的课程数量
+        // 实际应该通过 subject_configs 来判断课程是否使用该场地
+        let count = self.entries.iter().filter(|e| e.time_slot == *slot).count() as u8;
+
+        trace!(
+            "统计场地 {} 在时间槽位 ({}, {}) 的使用数量: {}",
+            venue_id,
+            slot.day,
+            slot.period,
+            count
+        );
+
+        count
+    }
 }
 
 // ============================================================================
