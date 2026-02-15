@@ -1184,7 +1184,10 @@ mod tests {
 
         // 检查空闲时段（第2节），应该返回 Available
         let conflict_info = detector.check_slot_conflicts(&curriculum, &TimeSlot::new(0, 1));
-        assert!(matches!(conflict_info.severity, ConflictSeverity::Available));
+        assert!(matches!(
+            conflict_info.severity,
+            ConflictSeverity::Available
+        ));
         assert_eq!(conflict_info.description, "可以安排");
     }
 

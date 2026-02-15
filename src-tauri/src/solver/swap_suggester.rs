@@ -256,7 +256,9 @@ impl SwapSuggester {
             );
 
             // 2. 尝试简单交换
-            if let Some(simple_swap) = self.find_simple_swap(&existing_entry, target_teacher, &desired_slot) {
+            if let Some(simple_swap) =
+                self.find_simple_swap(&existing_entry, target_teacher, &desired_slot)
+            {
                 options.push(simple_swap);
             }
 
@@ -368,7 +370,10 @@ impl SwapSuggester {
             alternative_slot.period + 1
         );
 
-        debug!("简单交换方案: cost_impact={}, description={}", cost_impact, description);
+        debug!(
+            "简单交换方案: cost_impact={}, description={}",
+            cost_impact, description
+        );
 
         Some(SwapOption::new(
             SwapType::Simple,
@@ -583,7 +588,9 @@ impl SwapSuggester {
                         && entry.time_slot == exclude_entry.time_slot)
             })
             .filter(|entry| {
-                if let Some(subject_config) = self.constraint_graph.subject_configs.get(&entry.subject_id) {
+                if let Some(subject_config) =
+                    self.constraint_graph.subject_configs.get(&entry.subject_id)
+                {
                     subject_config.venue_id.as_deref() == Some(venue_id)
                 } else {
                     false
@@ -664,7 +671,9 @@ impl SwapSuggester {
             }
 
             // 软约束3：主科连续3节惩罚
-            if let Some(subject_config) = self.constraint_graph.subject_configs.get(&entry.subject_id) {
+            if let Some(subject_config) =
+                self.constraint_graph.subject_configs.get(&entry.subject_id)
+            {
                 if subject_config.is_major_subject {
                     let consecutive_count = self.count_consecutive_sessions(entry);
                     if consecutive_count >= 3 {
@@ -854,12 +863,7 @@ mod tests {
             TimeSlot::new(0, 1),
         )];
 
-        let option = SwapOption::new(
-            SwapType::Simple,
-            moves,
-            -10,
-            "测试交换方案".to_string(),
-        );
+        let option = SwapOption::new(SwapType::Simple, moves, -10, "测试交换方案".to_string());
 
         assert_eq!(option.swap_type, SwapType::Simple);
         assert_eq!(option.moves.len(), 1);
