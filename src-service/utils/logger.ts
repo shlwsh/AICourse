@@ -76,8 +76,9 @@ interface LogEntry {
 
 // 默认配置
 const defaultConfig: LoggerConfig = {
-  level: (process.env.LOG_LEVEL as LogLevel) ||
-         (process.env.NODE_ENV === 'development' ? LogLevel.DEBUG : LogLevel.INFO),
+  level:
+    (process.env.LOG_LEVEL as LogLevel) ||
+    (process.env.NODE_ENV === 'development' ? LogLevel.DEBUG : LogLevel.INFO),
   enableConsole: process.env.LOG_ENABLE_CONSOLE !== 'false',
   enableFile: process.env.LOG_ENABLE_FILE !== 'false',
   logDir: process.env.LOG_DIR || 'logs',
@@ -290,7 +291,7 @@ class Logger {
     if (this.config.enableFile) {
       try {
         const logFilePath = this.getLogFilePath();
-        appendFileSync(logFilePath, `${formattedMessage  }\n`, 'utf-8');
+        appendFileSync(logFilePath, `${formattedMessage}\n`, 'utf-8');
       } catch (error) {
         console.error('写入日志文件失败:', error);
       }
