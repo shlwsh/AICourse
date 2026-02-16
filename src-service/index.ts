@@ -11,14 +11,23 @@
 import { Hono } from 'hono';
 import { cors } from 'hono/cors';
 import { requestLogger } from './middleware/request-logger';
+import { errorHandler } from './middleware/error-handler';
 import { logger } from './utils/logger';
+import { scheduleRoutes } from './routes/schedule';
+import { teacherRoutes } from './routes/teacher';
+import { importExportRoutes } from './routes/import-export';
 
 // 创建 Hono 应用实例
 const app = new Hono();
 
 // 配置全局中间件
-app.use('*', requestLogger()); // 自定义请求日志中间件
+app.use('*', requestLogger); // 自定义请求日志中间件
 app.use('*', cors()); // CORS 跨域中间件
+
+// 注册路由
+app.route('/api/schedule', scheduleRoutes);
+app.route('/api/teacher', teacherRoutes);
+app.route('/api/import-export', importExportRoutes);
 
 // 健康检查路由
 app.get('/health', (c) => {
@@ -55,22 +64,8 @@ app.notFound((c) => {
   );
 });
 
-// 错误处理
-app.onError((err, c) => {
-  logger.error('服务器错误', {
-    error: err.message,
-    stack: err.stack,
-    path: c.req.path,
-    method: c.req.method,
-  });
-  return c.json(
-    {
-      error: '服务器内部错误',
-      message: err.message,
-    },
-    500,
-  );
-});
+// 错误处理（使用统一的错误处理中间件）
+app.onError(errorHandler);
 
 // 启动服务器
 const port = process.env.PORT || 3000;

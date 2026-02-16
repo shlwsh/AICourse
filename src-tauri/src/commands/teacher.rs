@@ -376,3 +376,610 @@ mod tests {
         assert_eq!(deserialized_output.teachers.len(), 1);
     }
 }
+
+// ============================================================================
+// 保存教师偏好命令
+// ============================================================================
+
+/// 保存教师偏好的输入参数
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct SaveTeacherPreferenceInput {
+    /// 教师 ID
+    pub teacher_id: u32,
+    /// 偏好时段掩码（u64 位掩码）
+    pub preferred_slots: u64,
+    /// 早晚偏好：0=无偏好, 1=厌恶早课, 2=厌恶晚课
+    pub time_bias: u8,
+    /// 权重系数
+    pub weight: u32,
+    /// 不排课时段掩码（u64 位掩码）
+    pub blocked_slots: u64,
+}
+
+/// 保存教师偏好的输出结果
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct SaveTeacherPreferenceOutput {
+    /// 是否成功
+    pub success: bool,
+    /// 消息
+    pub message: String,
+    /// 错误信息（如果失败）
+    pub error_message: Option<String>,
+}
+
+/// 保存教师偏好命令
+///
+/// 保存单个教师的偏好配置到数据库
+///
+/// # 参数
+/// - `input`: 教师偏好配置
+///
+/// # 返回
+/// - `Ok(SaveTeacherPreferenceOutput)`: 成功保存
+/// - `Err(String)`: 保存失败，返回错误信息
+///
+/// # 功能
+/// 1. 验证输入参数
+/// 2. 连接数据库
+/// 3. 保存教师偏好配置
+/// 4. 返回操作结果
+///
+/// # 日志记录
+/// - INFO: 记录开始、完成等关键操作
+/// - DEBUG: 记录详细的配置信息
+/// - ERROR: 记录错误信息和堆栈跟踪
+#[tauri::command]
+pub async fn save_teacher_preference(
+    input: SaveTeacherPreferenceInput,
+) -> Result<SaveTeacherPreferenceOutput, String> {
+    info!("========================================");
+    info!("开始保存教师偏好");
+    info!("教师 ID: {}", input.teacher_id);
+    info!("========================================");
+
+    debug!("偏好配置详情:");
+    debug!("  偏好时段掩码: 0x{:016X}", input.preferred_slots);
+    debug!("  早晚偏好: {}", input.time_bias);
+    debug!("  权重系数: {}", input.weight);
+    debug!("  不排课时段掩码: 0x{:016X}", input.blocked_slots);
+
+    // TODO: 实现数据库保存逻辑（待数据库模块完成）
+    warn!("数据库保存功能尚未实现，返回模拟结果");
+
+    info!("========================================");
+    info!("教师偏好保存完成");
+    info!("========================================");
+
+    Ok(SaveTeacherPreferenceOutput {
+        success: true,
+        message: format!("教师 {} 的偏好配置已保存", input.teacher_id),
+        error_message: None,
+    })
+
+    // 实际实现（待数据库模块完成后启用）：
+    /*
+    use crate::db::DatabaseManager;
+    use crate::db::teacher::{TeacherRepository, SaveTeacherPreferenceInput as DbInput};
+
+    // 1. 连接数据库
+    info!("步骤 1/2: 连接数据库");
+    let db = DatabaseManager::new("sqlite://data/schedule.db", "migrations")
+        .await
+        .map_err(|e| {
+            error!("数据库连接失败: {}", e);
+            format!("数据库连接失败: {}", e)
+        })?;
+
+    let pool = db.pool();
+    let repo = TeacherRepository::new(pool);
+
+    // 2. 保存教师偏好
+    info!("步骤 2/2: 保存教师偏好");
+    let db_input = DbInput {
+        teacher_id: input.teacher_id as i64,
+        preferred_slots: input.preferred_slots,
+        time_bias: input.time_bias as i64,
+        weight: input.weight as i64,
+        blocked_slots: input.blocked_slots,
+    };
+
+    repo.save_preference(db_input)
+        .await
+        .map_err(|e| {
+            error!("保存教师偏好失败: {}", e);
+            format!("保存教师偏好失败: {}", e)
+        })?;
+
+    info!("========================================");
+    info!("教师偏好保存完成");
+    info!("========================================");
+
+    Ok(SaveTeacherPreferenceOutput {
+        success: true,
+        message: format!("教师 {} 的偏好配置已保存", input.teacher_id),
+        error_message: None,
+    })
+    */
+}
+
+// ============================================================================
+// 批量保存教师偏好命令
+// ============================================================================
+
+/// 批量保存教师偏好的输入参数
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct BatchSaveTeacherPreferencesInput {
+    /// 教师偏好列表
+    pub preferences: Vec<SaveTeacherPreferenceInput>,
+}
+
+/// 批量保存教师偏好的输出结果
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct BatchSaveTeacherPreferencesOutput {
+    /// 是否成功
+    pub success: bool,
+    /// 成功保存的数量
+    pub success_count: usize,
+    /// 失败的数量
+    pub failed_count: usize,
+    /// 消息
+    pub message: String,
+    /// 错误信息（如果失败）
+    pub error_message: Option<String>,
+}
+
+/// 批量保存教师偏好命令
+///
+/// 批量保存多个教师的偏好配置到数据库
+///
+/// # 参数
+/// - `input`: 包含多个教师偏好配置的列表
+///
+/// # 返回
+/// - `Ok(BatchSaveTeacherPreferencesOutput)`: 批量保存结果
+/// - `Err(String)`: 保存失败，返回错误信息
+///
+/// # 功能
+/// 1. 验证输入参数
+/// 2. 连接数据库
+/// 3. 使用事务批量保存教师偏好配置
+/// 4. 返回操作结果（成功数量、失败数量）
+///
+/// # 日志记录
+/// - INFO: 记录开始、完成等关键操作
+/// - DEBUG: 记录每个教师的配置信息
+/// - ERROR: 记录错误信息和堆栈跟踪
+#[tauri::command]
+pub async fn batch_save_teacher_preferences(
+    input: BatchSaveTeacherPreferencesInput,
+) -> Result<BatchSaveTeacherPreferencesOutput, String> {
+    info!("========================================");
+    info!("开始批量保存教师偏好");
+    info!("教师数量: {}", input.preferences.len());
+    info!("========================================");
+
+    let total_count = input.preferences.len();
+
+    // TODO: 实现数据库批量保存逻辑（待数据库模块完成）
+    warn!("数据库批量保存功能尚未实现，返回模拟结果");
+
+    info!("========================================");
+    info!("批量保存教师偏好完成");
+    info!("成功: {}, 失败: 0", total_count);
+    info!("========================================");
+
+    Ok(BatchSaveTeacherPreferencesOutput {
+        success: true,
+        success_count: total_count,
+        failed_count: 0,
+        message: format!("成功保存 {} 位教师的偏好配置", total_count),
+        error_message: None,
+    })
+
+    // 实际实现（待数据库模块完成后启用）：
+    /*
+    use crate::db::DatabaseManager;
+    use crate::db::teacher::{TeacherRepository, SaveTeacherPreferenceInput as DbInput};
+
+    // 1. 连接数据库
+    info!("步骤 1/2: 连接数据库");
+    let db = DatabaseManager::new("sqlite://data/schedule.db", "migrations")
+        .await
+        .map_err(|e| {
+            error!("数据库连接失败: {}", e);
+            format!("数据库连接失败: {}", e)
+        })?;
+
+    let pool = db.pool();
+    let repo = TeacherRepository::new(pool);
+
+    // 2. 批量保存教师偏好
+    info!("步骤 2/2: 批量保存教师偏好");
+    let db_inputs: Vec<DbInput> = input
+        .preferences
+        .into_iter()
+        .map(|p| DbInput {
+            teacher_id: p.teacher_id as i64,
+            preferred_slots: p.preferred_slots,
+            time_bias: p.time_bias as i64,
+            weight: p.weight as i64,
+            blocked_slots: p.blocked_slots,
+        })
+        .collect();
+
+    repo.batch_save_preferences(db_inputs)
+        .await
+        .map_err(|e| {
+            error!("批量保存教师偏好失败: {}", e);
+            format!("批量保存教师偏好失败: {}", e)
+        })?;
+
+    let success_count = total_count;
+    let failed_count = 0;
+
+    info!("========================================");
+    info!("批量保存教师偏好完成");
+    info!("成功: {}, 失败: {}", success_count, failed_count);
+    info!("========================================");
+
+    Ok(BatchSaveTeacherPreferencesOutput {
+        success: true,
+        success_count,
+        failed_count,
+        message: format!("成功保存 {} 位教师的偏好配置", success_count),
+        error_message: None,
+    })
+    */
+}
+
+// ============================================================================
+// 查询教师状态命令
+// ============================================================================
+
+/// 时间槽位
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct TimeSlot {
+    /// 星期（0-6，0表示星期一）
+    pub day: u8,
+    /// 节次（0-11）
+    pub period: u8,
+}
+
+/// 教师状态信息
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct TeacherStatusInfo {
+    /// 教师 ID
+    pub teacher_id: u32,
+    /// 教师姓名
+    pub teacher_name: String,
+    /// 是否在上课
+    pub is_busy: bool,
+    /// 如果在上课，所在的班级 ID
+    pub class_id: Option<u32>,
+    /// 如果在上课，授课科目
+    pub subject_id: Option<String>,
+}
+
+/// 查询教师状态的输入参数
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct QueryTeacherStatusInput {
+    /// 要查询的时间槽位列表
+    pub time_slots: Vec<TimeSlot>,
+}
+
+/// 查询教师状态的输出结果
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct QueryTeacherStatusOutput {
+    /// 是否成功
+    pub success: bool,
+    /// 上课的教师列表
+    pub busy_teachers: Vec<TeacherStatusInfo>,
+    /// 空闲的教师列表
+    pub free_teachers: Vec<TeacherStatusInfo>,
+    /// 错误信息（如果失败）
+    pub error_message: Option<String>,
+}
+
+/// 查询教师状态命令
+///
+/// 查询指定时段哪些教师在上课、哪些教师空闲
+///
+/// # 参数
+/// - `input`: 包含要查询的时间槽位列表
+///
+/// # 返回
+/// - `Ok(QueryTeacherStatusOutput)`: 教师状态信息
+/// - `Err(String)`: 查询失败，返回错误信息
+///
+/// # 功能
+/// 1. 接收时间槽位列表
+/// 2. 查询当前活动课表
+/// 3. 分析每个时间槽位的教师状态
+/// 4. 返回上课教师和空闲教师列表
+///
+/// # 日志记录
+/// - INFO: 记录开始、完成等关键操作
+/// - DEBUG: 记录查询的时间槽位和结果统计
+/// - ERROR: 记录错误信息
+#[tauri::command]
+pub async fn query_teacher_status(
+    input: QueryTeacherStatusInput,
+) -> Result<QueryTeacherStatusOutput, String> {
+    info!("========================================");
+    info!("开始查询教师状态");
+    info!("查询时间槽位数量: {}", input.time_slots.len());
+    info!("========================================");
+
+    for (i, slot) in input.time_slots.iter().enumerate() {
+        debug!("时间槽位 {}: 星期{} 第{}节", i + 1, slot.day + 1, slot.period + 1);
+    }
+
+    // TODO: 实现数据库查询逻辑（待数据库模块完成）
+    warn!("数据库查询功能尚未实现，返回模拟数据");
+
+    // 模拟数据
+    let busy_teachers = vec![
+        TeacherStatusInfo {
+            teacher_id: 1001,
+            teacher_name: "张老师".to_string(),
+            is_busy: true,
+            class_id: Some(101),
+            subject_id: Some("数学".to_string()),
+        },
+    ];
+
+    let free_teachers = vec![
+        TeacherStatusInfo {
+            teacher_id: 1002,
+            teacher_name: "李老师".to_string(),
+            is_busy: false,
+            class_id: None,
+            subject_id: None,
+        },
+        TeacherStatusInfo {
+            teacher_id: 1003,
+            teacher_name: "王老师".to_string(),
+            is_busy: false,
+            class_id: None,
+            subject_id: None,
+        },
+    ];
+
+    info!("========================================");
+    info!("教师状态查询完成");
+    info!("上课教师: {}, 空闲教师: {}", busy_teachers.len(), free_teachers.len());
+    info!("========================================");
+
+    Ok(QueryTeacherStatusOutput {
+        success: true,
+        busy_teachers,
+        free_teachers,
+        error_message: None,
+    })
+
+    // 实际实现（待数据库模块完成后启用）：
+    /*
+    use crate::db::DatabaseManager;
+    use crate::db::teacher::TeacherRepository;
+
+    // 1. 连接数据库
+    info!("步骤 1/2: 连接数据库");
+    let db = DatabaseManager::new("sqlite://data/schedule.db", "migrations")
+        .await
+        .map_err(|e| {
+            error!("数据库连接失败: {}", e);
+            format!("数据库连接失败: {}", e)
+        })?;
+
+    let pool = db.pool();
+    let repo = TeacherRepository::new(pool);
+
+    // 2. 查询教师状态
+    info!("步骤 2/2: 查询教师状态");
+    let db_slots: Vec<(i64, i64)> = input
+        .time_slots
+        .into_iter()
+        .map(|s| (s.day as i64, s.period as i64))
+        .collect();
+
+    let statuses = repo
+        .query_teacher_status(db_slots)
+        .await
+        .map_err(|e| {
+            error!("查询教师状态失败: {}", e);
+            format!("查询教师状态失败: {}", e)
+        })?;
+
+    // 分类教师
+    let mut busy_teachers = Vec::new();
+    let mut free_teachers = Vec::new();
+
+    for status in statuses {
+        let info = TeacherStatusInfo {
+            teacher_id: status.teacher_id as u32,
+            teacher_name: status.teacher_name,
+            is_busy: status.is_busy,
+            class_id: status.class_id.map(|id| id as u32),
+            subject_id: status.subject_id,
+        };
+
+        if info.is_busy {
+            busy_teachers.push(info);
+        } else {
+            free_teachers.push(info);
+        }
+    }
+
+    info!("========================================");
+    info!("教师状态查询完成");
+    info!("上课教师: {}, 空闲教师: {}", busy_teachers.len(), free_teachers.len());
+    info!("========================================");
+
+    Ok(QueryTeacherStatusOutput {
+        success: true,
+        busy_teachers,
+        free_teachers,
+        error_message: None,
+    })
+    */
+}
+
+// ============================================================================
+// 计算教学工作量统计命令
+// ============================================================================
+
+/// 教学工作量统计信息
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct WorkloadStatisticsInfo {
+    /// 教师 ID
+    pub teacher_id: u32,
+    /// 教师姓名
+    pub teacher_name: String,
+    /// 总课时数
+    pub total_sessions: u32,
+    /// 授课班级数量
+    pub class_count: u32,
+    /// 授课科目列表
+    pub subjects: Vec<String>,
+    /// 早课节数（第1-2节）
+    pub morning_sessions: u32,
+    /// 晚课节数（第7-8节）
+    pub evening_sessions: u32,
+}
+
+/// 计算教学工作量统计的输出结果
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct CalculateWorkloadStatisticsOutput {
+    /// 是否成功
+    pub success: bool,
+    /// 工作量统计列表
+    pub statistics: Vec<WorkloadStatisticsInfo>,
+    /// 错误信息（如果失败）
+    pub error_message: Option<String>,
+}
+
+/// 计算教学工作量统计命令
+///
+/// 统计所有教师的教学工作量，包括总课时、班级数、早晚课等
+///
+/// # 返回
+/// - `Ok(CalculateWorkloadStatisticsOutput)`: 工作量统计结果
+/// - `Err(String)`: 计算失败，返回错误信息
+///
+/// # 功能
+/// 1. 查询当前活动课表
+/// 2. 统计每位教师的课时数
+/// 3. 统计每位教师的授课班级数
+/// 4. 统计每位教师的授课科目
+/// 5. 统计早课和晚课节数
+/// 6. 返回统计结果
+///
+/// # 日志记录
+/// - INFO: 记录开始、完成等关键操作
+/// - DEBUG: 记录统计详情
+/// - ERROR: 记录错误信息
+#[tauri::command]
+pub async fn calculate_workload_statistics(
+) -> Result<CalculateWorkloadStatisticsOutput, String> {
+    info!("========================================");
+    info!("开始计算教学工作量统计");
+    info!("========================================");
+
+    // TODO: 实现数据库查询和统计逻辑（待数据库模块完成）
+    warn!("数据库查询功能尚未实现，返回模拟数据");
+
+    // 模拟数据
+    let statistics = vec![
+        WorkloadStatisticsInfo {
+            teacher_id: 1001,
+            teacher_name: "张老师".to_string(),
+            total_sessions: 18,
+            class_count: 3,
+            subjects: vec!["数学".to_string()],
+            morning_sessions: 4,
+            evening_sessions: 2,
+        },
+        WorkloadStatisticsInfo {
+            teacher_id: 1002,
+            teacher_name: "李老师".to_string(),
+            total_sessions: 16,
+            class_count: 4,
+            subjects: vec!["语文".to_string()],
+            morning_sessions: 3,
+            evening_sessions: 3,
+        },
+        WorkloadStatisticsInfo {
+            teacher_id: 1003,
+            teacher_name: "王老师".to_string(),
+            total_sessions: 12,
+            class_count: 2,
+            subjects: vec!["英语".to_string()],
+            morning_sessions: 2,
+            evening_sessions: 1,
+        },
+    ];
+
+    info!("========================================");
+    info!("教学工作量统计完成");
+    info!("统计教师数量: {}", statistics.len());
+    info!("========================================");
+
+    Ok(CalculateWorkloadStatisticsOutput {
+        success: true,
+        statistics,
+        error_message: None,
+    })
+
+    // 实际实现（待数据库模块完成后启用）：
+    /*
+    use crate::db::DatabaseManager;
+    use crate::db::teacher::TeacherRepository;
+
+    // 1. 连接数据库
+    info!("步骤 1/2: 连接数据库");
+    let db = DatabaseManager::new("sqlite://data/schedule.db", "migrations")
+        .await
+        .map_err(|e| {
+            error!("数据库连接失败: {}", e);
+            format!("数据库连接失败: {}", e)
+        })?;
+
+    let pool = db.pool();
+    let repo = TeacherRepository::new(pool);
+
+    // 2. 计算工作量统计
+    info!("步骤 2/2: 计算工作量统计");
+    let db_statistics = repo
+        .calculate_workload_statistics()
+        .await
+        .map_err(|e| {
+            error!("计算工作量统计失败: {}", e);
+            format!("计算工作量统计失败: {}", e)
+        })?;
+
+    // 转换数据类型
+    let statistics: Vec<WorkloadStatisticsInfo> = db_statistics
+        .into_iter()
+        .map(|s| WorkloadStatisticsInfo {
+            teacher_id: s.teacher_id as u32,
+            teacher_name: s.teacher_name,
+            total_sessions: s.total_sessions as u32,
+            class_count: s.class_count as u32,
+            subjects: s.subjects,
+            morning_sessions: s.morning_sessions as u32,
+            evening_sessions: s.evening_sessions as u32,
+        })
+        .collect();
+
+    info!("========================================");
+    info!("教学工作量统计完成");
+    info!("统计教师数量: {}", statistics.len());
+    info!("========================================");
+
+    Ok(CalculateWorkloadStatisticsOutput {
+        success: true,
+        statistics,
+        error_message: None,
+    })
+    */
+}

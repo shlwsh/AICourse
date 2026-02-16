@@ -37,20 +37,22 @@
     "prepare": "husky"
   },
   "dependencies": {
-    "vue": "^3.4.0",
-    "vue-router": "^4.2.5",
+    "@element-plus/icons-vue": "^2.3.1",
+    "@hono/zod-validator": "^0.2.1",
+    "@tauri-apps/api": "^1.5.3",
+    "@vueuse/core": "^14.2.1",
+    "axios": "^1.6.2",
+    "dayjs": "^1.11.10",
+    "echarts": "^6.0.0",
+    "element-plus": "^2.5.0",
+    "hono": "^3.11.7",
+    "lodash-es": "^4.17.21",
     "pinia": "^2.1.7",
     "pinia-plugin-persistedstate": "^3.2.1",
-    "element-plus": "^2.5.0",
-    "@element-plus/icons-vue": "^2.3.1",
-    "@tauri-apps/api": "^1.5.3",
-    "axios": "^1.6.2",
+    "vue": "^3.4.0",
     "vue-draggable-plus": "^0.5.3",
-    "hono": "^3.11.7",
-    "@hono/zod-validator": "^0.2.1",
-    "zod": "^3.22.4",
-    "dayjs": "^1.11.10",
-    "lodash-es": "^4.17.21"
+    "vue-router": "^4.2.5",
+    "zod": "^3.22.4"
   },
   "devDependencies": {
     "@playwright/test": "^1.40.0",
@@ -85,8 +87,15 @@
     "bun": ">=1.0.0"
   },
   "lint-staged": {
-    "*.{ts,tsx,vue}": ["eslint --fix", "prettier --write"],
-    "*.{js,jsx,json,css,scss,html}": ["prettier --write"],
-    "src-tauri/**/*.rs": ["sh -c 'cd src-tauri && cargo fmt'"]
+    "*.{ts,tsx,vue}": [
+      "eslint --fix",
+      "prettier --write"
+    ],
+    "*.{js,jsx,json,css,scss,html}": [
+      "prettier --write"
+    ],
+    "src-tauri/**/*.rs": [
+      "sh -c 'cd src-tauri && cargo fmt'"
+    ]
   }
 }

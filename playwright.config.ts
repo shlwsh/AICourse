@@ -77,11 +77,13 @@ export default defineConfig({
    * - html: 交互式 HTML 报告
    * - list: 控制台列表输出
    * - json: JSON 格式报告（用于 CI 集成）
+   * - custom: 自定义中文报告
    */
   reporter: [
     ['html', { outputFolder: 'tests/reports/html', open: 'never' }],
     ['list'],
     ['json', { outputFile: 'tests/reports/test-results.json' }],
+    ['./tests/helpers/custom-reporter.ts'],
   ],
 
   /**

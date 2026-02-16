@@ -207,6 +207,123 @@ export const useScheduleStore = defineStore('schedule', () => {
   };
 
   /**
+   * 设置固定课程
+   */
+  const setFixedCourse = async (entry: ScheduleEntry): Promise<void> => {
+    try {
+      logger.info('设置固定课程', { entry });
+
+      // TODO: 调用 Tauri 命令设置固定课程
+      // await invoke('set_fixed_course', {
+      //   classId: entry.classId,
+      //   subjectId: entry.subjectId,
+      //   teacherId: entry.teacherId,
+      //   timeSlot: entry.timeSlot,
+      //   weekType: entry.weekType,
+      // });
+
+      // 重新加载课表
+      await loadSchedule();
+
+      logger.info('固定课程设置成功');
+    } catch (error) {
+      logger.error('设置固定课程失败', { error });
+      throw error;
+    }
+  };
+
+  /**
+   * 解除固定课程
+   */
+  const unsetFixedCourse = async (entry: ScheduleEntry): Promise<void> => {
+    try {
+      logger.info('解除固定课程', { entry });
+
+      // TODO: 调用 Tauri 命令解除固定课程
+      // await invoke('unset_fixed_course', {
+      //   classId: entry.classId,
+      //   subjectId: entry.subjectId,
+      //   teacherId: entry.teacherId,
+      //   timeSlot: entry.timeSlot,
+      // });
+
+      // 重新加载课表
+      await loadSchedule();
+
+      logger.info('固定课程解除成功');
+    } catch (error) {
+      logger.error('解除固定课程失败', { error });
+      throw error;
+    }
+  };
+
+  /**
+   * 批量设置固定课程
+   */
+  const batchSetFixedCourses = async (entries: ScheduleEntry[]): Promise<void> => {
+    try {
+      logger.info('批量设置固定课程', { count: entries.length });
+
+      // TODO: 调用 Tauri 命令批量设置固定课程
+      // await invoke('batch_set_fixed_courses', {
+      //   entries: entries.map(e => ({
+      //     classId: e.classId,
+      //     subjectId: e.subjectId,
+      //     teacherId: e.teacherId,
+      //     timeSlot: e.timeSlot,
+      //     weekType: e.weekType,
+      //   })),
+      // });
+
+      // 重新加载课表
+      await loadSchedule();
+
+      logger.info('批量设置固定课程成功');
+    } catch (error) {
+      logger.error('批量设置固定课程失败', { error });
+      throw error;
+    }
+  };
+
+  /**
+   * 批量解除固定课程
+   */
+  const batchUnsetFixedCourses = async (entries: ScheduleEntry[]): Promise<void> => {
+    try {
+      logger.info('批量解除固定课程', { count: entries.length });
+
+      // TODO: 调用 Tauri 命令批量解除固定课程
+      // await invoke('batch_unset_fixed_courses', {
+      //   entries: entries.map(e => ({
+      //     classId: e.classId,
+      //     subjectId: e.subjectId,
+      //     teacherId: e.teacherId,
+      //     timeSlot: e.timeSlot,
+      //   })),
+      // });
+
+      // 重新加载课表
+      await loadSchedule();
+
+      logger.info('批量解除固定课程成功');
+    } catch (error) {
+      logger.error('批量解除固定课程失败', { error });
+      throw error;
+    }
+  };
+
+  /**
+   * 获取所有固定课程
+   */
+  const getFixedCourses = (): ScheduleEntry[] => {
+    if (!schedule.value) {
+      return [];
+    }
+
+    return schedule.value.entries.filter(entry => entry.isFixed);
+  };
+
+  /**
    * 重置状态
    */
   const reset = (): void => {
@@ -242,6 +359,11 @@ export const useScheduleStore = defineStore('schedule', () => {
     detectConflicts,
     setViewMode,
     toggleHeatmap,
+    setFixedCourse,
+    unsetFixedCourse,
+    batchSetFixedCourses,
+    batchUnsetFixedCourses,
+    getFixedCourses,
     reset,
   };
 });

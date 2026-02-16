@@ -44,6 +44,33 @@ const routes: RouteRecordRaw[] = [
     },
   },
   {
+    path: '/import-export',
+    name: 'ImportExport',
+    component: () => import('@/views/ImportExport.vue'),
+    meta: {
+      title: '导入导出',
+      requiresAuth: false,
+    },
+  },
+  {
+    path: '/statistics',
+    name: 'Statistics',
+    component: () => import('@/views/Statistics.vue'),
+    meta: {
+      title: '统计分析',
+      requiresAuth: false,
+    },
+  },
+  {
+    path: '/help',
+    name: 'Help',
+    component: () => import('@/views/Help.vue'),
+    meta: {
+      title: '帮助中心',
+      requiresAuth: false,
+    },
+  },
+  {
     path: '/:pathMatch(.*)*',
     name: 'NotFound',
     component: () => import('@/views/NotFound.vue'),

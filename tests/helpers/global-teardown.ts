@@ -48,23 +48,19 @@ async function globalTeardown(_config: FullConfig) {
 async function cleanupTestData() {
   console.log('🗑️  清理测试数据...');
 
-  const testDbPath = join(process.cwd(), 'data/test/scheduling.db');
+  try {
+    // 导入数据库辅助工具
+    const { createDatabaseHelper } = await import('./database-helper');
 
-  // 根据环境变量决定是否保留测试数据库
-  const keepTestData = process.env.KEEP_TEST_DATA === 'true';
+    // 创建数据库辅助工具
+    const dbHelper = createDatabaseHelper({
+      deleteAfterTest: process.env.KEEP_TEST_DATA !== 'true',
+    });
 
-  if (keepTestData) {
-    console.log('  ℹ️  保留测试数据库用于调试');
-    console.log(`  📍 数据库位置: ${testDbPath}`);
-  } else if (existsSync(testDbPath)) {
-    // 在实际项目中，这里可以删除测试数据库
-    // const fs = await import('fs/promises');
-    // await fs.unlink(testDbPath);
-    // console.log('  ✓ 删除测试数据库');
-
-    console.log('  ℹ️  测试数据库已保留（可手动删除）');
-  } else {
-    console.log('  ○ 测试数据库不存在');
+    // 清理数据库
+    await dbHelper.cleanup();
+  } catch (error) {
+    console.error('  ⚠️  数据库清理失败:', error);
   }
 }
 

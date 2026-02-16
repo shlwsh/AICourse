@@ -365,5 +365,10 @@ class Logger {
 // 导出默认日志实例
 export const logger = new Logger('Service');
 
+// 导出创建日志记录器的工厂函数
+export function createLogger(moduleName: string, config?: Partial<LoggerConfig>): Logger {
+  return new Logger(moduleName, config);
+}
+
 // 导出 Logger 类供其他模块创建实例
 export default Logger;

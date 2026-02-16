@@ -88,18 +88,44 @@ async function createDirectories() {
 async function initializeTestDatabase() {
   console.log('\n🗄️  初始化测试数据库...');
 
-  const testDbPath = join(process.cwd(), 'data/test/scheduling.db');
+  try {
+    // 导入数据库辅助工具
+    const { createDatabaseHelper } = await import('./database-helper');
+    const { generateCompleteTestData } = await import('./test-data-generator');
 
-  // 如果测试数据库已存在，先删除
-  if (existsSync(testDbPath)) {
-    const fs = await import('fs/promises');
-    await fs.unlink(testDbPath);
-    console.log('  ✓ 删除旧的测试数据库');
+    // 创建数据库辅助工具
+    const dbHelper = createDatabaseHelper();
+
+    // 初始化数据库
+    await dbHelper.initialize();
+    console.log('  ✓ 数据库结构创建完成');
+
+    // 生成测试数据
+    const testData = generateCompleteTestData({
+      teacherCount: 30,
+      classCount: 10,
+      daysPerWeek: 5,
+      periodsPerDay: 8,
+    });
+
+    // 插入测试数据
+    await dbHelper.insertSubjects(testData.subjects);
+    console.log(`  ✓ 插入 ${testData.subjects.length} 条科目数据`);
+
+    await dbHelper.insertTeachers(testData.teachers);
+    console.log(`  ✓ 插入 ${testData.teachers.length} 条教师数据`);
+
+    await dbHelper.insertClasses(testData.classes);
+    console.log(`  ✓ 插入 ${testData.classes.length} 条班级数据`);
+
+    await dbHelper.insertCurriculums(testData.curriculums);
+    console.log(`  ✓ 插入 ${testData.curriculums.length} 条教学计划数据`);
+
+    console.log('  ✓ 测试数据库初始化完成');
+  } catch (error) {
+    console.error('  ❌ 数据库初始化失败:', error);
+    console.log('  ℹ️  将在测试中使用模拟数据');
   }
-
-  // TODO: 在后续任务中实现数据库初始化逻辑
-  // 这里需要调用 Rust 后端的数据库迁移功能
-  console.log('  ⚠️  数据库初始化逻辑待实现（阶段 2）');
 }
 
 /**

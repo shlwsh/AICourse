@@ -21,10 +21,15 @@
 // 子模块声明
 pub mod schedule;
 pub mod teacher;
-// pub mod import_export; // 将在后续任务中实现
+pub mod import_export;
+pub mod health;
+pub mod logging;
 // pub mod venue;        // 将在后续任务中实现
 // pub mod config;       // 将在后续任务中实现
 
 // 重新导出命令函数
 pub use schedule::*;
 pub use teacher::*;
+pub use import_export::*;
+pub use health::*;
+pub use logging::*;
