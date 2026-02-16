@@ -8,9 +8,9 @@ declare global {
   const EffectScope: typeof import('vue')['EffectScope']
   const acceptHMRUpdate: typeof import('pinia')['acceptHMRUpdate']
   const appDataDir: typeof import('@tauri-apps/api/path')['appDataDir']
-  const ask: typeof import('@tauri-apps/api/dialog')['ask']
+  const ask: typeof import('@tauri-apps/plugin-dialog')['ask']
   const computed: typeof import('vue')['computed']
-  const confirm: typeof import('@tauri-apps/api/dialog')['confirm']
+  const confirm: typeof import('@tauri-apps/plugin-dialog')['confirm']
   const createApp: typeof import('vue')['createApp']
   const createPinia: typeof import('pinia')['createPinia']
   const customRef: typeof import('vue')['customRef']
@@ -23,7 +23,7 @@ declare global {
   const getCurrentScope: typeof import('vue')['getCurrentScope']
   const h: typeof import('vue')['h']
   const inject: typeof import('vue')['inject']
-  const invoke: typeof import('@tauri-apps/api/tauri')['invoke']
+  const invoke: typeof import('@tauri-apps/api/core')['invoke']
   const isProxy: typeof import('vue')['isProxy']
   const isReactive: typeof import('vue')['isReactive']
   const isReadonly: typeof import('vue')['isReadonly']
@@ -34,7 +34,7 @@ declare global {
   const mapStores: typeof import('pinia')['mapStores']
   const mapWritableState: typeof import('pinia')['mapWritableState']
   const markRaw: typeof import('vue')['markRaw']
-  const message: typeof import('@tauri-apps/api/dialog')['message']
+  const message: typeof import('@tauri-apps/plugin-dialog')['message']
   const nextTick: typeof import('vue')['nextTick']
   const onActivated: typeof import('vue')['onActivated']
   const onBeforeMount: typeof import('vue')['onBeforeMount']
@@ -52,15 +52,15 @@ declare global {
   const onUnmounted: typeof import('vue')['onUnmounted']
   const onUpdated: typeof import('vue')['onUpdated']
   const onWatcherCleanup: typeof import('vue')['onWatcherCleanup']
-  const open: typeof import('@tauri-apps/api/dialog')['open']
+  const open: typeof import('@tauri-apps/plugin-dialog')['open']
   const provide: typeof import('vue')['provide']
   const reactive: typeof import('vue')['reactive']
   const readonly: typeof import('vue')['readonly']
   const ref: typeof import('vue')['ref']
   const resolveComponent: typeof import('vue')['resolveComponent']
   const resourceDir: typeof import('@tauri-apps/api/path')['resourceDir']
-  const save: typeof import('@tauri-apps/api/dialog')['save']
-  const sendNotification: typeof import('@tauri-apps/api/notification')['sendNotification']
+  const save: typeof import('@tauri-apps/plugin-dialog')['save']
+  const sendNotification: typeof import('@tauri-apps/plugin-notification')['sendNotification']
   const setActivePinia: typeof import('pinia')['setActivePinia']
   const setMapStoreSuffix: typeof import('pinia')['setMapStoreSuffix']
   const shallowReactive: typeof import('vue')['shallowReactive']
@@ -102,9 +102,9 @@ declare module 'vue' {
     readonly EffectScope: UnwrapRef<typeof import('vue')['EffectScope']>
     readonly acceptHMRUpdate: UnwrapRef<typeof import('pinia')['acceptHMRUpdate']>
     readonly appDataDir: UnwrapRef<typeof import('@tauri-apps/api/path')['appDataDir']>
-    readonly ask: UnwrapRef<typeof import('@tauri-apps/api/dialog')['ask']>
+    readonly ask: UnwrapRef<typeof import('@tauri-apps/plugin-dialog')['ask']>
     readonly computed: UnwrapRef<typeof import('vue')['computed']>
-    readonly confirm: UnwrapRef<typeof import('@tauri-apps/api/dialog')['confirm']>
+    readonly confirm: UnwrapRef<typeof import('@tauri-apps/plugin-dialog')['confirm']>
     readonly createApp: UnwrapRef<typeof import('vue')['createApp']>
     readonly createPinia: UnwrapRef<typeof import('pinia')['createPinia']>
     readonly customRef: UnwrapRef<typeof import('vue')['customRef']>
@@ -117,7 +117,7 @@ declare module 'vue' {
     readonly getCurrentScope: UnwrapRef<typeof import('vue')['getCurrentScope']>
     readonly h: UnwrapRef<typeof import('vue')['h']>
     readonly inject: UnwrapRef<typeof import('vue')['inject']>
-    readonly invoke: UnwrapRef<typeof import('@tauri-apps/api/tauri')['invoke']>
+    readonly invoke: UnwrapRef<typeof import('@tauri-apps/api/core')['invoke']>
     readonly isProxy: UnwrapRef<typeof import('vue')['isProxy']>
     readonly isReactive: UnwrapRef<typeof import('vue')['isReactive']>
     readonly isReadonly: UnwrapRef<typeof import('vue')['isReadonly']>
@@ -128,7 +128,7 @@ declare module 'vue' {
     readonly mapStores: UnwrapRef<typeof import('pinia')['mapStores']>
     readonly mapWritableState: UnwrapRef<typeof import('pinia')['mapWritableState']>
     readonly markRaw: UnwrapRef<typeof import('vue')['markRaw']>
-    readonly message: UnwrapRef<typeof import('@tauri-apps/api/dialog')['message']>
+    readonly message: UnwrapRef<typeof import('@tauri-apps/plugin-dialog')['message']>
     readonly nextTick: UnwrapRef<typeof import('vue')['nextTick']>
     readonly onActivated: UnwrapRef<typeof import('vue')['onActivated']>
     readonly onBeforeMount: UnwrapRef<typeof import('vue')['onBeforeMount']>
@@ -146,15 +146,15 @@ declare module 'vue' {
     readonly onUnmounted: UnwrapRef<typeof import('vue')['onUnmounted']>
     readonly onUpdated: UnwrapRef<typeof import('vue')['onUpdated']>
     readonly onWatcherCleanup: UnwrapRef<typeof import('vue')['onWatcherCleanup']>
-    readonly open: UnwrapRef<typeof import('@tauri-apps/api/dialog')['open']>
+    readonly open: UnwrapRef<typeof import('@tauri-apps/plugin-dialog')['open']>
     readonly provide: UnwrapRef<typeof import('vue')['provide']>
     readonly reactive: UnwrapRef<typeof import('vue')['reactive']>
     readonly readonly: UnwrapRef<typeof import('vue')['readonly']>
     readonly ref: UnwrapRef<typeof import('vue')['ref']>
     readonly resolveComponent: UnwrapRef<typeof import('vue')['resolveComponent']>
     readonly resourceDir: UnwrapRef<typeof import('@tauri-apps/api/path')['resourceDir']>
-    readonly save: UnwrapRef<typeof import('@tauri-apps/api/dialog')['save']>
-    readonly sendNotification: UnwrapRef<typeof import('@tauri-apps/api/notification')['sendNotification']>
+    readonly save: UnwrapRef<typeof import('@tauri-apps/plugin-dialog')['save']>
+    readonly sendNotification: UnwrapRef<typeof import('@tauri-apps/plugin-notification')['sendNotification']>
     readonly setActivePinia: UnwrapRef<typeof import('pinia')['setActivePinia']>
     readonly setMapStoreSuffix: UnwrapRef<typeof import('pinia')['setMapStoreSuffix']>
     readonly shallowReactive: UnwrapRef<typeof import('vue')['shallowReactive']>

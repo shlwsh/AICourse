@@ -237,7 +237,7 @@ bun run lint --fix
 bun run type-check
 
 # 或直接使用 tsc
-npx tsc --noEmit
+bunx tsc --noEmit
 ```
 
 ### 格式化代码

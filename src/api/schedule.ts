@@ -325,7 +325,6 @@ export class ScheduleApi {
       throw error;
     }
   }
-}
 
   /**
    * 设置固定课程

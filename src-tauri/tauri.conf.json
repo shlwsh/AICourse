@@ -1,82 +1,25 @@
 {
-  "$schema": "https://schema.tauri.app/config/1",
+  "$schema": "https://schema.tauri.app/config/2",
+  "productName": "排课系统",
+  "version": "0.1.0",
+  "identifier": "com.course-scheduling.app",
   "build": {
-    "beforeDevCommand": "bun run dev",
+    "beforeDevCommand": "vite",
     "beforeBuildCommand": "bun run build",
-    "devPath": "http://localhost:5173",
-    "distDir": "../dist",
-    "withGlobalTauri": true
+    "devUrl": "http://localhost:5173",
+    "frontendDist": "../dist"
   },
-  "package": {
-    "productName": "排课系统",
-    "version": "0.1.0"
+  "bundle": {
+    "active": true,
+    "targets": "all",
+    "icon": ["icons/32x32.png", "icons/128x128.png", "icons/128x128@2x.png", "icons/icon.png"],
+    "resources": [],
+    "copyright": "Copyright © 2024 排课系统开发团队",
+    "category": "Education",
+    "shortDescription": "智能排课系统",
+    "longDescription": "基于约束优化的智能课程调度系统，支持自动排课和手动调课，使用 Bun + Rust + Tauri 技术栈构建"
   },
-  "tauri": {
-    "allowlist": {
-      "all": false,
-      "shell": {
-        "all": false,
-        "open": true
-      },
-      "fs": {
-        "all": false,
-        "readFile": true,
-        "writeFile": true,
-        "readDir": true,
-        "copyFile": true,
-        "createDir": true,
-        "removeDir": true,
-        "removeFile": true,
-        "renameFile": true,
-        "exists": true,
-        "scope": ["$APPDATA/*", "$APPDATA/**", "$RESOURCE/*", "$RESOURCE/**"]
-      },
-      "dialog": {
-        "all": false,
-        "open": true,
-        "save": true,
-        "message": true,
-        "ask": true,
-        "confirm": true
-      },
-      "path": {
-        "all": true
-      },
-      "http": {
-        "all": false,
-        "scope": ["http://localhost:3000/*", "http://127.0.0.1:3000/*"]
-      },
-      "window": {
-        "all": false,
-        "create": true,
-        "close": true,
-        "minimize": true,
-        "maximize": true,
-        "show": true,
-        "hide": true,
-        "setTitle": true,
-        "setSize": true,
-        "setPosition": true
-      },
-      "notification": {
-        "all": true
-      }
-    },
-    "bundle": {
-      "active": true,
-      "targets": "all",
-      "identifier": "com.course-scheduling.app",
-      "icon": ["icons/32x32.png", "icons/128x128.png", "icons/128x128@2x.png", "icons/icon.png"],
-      "resources": [],
-      "externalBin": [],
-      "copyright": "Copyright © 2024 排课系统开发团队",
-      "category": "Education",
-      "shortDescription": "智能排课系统",
-      "longDescription": "基于约束优化的智能课程调度系统，支持自动排课和手动调课，使用 Bun + Rust + Tauri 技术栈构建"
-    },
-    "security": {
-      "csp": "default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data: https:; font-src 'self' data:; connect-src 'self' http://localhost:3000 http://127.0.0.1:3000"
-    },
+  "app": {
     "windows": [
       {
         "title": "排课系统",
@@ -95,29 +38,31 @@
         "fileDropEnabled": true
       }
     ],
-    "systemTray": {
+    "security": {
+      "csp": "default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data: https:; font-src 'self' data:; connect-src 'self' http://localhost:3000 http://127.0.0.1:3000"
+    },
+    "trayIcon": {
       "iconPath": "icons/icon.png",
       "iconAsTemplate": true,
       "menuOnLeftClick": false
+    }
+  },
+  "plugins": {
+    "shell": {
+      "open": true
     },
-    "updater": {
-      "active": false,
-      "endpoints": [],
-      "dialog": true,
-      "pubkey": ""
+    "dialog": {
+      "open": true,
+      "save": true,
+      "message": true,
+      "ask": true,
+      "confirm": true
     },
-    "cli": {
-      "description": "排课系统 - 智能课程调度应用",
-      "args": [
-        {
-          "name": "dev",
-          "description": "以开发模式启动应用"
-        },
-        {
-          "name": "debug",
-          "description": "启用调试日志"
-        }
-      ]
+    "fs": {
+      "scope": ["$APPDATA/*", "$APPDATA/**", "$RESOURCE/*", "$RESOURCE/**"]
+    },
+    "notification": {
+      "all": true
     }
   }
 }

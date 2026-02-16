@@ -1,0 +1,2455 @@
+{
+  "teachers": [
+    {
+      "id": 1,
+      "name": "张老师",
+      "group": "语文组"
+    },
+    {
+      "id": 2,
+      "name": "李老师",
+      "group": "语文组"
+    },
+    {
+      "id": 3,
+      "name": "王老师",
+      "group": "语文组"
+    },
+    {
+      "id": 4,
+      "name": "赵老师",
+      "group": "语文组"
+    },
+    {
+      "id": 5,
+      "name": "刘老师",
+      "group": "数学组"
+    },
+    {
+      "id": 6,
+      "name": "陈老师",
+      "group": "数学组"
+    },
+    {
+      "id": 7,
+      "name": "杨老师",
+      "group": "数学组"
+    },
+    {
+      "id": 8,
+      "name": "黄老师",
+      "group": "数学组"
+    },
+    {
+      "id": 9,
+      "name": "周老师",
+      "group": "英语组"
+    },
+    {
+      "id": 10,
+      "name": "吴老师",
+      "group": "英语组"
+    },
+    {
+      "id": 11,
+      "name": "郑老师",
+      "group": "英语组"
+    },
+    {
+      "id": 12,
+      "name": "孙老师",
+      "group": "英语组"
+    },
+    {
+      "id": 13,
+      "name": "朱老师",
+      "group": "物理组"
+    },
+    {
+      "id": 14,
+      "name": "徐老师",
+      "group": "物理组"
+    },
+    {
+      "id": 15,
+      "name": "马老师",
+      "group": "物理组"
+    },
+    {
+      "id": 16,
+      "name": "胡老师",
+      "group": "化学组"
+    },
+    {
+      "id": 17,
+      "name": "林老师",
+      "group": "化学组"
+    },
+    {
+      "id": 18,
+      "name": "何老师",
+      "group": "化学组"
+    },
+    {
+      "id": 19,
+      "name": "高老师",
+      "group": "生物组"
+    },
+    {
+      "id": 20,
+      "name": "梁老师",
+      "group": "生物组"
+    },
+    {
+      "id": 21,
+      "name": "郭老师",
+      "group": "政治组"
+    },
+    {
+      "id": 22,
+      "name": "罗老师",
+      "group": "政治组"
+    },
+    {
+      "id": 23,
+      "name": "宋老师",
+      "group": "历史组"
+    },
+    {
+      "id": 24,
+      "name": "谢老师",
+      "group": "历史组"
+    },
+    {
+      "id": 25,
+      "name": "韩老师",
+      "group": "地理组"
+    },
+    {
+      "id": 26,
+      "name": "唐老师",
+      "group": "地理组"
+    },
+    {
+      "id": 27,
+      "name": "冯老师",
+      "group": "体育组"
+    },
+    {
+      "id": 28,
+      "name": "于老师",
+      "group": "体育组"
+    },
+    {
+      "id": 29,
+      "name": "董老师",
+      "group": "体育组"
+    },
+    {
+      "id": 30,
+      "name": "程老师",
+      "group": "音乐组"
+    },
+    {
+      "id": 31,
+      "name": "曹老师",
+      "group": "美术组"
+    }
+  ],
+  "classes": [
+    {
+      "id": 1,
+      "name": "高一1班",
+      "grade": "高一",
+      "studentCount": 49
+    },
+    {
+      "id": 2,
+      "name": "高一2班",
+      "grade": "高一",
+      "studentCount": 44
+    },
+    {
+      "id": 3,
+      "name": "高一3班",
+      "grade": "高一",
+      "studentCount": 40
+    },
+    {
+      "id": 4,
+      "name": "高一4班",
+      "grade": "高一",
+      "studentCount": 48
+    },
+    {
+      "id": 5,
+      "name": "高一5班",
+      "grade": "高一",
+      "studentCount": 43
+    },
+    {
+      "id": 6,
+      "name": "高一6班",
+      "grade": "高一",
+      "studentCount": 41
+    },
+    {
+      "id": 7,
+      "name": "高二1班",
+      "grade": "高二",
+      "studentCount": 48
+    },
+    {
+      "id": 8,
+      "name": "高二2班",
+      "grade": "高二",
+      "studentCount": 43
+    },
+    {
+      "id": 9,
+      "name": "高二3班",
+      "grade": "高二",
+      "studentCount": 41
+    },
+    {
+      "id": 10,
+      "name": "高二4班",
+      "grade": "高二",
+      "studentCount": 49
+    },
+    {
+      "id": 11,
+      "name": "高二5班",
+      "grade": "高二",
+      "studentCount": 48
+    },
+    {
+      "id": 12,
+      "name": "高二6班",
+      "grade": "高二",
+      "studentCount": 43
+    },
+    {
+      "id": 13,
+      "name": "高三1班",
+      "grade": "高三",
+      "studentCount": 45
+    },
+    {
+      "id": 14,
+      "name": "高三2班",
+      "grade": "高三",
+      "studentCount": 41
+    },
+    {
+      "id": 15,
+      "name": "高三3班",
+      "grade": "高三",
+      "studentCount": 43
+    },
+    {
+      "id": 16,
+      "name": "高三4班",
+      "grade": "高三",
+      "studentCount": 40
+    },
+    {
+      "id": 17,
+      "name": "高三5班",
+      "grade": "高三",
+      "studentCount": 48
+    },
+    {
+      "id": 18,
+      "name": "高三6班",
+      "grade": "高三",
+      "studentCount": 47
+    }
+  ],
+  "subjects": [
+    {
+      "id": "chinese",
+      "name": "语文",
+      "hoursPerWeek": 5,
+      "category": "主科"
+    },
+    {
+      "id": "math",
+      "name": "数学",
+      "hoursPerWeek": 5,
+      "category": "主科"
+    },
+    {
+      "id": "english",
+      "name": "英语",
+      "hoursPerWeek": 5,
+      "category": "主科"
+    },
+    {
+      "id": "physics",
+      "name": "物理",
+      "hoursPerWeek": 4,
+      "category": "理科"
+    },
+    {
+      "id": "chemistry",
+      "name": "化学",
+      "hoursPerWeek": 4,
+      "category": "理科"
+    },
+    {
+      "id": "biology",
+      "name": "生物",
+      "hoursPerWeek": 3,
+      "category": "理科"
+    },
+    {
+      "id": "politics",
+      "name": "政治",
+      "hoursPerWeek": 3,
+      "category": "文科"
+    },
+    {
+      "id": "history",
+      "name": "历史",
+      "hoursPerWeek": 3,
+      "category": "文科"
+    },
+    {
+      "id": "geography",
+      "name": "地理",
+      "hoursPerWeek": 3,
+      "category": "文科"
+    },
+    {
+      "id": "pe",
+      "name": "体育",
+      "hoursPerWeek": 2,
+      "category": "其他"
+    },
+    {
+      "id": "music",
+      "name": "音乐",
+      "hoursPerWeek": 1,
+      "category": "其他"
+    },
+    {
+      "id": "art",
+      "name": "美术",
+      "hoursPerWeek": 1,
+      "category": "其他"
+    }
+  ],
+  "curriculums": [
+    {
+      "classId": 1,
+      "className": "高一1班",
+      "subjectId": "chinese",
+      "subjectName": "语文",
+      "teacherId": 4,
+      "teacherName": "赵老师",
+      "hoursPerWeek": 5
+    },
+    {
+      "classId": 1,
+      "className": "高一1班",
+      "subjectId": "math",
+      "subjectName": "数学",
+      "teacherId": 5,
+      "teacherName": "刘老师",
+      "hoursPerWeek": 5
+    },
+    {
+      "classId": 1,
+      "className": "高一1班",
+      "subjectId": "english",
+      "subjectName": "英语",
+      "teacherId": 11,
+      "teacherName": "郑老师",
+      "hoursPerWeek": 5
+    },
+    {
+      "classId": 1,
+      "className": "高一1班",
+      "subjectId": "physics",
+      "subjectName": "物理",
+      "teacherId": 14,
+      "teacherName": "徐老师",
+      "hoursPerWeek": 4
+    },
+    {
+      "classId": 1,
+      "className": "高一1班",
+      "subjectId": "chemistry",
+      "subjectName": "化学",
+      "teacherId": 17,
+      "teacherName": "林老师",
+      "hoursPerWeek": 4
+    },
+    {
+      "classId": 1,
+      "className": "高一1班",
+      "subjectId": "biology",
+      "subjectName": "生物",
+      "teacherId": 20,
+      "teacherName": "梁老师",
+      "hoursPerWeek": 3
+    },
+    {
+      "classId": 1,
+      "className": "高一1班",
+      "subjectId": "politics",
+      "subjectName": "政治",
+      "teacherId": 22,
+      "teacherName": "罗老师",
+      "hoursPerWeek": 3
+    },
+    {
+      "classId": 1,
+      "className": "高一1班",
+      "subjectId": "history",
+      "subjectName": "历史",
+      "teacherId": 23,
+      "teacherName": "宋老师",
+      "hoursPerWeek": 3
+    },
+    {
+      "classId": 1,
+      "className": "高一1班",
+      "subjectId": "geography",
+      "subjectName": "地理",
+      "teacherId": 25,
+      "teacherName": "韩老师",
+      "hoursPerWeek": 3
+    },
+    {
+      "classId": 1,
+      "className": "高一1班",
+      "subjectId": "pe",
+      "subjectName": "体育",
+      "teacherId": 29,
+      "teacherName": "董老师",
+      "hoursPerWeek": 2
+    },
+    {
+      "classId": 1,
+      "className": "高一1班",
+      "subjectId": "music",
+      "subjectName": "音乐",
+      "teacherId": 30,
+      "teacherName": "程老师",
+      "hoursPerWeek": 1
+    },
+    {
+      "classId": 1,
+      "className": "高一1班",
+      "subjectId": "art",
+      "subjectName": "美术",
+      "teacherId": 31,
+      "teacherName": "曹老师",
+      "hoursPerWeek": 1
+    },
+    {
+      "classId": 2,
+      "className": "高一2班",
+      "subjectId": "chinese",
+      "subjectName": "语文",
+      "teacherId": 4,
+      "teacherName": "赵老师",
+      "hoursPerWeek": 5
+    },
+    {
+      "classId": 2,
+      "className": "高一2班",
+      "subjectId": "math",
+      "subjectName": "数学",
+      "teacherId": 6,
+      "teacherName": "陈老师",
+      "hoursPerWeek": 5
+    },
+    {
+      "classId": 2,
+      "className": "高一2班",
+      "subjectId": "english",
+      "subjectName": "英语",
+      "teacherId": 12,
+      "teacherName": "孙老师",
+      "hoursPerWeek": 5
+    },
+    {
+      "classId": 2,
+      "className": "高一2班",
+      "subjectId": "physics",
+      "subjectName": "物理",
+      "teacherId": 14,
+      "teacherName": "徐老师",
+      "hoursPerWeek": 4
+    },
+    {
+      "classId": 2,
+      "className": "高一2班",
+      "subjectId": "chemistry",
+      "subjectName": "化学",
+      "teacherId": 17,
+      "teacherName": "林老师",
+      "hoursPerWeek": 4
+    },
+    {
+      "classId": 2,
+      "className": "高一2班",
+      "subjectId": "biology",
+      "subjectName": "生物",
+      "teacherId": 20,
+      "teacherName": "梁老师",
+      "hoursPerWeek": 3
+    },
+    {
+      "classId": 2,
+      "className": "高一2班",
+      "subjectId": "politics",
+      "subjectName": "政治",
+      "teacherId": 22,
+      "teacherName": "罗老师",
+      "hoursPerWeek": 3
+    },
+    {
+      "classId": 2,
+      "className": "高一2班",
+      "subjectId": "history",
+      "subjectName": "历史",
+      "teacherId": 24,
+      "teacherName": "谢老师",
+      "hoursPerWeek": 3
+    },
+    {
+      "classId": 2,
+      "className": "高一2班",
+      "subjectId": "geography",
+      "subjectName": "地理",
+      "teacherId": 25,
+      "teacherName": "韩老师",
+      "hoursPerWeek": 3
+    },
+    {
+      "classId": 2,
+      "className": "高一2班",
+      "subjectId": "pe",
+      "subjectName": "体育",
+      "teacherId": 28,
+      "teacherName": "于老师",
+      "hoursPerWeek": 2
+    },
+    {
+      "classId": 2,
+      "className": "高一2班",
+      "subjectId": "music",
+      "subjectName": "音乐",
+      "teacherId": 30,
+      "teacherName": "程老师",
+      "hoursPerWeek": 1
+    },
+    {
+      "classId": 2,
+      "className": "高一2班",
+      "subjectId": "art",
+      "subjectName": "美术",
+      "teacherId": 31,
+      "teacherName": "曹老师",
+      "hoursPerWeek": 1
+    },
+    {
+      "classId": 3,
+      "className": "高一3班",
+      "subjectId": "chinese",
+      "subjectName": "语文",
+      "teacherId": 4,
+      "teacherName": "赵老师",
+      "hoursPerWeek": 5
+    },
+    {
+      "classId": 3,
+      "className": "高一3班",
+      "subjectId": "math",
+      "subjectName": "数学",
+      "teacherId": 6,
+      "teacherName": "陈老师",
+      "hoursPerWeek": 5
+    },
+    {
+      "classId": 3,
+      "className": "高一3班",
+      "subjectId": "english",
+      "subjectName": "英语",
+      "teacherId": 9,
+      "teacherName": "周老师",
+      "hoursPerWeek": 5
+    },
+    {
+      "classId": 3,
+      "className": "高一3班",
+      "subjectId": "physics",
+      "subjectName": "物理",
+      "teacherId": 13,
+      "teacherName": "朱老师",
+      "hoursPerWeek": 4
+    },
+    {
+      "classId": 3,
+      "className": "高一3班",
+      "subjectId": "chemistry",
+      "subjectName": "化学",
+      "teacherId": 18,
+      "teacherName": "何老师",
+      "hoursPerWeek": 4
+    },
+    {
+      "classId": 3,
+      "className": "高一3班",
+      "subjectId": "biology",
+      "subjectName": "生物",
+      "teacherId": 19,
+      "teacherName": "高老师",
+      "hoursPerWeek": 3
+    },
+    {
+      "classId": 3,
+      "className": "高一3班",
+      "subjectId": "politics",
+      "subjectName": "政治",
+      "teacherId": 22,
+      "teacherName": "罗老师",
+      "hoursPerWeek": 3
+    },
+    {
+      "classId": 3,
+      "className": "高一3班",
+      "subjectId": "history",
+      "subjectName": "历史",
+      "teacherId": 23,
+      "teacherName": "宋老师",
+      "hoursPerWeek": 3
+    },
+    {
+      "classId": 3,
+      "className": "高一3班",
+      "subjectId": "geography",
+      "subjectName": "地理",
+      "teacherId": 26,
+      "teacherName": "唐老师",
+      "hoursPerWeek": 3
+    },
+    {
+      "classId": 3,
+      "className": "高一3班",
+      "subjectId": "pe",
+      "subjectName": "体育",
+      "teacherId": 27,
+      "teacherName": "冯老师",
+      "hoursPerWeek": 2
+    },
+    {
+      "classId": 3,
+      "className": "高一3班",
+      "subjectId": "music",
+      "subjectName": "音乐",
+      "teacherId": 30,
+      "teacherName": "程老师",
+      "hoursPerWeek": 1
+    },
+    {
+      "classId": 3,
+      "className": "高一3班",
+      "subjectId": "art",
+      "subjectName": "美术",
+      "teacherId": 31,
+      "teacherName": "曹老师",
+      "hoursPerWeek": 1
+    },
+    {
+      "classId": 4,
+      "className": "高一4班",
+      "subjectId": "chinese",
+      "subjectName": "语文",
+      "teacherId": 3,
+      "teacherName": "王老师",
+      "hoursPerWeek": 5
+    },
+    {
+      "classId": 4,
+      "className": "高一4班",
+      "subjectId": "math",
+      "subjectName": "数学",
+      "teacherId": 5,
+      "teacherName": "刘老师",
+      "hoursPerWeek": 5
+    },
+    {
+      "classId": 4,
+      "className": "高一4班",
+      "subjectId": "english",
+      "subjectName": "英语",
+      "teacherId": 11,
+      "teacherName": "郑老师",
+      "hoursPerWeek": 5
+    },
+    {
+      "classId": 4,
+      "className": "高一4班",
+      "subjectId": "physics",
+      "subjectName": "物理",
+      "teacherId": 15,
+      "teacherName": "马老师",
+      "hoursPerWeek": 4
+    },
+    {
+      "classId": 4,
+      "className": "高一4班",
+      "subjectId": "chemistry",
+      "subjectName": "化学",
+      "teacherId": 17,
+      "teacherName": "林老师",
+      "hoursPerWeek": 4
+    },
+    {
+      "classId": 4,
+      "className": "高一4班",
+      "subjectId": "biology",
+      "subjectName": "生物",
+      "teacherId": 19,
+      "teacherName": "高老师",
+      "hoursPerWeek": 3
+    },
+    {
+      "classId": 4,
+      "className": "高一4班",
+      "subjectId": "politics",
+      "subjectName": "政治",
+      "teacherId": 22,
+      "teacherName": "罗老师",
+      "hoursPerWeek": 3
+    },
+    {
+      "classId": 4,
+      "className": "高一4班",
+      "subjectId": "history",
+      "subjectName": "历史",
+      "teacherId": 24,
+      "teacherName": "谢老师",
+      "hoursPerWeek": 3
+    },
+    {
+      "classId": 4,
+      "className": "高一4班",
+      "subjectId": "geography",
+      "subjectName": "地理",
+      "teacherId": 25,
+      "teacherName": "韩老师",
+      "hoursPerWeek": 3
+    },
+    {
+      "classId": 4,
+      "className": "高一4班",
+      "subjectId": "pe",
+      "subjectName": "体育",
+      "teacherId": 29,
+      "teacherName": "董老师",
+      "hoursPerWeek": 2
+    },
+    {
+      "classId": 4,
+      "className": "高一4班",
+      "subjectId": "music",
+      "subjectName": "音乐",
+      "teacherId": 30,
+      "teacherName": "程老师",
+      "hoursPerWeek": 1
+    },
+    {
+      "classId": 4,
+      "className": "高一4班",
+      "subjectId": "art",
+      "subjectName": "美术",
+      "teacherId": 31,
+      "teacherName": "曹老师",
+      "hoursPerWeek": 1
+    },
+    {
+      "classId": 5,
+      "className": "高一5班",
+      "subjectId": "chinese",
+      "subjectName": "语文",
+      "teacherId": 3,
+      "teacherName": "王老师",
+      "hoursPerWeek": 5
+    },
+    {
+      "classId": 5,
+      "className": "高一5班",
+      "subjectId": "math",
+      "subjectName": "数学",
+      "teacherId": 7,
+      "teacherName": "杨老师",
+      "hoursPerWeek": 5
+    },
+    {
+      "classId": 5,
+      "className": "高一5班",
+      "subjectId": "english",
+      "subjectName": "英语",
+      "teacherId": 10,
+      "teacherName": "吴老师",
+      "hoursPerWeek": 5
+    },
+    {
+      "classId": 5,
+      "className": "高一5班",
+      "subjectId": "physics",
+      "subjectName": "物理",
+      "teacherId": 15,
+      "teacherName": "马老师",
+      "hoursPerWeek": 4
+    },
+    {
+      "classId": 5,
+      "className": "高一5班",
+      "subjectId": "chemistry",
+      "subjectName": "化学",
+      "teacherId": 17,
+      "teacherName": "林老师",
+      "hoursPerWeek": 4
+    },
+    {
+      "classId": 5,
+      "className": "高一5班",
+      "subjectId": "biology",
+      "subjectName": "生物",
+      "teacherId": 20,
+      "teacherName": "梁老师",
+      "hoursPerWeek": 3
+    },
+    {
+      "classId": 5,
+      "className": "高一5班",
+      "subjectId": "politics",
+      "subjectName": "政治",
+      "teacherId": 22,
+      "teacherName": "罗老师",
+      "hoursPerWeek": 3
+    },
+    {
+      "classId": 5,
+      "className": "高一5班",
+      "subjectId": "history",
+      "subjectName": "历史",
+      "teacherId": 23,
+      "teacherName": "宋老师",
+      "hoursPerWeek": 3
+    },
+    {
+      "classId": 5,
+      "className": "高一5班",
+      "subjectId": "geography",
+      "subjectName": "地理",
+      "teacherId": 25,
+      "teacherName": "韩老师",
+      "hoursPerWeek": 3
+    },
+    {
+      "classId": 5,
+      "className": "高一5班",
+      "subjectId": "pe",
+      "subjectName": "体育",
+      "teacherId": 28,
+      "teacherName": "于老师",
+      "hoursPerWeek": 2
+    },
+    {
+      "classId": 5,
+      "className": "高一5班",
+      "subjectId": "music",
+      "subjectName": "音乐",
+      "teacherId": 30,
+      "teacherName": "程老师",
+      "hoursPerWeek": 1
+    },
+    {
+      "classId": 5,
+      "className": "高一5班",
+      "subjectId": "art",
+      "subjectName": "美术",
+      "teacherId": 31,
+      "teacherName": "曹老师",
+      "hoursPerWeek": 1
+    },
+    {
+      "classId": 6,
+      "className": "高一6班",
+      "subjectId": "chinese",
+      "subjectName": "语文",
+      "teacherId": 2,
+      "teacherName": "李老师",
+      "hoursPerWeek": 5
+    },
+    {
+      "classId": 6,
+      "className": "高一6班",
+      "subjectId": "math",
+      "subjectName": "数学",
+      "teacherId": 6,
+      "teacherName": "陈老师",
+      "hoursPerWeek": 5
+    },
+    {
+      "classId": 6,
+      "className": "高一6班",
+      "subjectId": "english",
+      "subjectName": "英语",
+      "teacherId": 11,
+      "teacherName": "郑老师",
+      "hoursPerWeek": 5
+    },
+    {
+      "classId": 6,
+      "className": "高一6班",
+      "subjectId": "physics",
+      "subjectName": "物理",
+      "teacherId": 15,
+      "teacherName": "马老师",
+      "hoursPerWeek": 4
+    },
+    {
+      "classId": 6,
+      "className": "高一6班",
+      "subjectId": "chemistry",
+      "subjectName": "化学",
+      "teacherId": 18,
+      "teacherName": "何老师",
+      "hoursPerWeek": 4
+    },
+    {
+      "classId": 6,
+      "className": "高一6班",
+      "subjectId": "biology",
+      "subjectName": "生物",
+      "teacherId": 19,
+      "teacherName": "高老师",
+      "hoursPerWeek": 3
+    },
+    {
+      "classId": 6,
+      "className": "高一6班",
+      "subjectId": "politics",
+      "subjectName": "政治",
+      "teacherId": 21,
+      "teacherName": "郭老师",
+      "hoursPerWeek": 3
+    },
+    {
+      "classId": 6,
+      "className": "高一6班",
+      "subjectId": "history",
+      "subjectName": "历史",
+      "teacherId": 23,
+      "teacherName": "宋老师",
+      "hoursPerWeek": 3
+    },
+    {
+      "classId": 6,
+      "className": "高一6班",
+      "subjectId": "geography",
+      "subjectName": "地理",
+      "teacherId": 26,
+      "teacherName": "唐老师",
+      "hoursPerWeek": 3
+    },
+    {
+      "classId": 6,
+      "className": "高一6班",
+      "subjectId": "pe",
+      "subjectName": "体育",
+      "teacherId": 27,
+      "teacherName": "冯老师",
+      "hoursPerWeek": 2
+    },
+    {
+      "classId": 6,
+      "className": "高一6班",
+      "subjectId": "music",
+      "subjectName": "音乐",
+      "teacherId": 30,
+      "teacherName": "程老师",
+      "hoursPerWeek": 1
+    },
+    {
+      "classId": 6,
+      "className": "高一6班",
+      "subjectId": "art",
+      "subjectName": "美术",
+      "teacherId": 31,
+      "teacherName": "曹老师",
+      "hoursPerWeek": 1
+    },
+    {
+      "classId": 7,
+      "className": "高二1班",
+      "subjectId": "chinese",
+      "subjectName": "语文",
+      "teacherId": 1,
+      "teacherName": "张老师",
+      "hoursPerWeek": 5
+    },
+    {
+      "classId": 7,
+      "className": "高二1班",
+      "subjectId": "math",
+      "subjectName": "数学",
+      "teacherId": 5,
+      "teacherName": "刘老师",
+      "hoursPerWeek": 5
+    },
+    {
+      "classId": 7,
+      "className": "高二1班",
+      "subjectId": "english",
+      "subjectName": "英语",
+      "teacherId": 9,
+      "teacherName": "周老师",
+      "hoursPerWeek": 5
+    },
+    {
+      "classId": 7,
+      "className": "高二1班",
+      "subjectId": "physics",
+      "subjectName": "物理",
+      "teacherId": 13,
+      "teacherName": "朱老师",
+      "hoursPerWeek": 4
+    },
+    {
+      "classId": 7,
+      "className": "高二1班",
+      "subjectId": "chemistry",
+      "subjectName": "化学",
+      "teacherId": 18,
+      "teacherName": "何老师",
+      "hoursPerWeek": 4
+    },
+    {
+      "classId": 7,
+      "className": "高二1班",
+      "subjectId": "biology",
+      "subjectName": "生物",
+      "teacherId": 20,
+      "teacherName": "梁老师",
+      "hoursPerWeek": 3
+    },
+    {
+      "classId": 7,
+      "className": "高二1班",
+      "subjectId": "politics",
+      "subjectName": "政治",
+      "teacherId": 22,
+      "teacherName": "罗老师",
+      "hoursPerWeek": 3
+    },
+    {
+      "classId": 7,
+      "className": "高二1班",
+      "subjectId": "history",
+      "subjectName": "历史",
+      "teacherId": 24,
+      "teacherName": "谢老师",
+      "hoursPerWeek": 3
+    },
+    {
+      "classId": 7,
+      "className": "高二1班",
+      "subjectId": "geography",
+      "subjectName": "地理",
+      "teacherId": 25,
+      "teacherName": "韩老师",
+      "hoursPerWeek": 3
+    },
+    {
+      "classId": 7,
+      "className": "高二1班",
+      "subjectId": "pe",
+      "subjectName": "体育",
+      "teacherId": 28,
+      "teacherName": "于老师",
+      "hoursPerWeek": 2
+    },
+    {
+      "classId": 7,
+      "className": "高二1班",
+      "subjectId": "music",
+      "subjectName": "音乐",
+      "teacherId": 30,
+      "teacherName": "程老师",
+      "hoursPerWeek": 1
+    },
+    {
+      "classId": 7,
+      "className": "高二1班",
+      "subjectId": "art",
+      "subjectName": "美术",
+      "teacherId": 31,
+      "teacherName": "曹老师",
+      "hoursPerWeek": 1
+    },
+    {
+      "classId": 8,
+      "className": "高二2班",
+      "subjectId": "chinese",
+      "subjectName": "语文",
+      "teacherId": 3,
+      "teacherName": "王老师",
+      "hoursPerWeek": 5
+    },
+    {
+      "classId": 8,
+      "className": "高二2班",
+      "subjectId": "math",
+      "subjectName": "数学",
+      "teacherId": 5,
+      "teacherName": "刘老师",
+      "hoursPerWeek": 5
+    },
+    {
+      "classId": 8,
+      "className": "高二2班",
+      "subjectId": "english",
+      "subjectName": "英语",
+      "teacherId": 11,
+      "teacherName": "郑老师",
+      "hoursPerWeek": 5
+    },
+    {
+      "classId": 8,
+      "className": "高二2班",
+      "subjectId": "physics",
+      "subjectName": "物理",
+      "teacherId": 15,
+      "teacherName": "马老师",
+      "hoursPerWeek": 4
+    },
+    {
+      "classId": 8,
+      "className": "高二2班",
+      "subjectId": "chemistry",
+      "subjectName": "化学",
+      "teacherId": 17,
+      "teacherName": "林老师",
+      "hoursPerWeek": 4
+    },
+    {
+      "classId": 8,
+      "className": "高二2班",
+      "subjectId": "biology",
+      "subjectName": "生物",
+      "teacherId": 19,
+      "teacherName": "高老师",
+      "hoursPerWeek": 3
+    },
+    {
+      "classId": 8,
+      "className": "高二2班",
+      "subjectId": "politics",
+      "subjectName": "政治",
+      "teacherId": 22,
+      "teacherName": "罗老师",
+      "hoursPerWeek": 3
+    },
+    {
+      "classId": 8,
+      "className": "高二2班",
+      "subjectId": "history",
+      "subjectName": "历史",
+      "teacherId": 24,
+      "teacherName": "谢老师",
+      "hoursPerWeek": 3
+    },
+    {
+      "classId": 8,
+      "className": "高二2班",
+      "subjectId": "geography",
+      "subjectName": "地理",
+      "teacherId": 26,
+      "teacherName": "唐老师",
+      "hoursPerWeek": 3
+    },
+    {
+      "classId": 8,
+      "className": "高二2班",
+      "subjectId": "pe",
+      "subjectName": "体育",
+      "teacherId": 29,
+      "teacherName": "董老师",
+      "hoursPerWeek": 2
+    },
+    {
+      "classId": 8,
+      "className": "高二2班",
+      "subjectId": "music",
+      "subjectName": "音乐",
+      "teacherId": 30,
+      "teacherName": "程老师",
+      "hoursPerWeek": 1
+    },
+    {
+      "classId": 8,
+      "className": "高二2班",
+      "subjectId": "art",
+      "subjectName": "美术",
+      "teacherId": 31,
+      "teacherName": "曹老师",
+      "hoursPerWeek": 1
+    },
+    {
+      "classId": 9,
+      "className": "高二3班",
+      "subjectId": "chinese",
+      "subjectName": "语文",
+      "teacherId": 3,
+      "teacherName": "王老师",
+      "hoursPerWeek": 5
+    },
+    {
+      "classId": 9,
+      "className": "高二3班",
+      "subjectId": "math",
+      "subjectName": "数学",
+      "teacherId": 6,
+      "teacherName": "陈老师",
+      "hoursPerWeek": 5
+    },
+    {
+      "classId": 9,
+      "className": "高二3班",
+      "subjectId": "english",
+      "subjectName": "英语",
+      "teacherId": 11,
+      "teacherName": "郑老师",
+      "hoursPerWeek": 5
+    },
+    {
+      "classId": 9,
+      "className": "高二3班",
+      "subjectId": "physics",
+      "subjectName": "物理",
+      "teacherId": 14,
+      "teacherName": "徐老师",
+      "hoursPerWeek": 4
+    },
+    {
+      "classId": 9,
+      "className": "高二3班",
+      "subjectId": "chemistry",
+      "subjectName": "化学",
+      "teacherId": 16,
+      "teacherName": "胡老师",
+      "hoursPerWeek": 4
+    },
+    {
+      "classId": 9,
+      "className": "高二3班",
+      "subjectId": "biology",
+      "subjectName": "生物",
+      "teacherId": 20,
+      "teacherName": "梁老师",
+      "hoursPerWeek": 3
+    },
+    {
+      "classId": 9,
+      "className": "高二3班",
+      "subjectId": "politics",
+      "subjectName": "政治",
+      "teacherId": 21,
+      "teacherName": "郭老师",
+      "hoursPerWeek": 3
+    },
+    {
+      "classId": 9,
+      "className": "高二3班",
+      "subjectId": "history",
+      "subjectName": "历史",
+      "teacherId": 23,
+      "teacherName": "宋老师",
+      "hoursPerWeek": 3
+    },
+    {
+      "classId": 9,
+      "className": "高二3班",
+      "subjectId": "geography",
+      "subjectName": "地理",
+      "teacherId": 26,
+      "teacherName": "唐老师",
+      "hoursPerWeek": 3
+    },
+    {
+      "classId": 9,
+      "className": "高二3班",
+      "subjectId": "pe",
+      "subjectName": "体育",
+      "teacherId": 27,
+      "teacherName": "冯老师",
+      "hoursPerWeek": 2
+    },
+    {
+      "classId": 9,
+      "className": "高二3班",
+      "subjectId": "music",
+      "subjectName": "音乐",
+      "teacherId": 30,
+      "teacherName": "程老师",
+      "hoursPerWeek": 1
+    },
+    {
+      "classId": 9,
+      "className": "高二3班",
+      "subjectId": "art",
+      "subjectName": "美术",
+      "teacherId": 31,
+      "teacherName": "曹老师",
+      "hoursPerWeek": 1
+    },
+    {
+      "classId": 10,
+      "className": "高二4班",
+      "subjectId": "chinese",
+      "subjectName": "语文",
+      "teacherId": 2,
+      "teacherName": "李老师",
+      "hoursPerWeek": 5
+    },
+    {
+      "classId": 10,
+      "className": "高二4班",
+      "subjectId": "math",
+      "subjectName": "数学",
+      "teacherId": 7,
+      "teacherName": "杨老师",
+      "hoursPerWeek": 5
+    },
+    {
+      "classId": 10,
+      "className": "高二4班",
+      "subjectId": "english",
+      "subjectName": "英语",
+      "teacherId": 9,
+      "teacherName": "周老师",
+      "hoursPerWeek": 5
+    },
+    {
+      "classId": 10,
+      "className": "高二4班",
+      "subjectId": "physics",
+      "subjectName": "物理",
+      "teacherId": 13,
+      "teacherName": "朱老师",
+      "hoursPerWeek": 4
+    },
+    {
+      "classId": 10,
+      "className": "高二4班",
+      "subjectId": "chemistry",
+      "subjectName": "化学",
+      "teacherId": 18,
+      "teacherName": "何老师",
+      "hoursPerWeek": 4
+    },
+    {
+      "classId": 10,
+      "className": "高二4班",
+      "subjectId": "biology",
+      "subjectName": "生物",
+      "teacherId": 20,
+      "teacherName": "梁老师",
+      "hoursPerWeek": 3
+    },
+    {
+      "classId": 10,
+      "className": "高二4班",
+      "subjectId": "politics",
+      "subjectName": "政治",
+      "teacherId": 21,
+      "teacherName": "郭老师",
+      "hoursPerWeek": 3
+    },
+    {
+      "classId": 10,
+      "className": "高二4班",
+      "subjectId": "history",
+      "subjectName": "历史",
+      "teacherId": 23,
+      "teacherName": "宋老师",
+      "hoursPerWeek": 3
+    },
+    {
+      "classId": 10,
+      "className": "高二4班",
+      "subjectId": "geography",
+      "subjectName": "地理",
+      "teacherId": 26,
+      "teacherName": "唐老师",
+      "hoursPerWeek": 3
+    },
+    {
+      "classId": 10,
+      "className": "高二4班",
+      "subjectId": "pe",
+      "subjectName": "体育",
+      "teacherId": 28,
+      "teacherName": "于老师",
+      "hoursPerWeek": 2
+    },
+    {
+      "classId": 10,
+      "className": "高二4班",
+      "subjectId": "music",
+      "subjectName": "音乐",
+      "teacherId": 30,
+      "teacherName": "程老师",
+      "hoursPerWeek": 1
+    },
+    {
+      "classId": 10,
+      "className": "高二4班",
+      "subjectId": "art",
+      "subjectName": "美术",
+      "teacherId": 31,
+      "teacherName": "曹老师",
+      "hoursPerWeek": 1
+    },
+    {
+      "classId": 11,
+      "className": "高二5班",
+      "subjectId": "chinese",
+      "subjectName": "语文",
+      "teacherId": 4,
+      "teacherName": "赵老师",
+      "hoursPerWeek": 5
+    },
+    {
+      "classId": 11,
+      "className": "高二5班",
+      "subjectId": "math",
+      "subjectName": "数学",
+      "teacherId": 8,
+      "teacherName": "黄老师",
+      "hoursPerWeek": 5
+    },
+    {
+      "classId": 11,
+      "className": "高二5班",
+      "subjectId": "english",
+      "subjectName": "英语",
+      "teacherId": 12,
+      "teacherName": "孙老师",
+      "hoursPerWeek": 5
+    },
+    {
+      "classId": 11,
+      "className": "高二5班",
+      "subjectId": "physics",
+      "subjectName": "物理",
+      "teacherId": 15,
+      "teacherName": "马老师",
+      "hoursPerWeek": 4
+    },
+    {
+      "classId": 11,
+      "className": "高二5班",
+      "subjectId": "chemistry",
+      "subjectName": "化学",
+      "teacherId": 17,
+      "teacherName": "林老师",
+      "hoursPerWeek": 4
+    },
+    {
+      "classId": 11,
+      "className": "高二5班",
+      "subjectId": "biology",
+      "subjectName": "生物",
+      "teacherId": 19,
+      "teacherName": "高老师",
+      "hoursPerWeek": 3
+    },
+    {
+      "classId": 11,
+      "className": "高二5班",
+      "subjectId": "politics",
+      "subjectName": "政治",
+      "teacherId": 22,
+      "teacherName": "罗老师",
+      "hoursPerWeek": 3
+    },
+    {
+      "classId": 11,
+      "className": "高二5班",
+      "subjectId": "history",
+      "subjectName": "历史",
+      "teacherId": 24,
+      "teacherName": "谢老师",
+      "hoursPerWeek": 3
+    },
+    {
+      "classId": 11,
+      "className": "高二5班",
+      "subjectId": "geography",
+      "subjectName": "地理",
+      "teacherId": 26,
+      "teacherName": "唐老师",
+      "hoursPerWeek": 3
+    },
+    {
+      "classId": 11,
+      "className": "高二5班",
+      "subjectId": "pe",
+      "subjectName": "体育",
+      "teacherId": 28,
+      "teacherName": "于老师",
+      "hoursPerWeek": 2
+    },
+    {
+      "classId": 11,
+      "className": "高二5班",
+      "subjectId": "music",
+      "subjectName": "音乐",
+      "teacherId": 30,
+      "teacherName": "程老师",
+      "hoursPerWeek": 1
+    },
+    {
+      "classId": 11,
+      "className": "高二5班",
+      "subjectId": "art",
+      "subjectName": "美术",
+      "teacherId": 31,
+      "teacherName": "曹老师",
+      "hoursPerWeek": 1
+    },
+    {
+      "classId": 12,
+      "className": "高二6班",
+      "subjectId": "chinese",
+      "subjectName": "语文",
+      "teacherId": 4,
+      "teacherName": "赵老师",
+      "hoursPerWeek": 5
+    },
+    {
+      "classId": 12,
+      "className": "高二6班",
+      "subjectId": "math",
+      "subjectName": "数学",
+      "teacherId": 8,
+      "teacherName": "黄老师",
+      "hoursPerWeek": 5
+    },
+    {
+      "classId": 12,
+      "className": "高二6班",
+      "subjectId": "english",
+      "subjectName": "英语",
+      "teacherId": 10,
+      "teacherName": "吴老师",
+      "hoursPerWeek": 5
+    },
+    {
+      "classId": 12,
+      "className": "高二6班",
+      "subjectId": "physics",
+      "subjectName": "物理",
+      "teacherId": 15,
+      "teacherName": "马老师",
+      "hoursPerWeek": 4
+    },
+    {
+      "classId": 12,
+      "className": "高二6班",
+      "subjectId": "chemistry",
+      "subjectName": "化学",
+      "teacherId": 17,
+      "teacherName": "林老师",
+      "hoursPerWeek": 4
+    },
+    {
+      "classId": 12,
+      "className": "高二6班",
+      "subjectId": "biology",
+      "subjectName": "生物",
+      "teacherId": 20,
+      "teacherName": "梁老师",
+      "hoursPerWeek": 3
+    },
+    {
+      "classId": 12,
+      "className": "高二6班",
+      "subjectId": "politics",
+      "subjectName": "政治",
+      "teacherId": 22,
+      "teacherName": "罗老师",
+      "hoursPerWeek": 3
+    },
+    {
+      "classId": 12,
+      "className": "高二6班",
+      "subjectId": "history",
+      "subjectName": "历史",
+      "teacherId": 24,
+      "teacherName": "谢老师",
+      "hoursPerWeek": 3
+    },
+    {
+      "classId": 12,
+      "className": "高二6班",
+      "subjectId": "geography",
+      "subjectName": "地理",
+      "teacherId": 26,
+      "teacherName": "唐老师",
+      "hoursPerWeek": 3
+    },
+    {
+      "classId": 12,
+      "className": "高二6班",
+      "subjectId": "pe",
+      "subjectName": "体育",
+      "teacherId": 27,
+      "teacherName": "冯老师",
+      "hoursPerWeek": 2
+    },
+    {
+      "classId": 12,
+      "className": "高二6班",
+      "subjectId": "music",
+      "subjectName": "音乐",
+      "teacherId": 30,
+      "teacherName": "程老师",
+      "hoursPerWeek": 1
+    },
+    {
+      "classId": 12,
+      "className": "高二6班",
+      "subjectId": "art",
+      "subjectName": "美术",
+      "teacherId": 31,
+      "teacherName": "曹老师",
+      "hoursPerWeek": 1
+    },
+    {
+      "classId": 13,
+      "className": "高三1班",
+      "subjectId": "chinese",
+      "subjectName": "语文",
+      "teacherId": 3,
+      "teacherName": "王老师",
+      "hoursPerWeek": 5
+    },
+    {
+      "classId": 13,
+      "className": "高三1班",
+      "subjectId": "math",
+      "subjectName": "数学",
+      "teacherId": 8,
+      "teacherName": "黄老师",
+      "hoursPerWeek": 5
+    },
+    {
+      "classId": 13,
+      "className": "高三1班",
+      "subjectId": "english",
+      "subjectName": "英语",
+      "teacherId": 10,
+      "teacherName": "吴老师",
+      "hoursPerWeek": 5
+    },
+    {
+      "classId": 13,
+      "className": "高三1班",
+      "subjectId": "physics",
+      "subjectName": "物理",
+      "teacherId": 13,
+      "teacherName": "朱老师",
+      "hoursPerWeek": 4
+    },
+    {
+      "classId": 13,
+      "className": "高三1班",
+      "subjectId": "chemistry",
+      "subjectName": "化学",
+      "teacherId": 17,
+      "teacherName": "林老师",
+      "hoursPerWeek": 4
+    },
+    {
+      "classId": 13,
+      "className": "高三1班",
+      "subjectId": "biology",
+      "subjectName": "生物",
+      "teacherId": 19,
+      "teacherName": "高老师",
+      "hoursPerWeek": 3
+    },
+    {
+      "classId": 13,
+      "className": "高三1班",
+      "subjectId": "politics",
+      "subjectName": "政治",
+      "teacherId": 22,
+      "teacherName": "罗老师",
+      "hoursPerWeek": 3
+    },
+    {
+      "classId": 13,
+      "className": "高三1班",
+      "subjectId": "history",
+      "subjectName": "历史",
+      "teacherId": 23,
+      "teacherName": "宋老师",
+      "hoursPerWeek": 3
+    },
+    {
+      "classId": 13,
+      "className": "高三1班",
+      "subjectId": "geography",
+      "subjectName": "地理",
+      "teacherId": 26,
+      "teacherName": "唐老师",
+      "hoursPerWeek": 3
+    },
+    {
+      "classId": 13,
+      "className": "高三1班",
+      "subjectId": "pe",
+      "subjectName": "体育",
+      "teacherId": 27,
+      "teacherName": "冯老师",
+      "hoursPerWeek": 2
+    },
+    {
+      "classId": 13,
+      "className": "高三1班",
+      "subjectId": "music",
+      "subjectName": "音乐",
+      "teacherId": 30,
+      "teacherName": "程老师",
+      "hoursPerWeek": 1
+    },
+    {
+      "classId": 13,
+      "className": "高三1班",
+      "subjectId": "art",
+      "subjectName": "美术",
+      "teacherId": 31,
+      "teacherName": "曹老师",
+      "hoursPerWeek": 1
+    },
+    {
+      "classId": 14,
+      "className": "高三2班",
+      "subjectId": "chinese",
+      "subjectName": "语文",
+      "teacherId": 1,
+      "teacherName": "张老师",
+      "hoursPerWeek": 5
+    },
+    {
+      "classId": 14,
+      "className": "高三2班",
+      "subjectId": "math",
+      "subjectName": "数学",
+      "teacherId": 5,
+      "teacherName": "刘老师",
+      "hoursPerWeek": 5
+    },
+    {
+      "classId": 14,
+      "className": "高三2班",
+      "subjectId": "english",
+      "subjectName": "英语",
+      "teacherId": 9,
+      "teacherName": "周老师",
+      "hoursPerWeek": 5
+    },
+    {
+      "classId": 14,
+      "className": "高三2班",
+      "subjectId": "physics",
+      "subjectName": "物理",
+      "teacherId": 15,
+      "teacherName": "马老师",
+      "hoursPerWeek": 4
+    },
+    {
+      "classId": 14,
+      "className": "高三2班",
+      "subjectId": "chemistry",
+      "subjectName": "化学",
+      "teacherId": 18,
+      "teacherName": "何老师",
+      "hoursPerWeek": 4
+    },
+    {
+      "classId": 14,
+      "className": "高三2班",
+      "subjectId": "biology",
+      "subjectName": "生物",
+      "teacherId": 20,
+      "teacherName": "梁老师",
+      "hoursPerWeek": 3
+    },
+    {
+      "classId": 14,
+      "className": "高三2班",
+      "subjectId": "politics",
+      "subjectName": "政治",
+      "teacherId": 21,
+      "teacherName": "郭老师",
+      "hoursPerWeek": 3
+    },
+    {
+      "classId": 14,
+      "className": "高三2班",
+      "subjectId": "history",
+      "subjectName": "历史",
+      "teacherId": 23,
+      "teacherName": "宋老师",
+      "hoursPerWeek": 3
+    },
+    {
+      "classId": 14,
+      "className": "高三2班",
+      "subjectId": "geography",
+      "subjectName": "地理",
+      "teacherId": 26,
+      "teacherName": "唐老师",
+      "hoursPerWeek": 3
+    },
+    {
+      "classId": 14,
+      "className": "高三2班",
+      "subjectId": "pe",
+      "subjectName": "体育",
+      "teacherId": 28,
+      "teacherName": "于老师",
+      "hoursPerWeek": 2
+    },
+    {
+      "classId": 14,
+      "className": "高三2班",
+      "subjectId": "music",
+      "subjectName": "音乐",
+      "teacherId": 30,
+      "teacherName": "程老师",
+      "hoursPerWeek": 1
+    },
+    {
+      "classId": 14,
+      "className": "高三2班",
+      "subjectId": "art",
+      "subjectName": "美术",
+      "teacherId": 31,
+      "teacherName": "曹老师",
+      "hoursPerWeek": 1
+    },
+    {
+      "classId": 15,
+      "className": "高三3班",
+      "subjectId": "chinese",
+      "subjectName": "语文",
+      "teacherId": 3,
+      "teacherName": "王老师",
+      "hoursPerWeek": 5
+    },
+    {
+      "classId": 15,
+      "className": "高三3班",
+      "subjectId": "math",
+      "subjectName": "数学",
+      "teacherId": 7,
+      "teacherName": "杨老师",
+      "hoursPerWeek": 5
+    },
+    {
+      "classId": 15,
+      "className": "高三3班",
+      "subjectId": "english",
+      "subjectName": "英语",
+      "teacherId": 11,
+      "teacherName": "郑老师",
+      "hoursPerWeek": 5
+    },
+    {
+      "classId": 15,
+      "className": "高三3班",
+      "subjectId": "physics",
+      "subjectName": "物理",
+      "teacherId": 14,
+      "teacherName": "徐老师",
+      "hoursPerWeek": 4
+    },
+    {
+      "classId": 15,
+      "className": "高三3班",
+      "subjectId": "chemistry",
+      "subjectName": "化学",
+      "teacherId": 18,
+      "teacherName": "何老师",
+      "hoursPerWeek": 4
+    },
+    {
+      "classId": 15,
+      "className": "高三3班",
+      "subjectId": "biology",
+      "subjectName": "生物",
+      "teacherId": 19,
+      "teacherName": "高老师",
+      "hoursPerWeek": 3
+    },
+    {
+      "classId": 15,
+      "className": "高三3班",
+      "subjectId": "politics",
+      "subjectName": "政治",
+      "teacherId": 22,
+      "teacherName": "罗老师",
+      "hoursPerWeek": 3
+    },
+    {
+      "classId": 15,
+      "className": "高三3班",
+      "subjectId": "history",
+      "subjectName": "历史",
+      "teacherId": 23,
+      "teacherName": "宋老师",
+      "hoursPerWeek": 3
+    },
+    {
+      "classId": 15,
+      "className": "高三3班",
+      "subjectId": "geography",
+      "subjectName": "地理",
+      "teacherId": 26,
+      "teacherName": "唐老师",
+      "hoursPerWeek": 3
+    },
+    {
+      "classId": 15,
+      "className": "高三3班",
+      "subjectId": "pe",
+      "subjectName": "体育",
+      "teacherId": 28,
+      "teacherName": "于老师",
+      "hoursPerWeek": 2
+    },
+    {
+      "classId": 15,
+      "className": "高三3班",
+      "subjectId": "music",
+      "subjectName": "音乐",
+      "teacherId": 30,
+      "teacherName": "程老师",
+      "hoursPerWeek": 1
+    },
+    {
+      "classId": 15,
+      "className": "高三3班",
+      "subjectId": "art",
+      "subjectName": "美术",
+      "teacherId": 31,
+      "teacherName": "曹老师",
+      "hoursPerWeek": 1
+    },
+    {
+      "classId": 16,
+      "className": "高三4班",
+      "subjectId": "chinese",
+      "subjectName": "语文",
+      "teacherId": 1,
+      "teacherName": "张老师",
+      "hoursPerWeek": 5
+    },
+    {
+      "classId": 16,
+      "className": "高三4班",
+      "subjectId": "math",
+      "subjectName": "数学",
+      "teacherId": 8,
+      "teacherName": "黄老师",
+      "hoursPerWeek": 5
+    },
+    {
+      "classId": 16,
+      "className": "高三4班",
+      "subjectId": "english",
+      "subjectName": "英语",
+      "teacherId": 9,
+      "teacherName": "周老师",
+      "hoursPerWeek": 5
+    },
+    {
+      "classId": 16,
+      "className": "高三4班",
+      "subjectId": "physics",
+      "subjectName": "物理",
+      "teacherId": 15,
+      "teacherName": "马老师",
+      "hoursPerWeek": 4
+    },
+    {
+      "classId": 16,
+      "className": "高三4班",
+      "subjectId": "chemistry",
+      "subjectName": "化学",
+      "teacherId": 18,
+      "teacherName": "何老师",
+      "hoursPerWeek": 4
+    },
+    {
+      "classId": 16,
+      "className": "高三4班",
+      "subjectId": "biology",
+      "subjectName": "生物",
+      "teacherId": 19,
+      "teacherName": "高老师",
+      "hoursPerWeek": 3
+    },
+    {
+      "classId": 16,
+      "className": "高三4班",
+      "subjectId": "politics",
+      "subjectName": "政治",
+      "teacherId": 21,
+      "teacherName": "郭老师",
+      "hoursPerWeek": 3
+    },
+    {
+      "classId": 16,
+      "className": "高三4班",
+      "subjectId": "history",
+      "subjectName": "历史",
+      "teacherId": 23,
+      "teacherName": "宋老师",
+      "hoursPerWeek": 3
+    },
+    {
+      "classId": 16,
+      "className": "高三4班",
+      "subjectId": "geography",
+      "subjectName": "地理",
+      "teacherId": 25,
+      "teacherName": "韩老师",
+      "hoursPerWeek": 3
+    },
+    {
+      "classId": 16,
+      "className": "高三4班",
+      "subjectId": "pe",
+      "subjectName": "体育",
+      "teacherId": 27,
+      "teacherName": "冯老师",
+      "hoursPerWeek": 2
+    },
+    {
+      "classId": 16,
+      "className": "高三4班",
+      "subjectId": "music",
+      "subjectName": "音乐",
+      "teacherId": 30,
+      "teacherName": "程老师",
+      "hoursPerWeek": 1
+    },
+    {
+      "classId": 16,
+      "className": "高三4班",
+      "subjectId": "art",
+      "subjectName": "美术",
+      "teacherId": 31,
+      "teacherName": "曹老师",
+      "hoursPerWeek": 1
+    },
+    {
+      "classId": 17,
+      "className": "高三5班",
+      "subjectId": "chinese",
+      "subjectName": "语文",
+      "teacherId": 1,
+      "teacherName": "张老师",
+      "hoursPerWeek": 5
+    },
+    {
+      "classId": 17,
+      "className": "高三5班",
+      "subjectId": "math",
+      "subjectName": "数学",
+      "teacherId": 7,
+      "teacherName": "杨老师",
+      "hoursPerWeek": 5
+    },
+    {
+      "classId": 17,
+      "className": "高三5班",
+      "subjectId": "english",
+      "subjectName": "英语",
+      "teacherId": 10,
+      "teacherName": "吴老师",
+      "hoursPerWeek": 5
+    },
+    {
+      "classId": 17,
+      "className": "高三5班",
+      "subjectId": "physics",
+      "subjectName": "物理",
+      "teacherId": 15,
+      "teacherName": "马老师",
+      "hoursPerWeek": 4
+    },
+    {
+      "classId": 17,
+      "className": "高三5班",
+      "subjectId": "chemistry",
+      "subjectName": "化学",
+      "teacherId": 18,
+      "teacherName": "何老师",
+      "hoursPerWeek": 4
+    },
+    {
+      "classId": 17,
+      "className": "高三5班",
+      "subjectId": "biology",
+      "subjectName": "生物",
+      "teacherId": 19,
+      "teacherName": "高老师",
+      "hoursPerWeek": 3
+    },
+    {
+      "classId": 17,
+      "className": "高三5班",
+      "subjectId": "politics",
+      "subjectName": "政治",
+      "teacherId": 22,
+      "teacherName": "罗老师",
+      "hoursPerWeek": 3
+    },
+    {
+      "classId": 17,
+      "className": "高三5班",
+      "subjectId": "history",
+      "subjectName": "历史",
+      "teacherId": 24,
+      "teacherName": "谢老师",
+      "hoursPerWeek": 3
+    },
+    {
+      "classId": 17,
+      "className": "高三5班",
+      "subjectId": "geography",
+      "subjectName": "地理",
+      "teacherId": 25,
+      "teacherName": "韩老师",
+      "hoursPerWeek": 3
+    },
+    {
+      "classId": 17,
+      "className": "高三5班",
+      "subjectId": "pe",
+      "subjectName": "体育",
+      "teacherId": 27,
+      "teacherName": "冯老师",
+      "hoursPerWeek": 2
+    },
+    {
+      "classId": 17,
+      "className": "高三5班",
+      "subjectId": "music",
+      "subjectName": "音乐",
+      "teacherId": 30,
+      "teacherName": "程老师",
+      "hoursPerWeek": 1
+    },
+    {
+      "classId": 17,
+      "className": "高三5班",
+      "subjectId": "art",
+      "subjectName": "美术",
+      "teacherId": 31,
+      "teacherName": "曹老师",
+      "hoursPerWeek": 1
+    },
+    {
+      "classId": 18,
+      "className": "高三6班",
+      "subjectId": "chinese",
+      "subjectName": "语文",
+      "teacherId": 4,
+      "teacherName": "赵老师",
+      "hoursPerWeek": 5
+    },
+    {
+      "classId": 18,
+      "className": "高三6班",
+      "subjectId": "math",
+      "subjectName": "数学",
+      "teacherId": 6,
+      "teacherName": "陈老师",
+      "hoursPerWeek": 5
+    },
+    {
+      "classId": 18,
+      "className": "高三6班",
+      "subjectId": "english",
+      "subjectName": "英语",
+      "teacherId": 9,
+      "teacherName": "周老师",
+      "hoursPerWeek": 5
+    },
+    {
+      "classId": 18,
+      "className": "高三6班",
+      "subjectId": "physics",
+      "subjectName": "物理",
+      "teacherId": 14,
+      "teacherName": "徐老师",
+      "hoursPerWeek": 4
+    },
+    {
+      "classId": 18,
+      "className": "高三6班",
+      "subjectId": "chemistry",
+      "subjectName": "化学",
+      "teacherId": 18,
+      "teacherName": "何老师",
+      "hoursPerWeek": 4
+    },
+    {
+      "classId": 18,
+      "className": "高三6班",
+      "subjectId": "biology",
+      "subjectName": "生物",
+      "teacherId": 20,
+      "teacherName": "梁老师",
+      "hoursPerWeek": 3
+    },
+    {
+      "classId": 18,
+      "className": "高三6班",
+      "subjectId": "politics",
+      "subjectName": "政治",
+      "teacherId": 21,
+      "teacherName": "郭老师",
+      "hoursPerWeek": 3
+    },
+    {
+      "classId": 18,
+      "className": "高三6班",
+      "subjectId": "history",
+      "subjectName": "历史",
+      "teacherId": 23,
+      "teacherName": "宋老师",
+      "hoursPerWeek": 3
+    },
+    {
+      "classId": 18,
+      "className": "高三6班",
+      "subjectId": "geography",
+      "subjectName": "地理",
+      "teacherId": 26,
+      "teacherName": "唐老师",
+      "hoursPerWeek": 3
+    },
+    {
+      "classId": 18,
+      "className": "高三6班",
+      "subjectId": "pe",
+      "subjectName": "体育",
+      "teacherId": 29,
+      "teacherName": "董老师",
+      "hoursPerWeek": 2
+    },
+    {
+      "classId": 18,
+      "className": "高三6班",
+      "subjectId": "music",
+      "subjectName": "音乐",
+      "teacherId": 30,
+      "teacherName": "程老师",
+      "hoursPerWeek": 1
+    },
+    {
+      "classId": 18,
+      "className": "高三6班",
+      "subjectId": "art",
+      "subjectName": "美术",
+      "teacherId": 31,
+      "teacherName": "曹老师",
+      "hoursPerWeek": 1
+    }
+  ],
+  "preferences": [
+    {
+      "teacherId": 1,
+      "teacherName": "张老师",
+      "day": 5,
+      "period": 6,
+      "type": "preferred",
+      "typeLabel": "偏好"
+    },
+    {
+      "teacherId": 2,
+      "teacherName": "李老师",
+      "day": 1,
+      "period": 1,
+      "type": "unavailable",
+      "typeLabel": "不可用"
+    },
+    {
+      "teacherId": 2,
+      "teacherName": "李老师",
+      "day": 2,
+      "period": 3,
+      "type": "unavailable",
+      "typeLabel": "不可用"
+    },
+    {
+      "teacherId": 3,
+      "teacherName": "王老师",
+      "day": 3,
+      "period": 3,
+      "type": "preferred",
+      "typeLabel": "偏好"
+    },
+    {
+      "teacherId": 3,
+      "teacherName": "王老师",
+      "day": 4,
+      "period": 5,
+      "type": "preferred",
+      "typeLabel": "偏好"
+    },
+    {
+      "teacherId": 3,
+      "teacherName": "王老师",
+      "day": 5,
+      "period": 4,
+      "type": "preferred",
+      "typeLabel": "偏好"
+    },
+    {
+      "teacherId": 4,
+      "teacherName": "赵老师",
+      "day": 5,
+      "period": 4,
+      "type": "preferred",
+      "typeLabel": "偏好"
+    },
+    {
+      "teacherId": 4,
+      "teacherName": "赵老师",
+      "day": 3,
+      "period": 4,
+      "type": "unavailable",
+      "typeLabel": "不可用"
+    },
+    {
+      "teacherId": 4,
+      "teacherName": "赵老师",
+      "day": 4,
+      "period": 1,
+      "type": "unavailable",
+      "typeLabel": "不可用"
+    },
+    {
+      "teacherId": 5,
+      "teacherName": "刘老师",
+      "day": 4,
+      "period": 7,
+      "type": "preferred",
+      "typeLabel": "偏好"
+    },
+    {
+      "teacherId": 5,
+      "teacherName": "刘老师",
+      "day": 2,
+      "period": 5,
+      "type": "preferred",
+      "typeLabel": "偏好"
+    },
+    {
+      "teacherId": 6,
+      "teacherName": "陈老师",
+      "day": 3,
+      "period": 5,
+      "type": "preferred",
+      "typeLabel": "偏好"
+    },
+    {
+      "teacherId": 6,
+      "teacherName": "陈老师",
+      "day": 4,
+      "period": 5,
+      "type": "unavailable",
+      "typeLabel": "不可用"
+    },
+    {
+      "teacherId": 7,
+      "teacherName": "杨老师",
+      "day": 3,
+      "period": 4,
+      "type": "unavailable",
+      "typeLabel": "不可用"
+    },
+    {
+      "teacherId": 7,
+      "teacherName": "杨老师",
+      "day": 3,
+      "period": 5,
+      "type": "preferred",
+      "typeLabel": "偏好"
+    },
+    {
+      "teacherId": 8,
+      "teacherName": "黄老师",
+      "day": 5,
+      "period": 4,
+      "type": "unavailable",
+      "typeLabel": "不可用"
+    },
+    {
+      "teacherId": 8,
+      "teacherName": "黄老师",
+      "day": 1,
+      "period": 6,
+      "type": "preferred",
+      "typeLabel": "偏好"
+    },
+    {
+      "teacherId": 8,
+      "teacherName": "黄老师",
+      "day": 3,
+      "period": 7,
+      "type": "preferred",
+      "typeLabel": "偏好"
+    },
+    {
+      "teacherId": 9,
+      "teacherName": "周老师",
+      "day": 5,
+      "period": 7,
+      "type": "preferred",
+      "typeLabel": "偏好"
+    },
+    {
+      "teacherId": 10,
+      "teacherName": "吴老师",
+      "day": 4,
+      "period": 4,
+      "type": "preferred",
+      "typeLabel": "偏好"
+    }
+  ],
+  "config": {
+    "daysPerWeek": 5,
+    "periodsPerDay": 8
+  }
+}

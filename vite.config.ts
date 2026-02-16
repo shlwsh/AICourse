@@ -39,9 +39,9 @@ export default defineConfig({
         'vue-router',
         'pinia',
         {
-          '@tauri-apps/api/tauri': ['invoke'],
-          '@tauri-apps/api/dialog': ['open', 'save', 'message', 'ask', 'confirm'],
-          '@tauri-apps/api/notification': ['sendNotification'],
+          '@tauri-apps/api/core': ['invoke'],
+          '@tauri-apps/plugin-dialog': ['open', 'save', 'message', 'ask', 'confirm'],
+          '@tauri-apps/plugin-notification': ['sendNotification'],
           '@tauri-apps/api/path': ['appDataDir', 'resourceDir'],
         },
       ],
@@ -283,6 +283,8 @@ export default defineConfig({
     // CSS 预处理器配置
     preprocessorOptions: {
       scss: {
+        // 使用现代 Sass API，避免弃用警告
+        api: 'modern-compiler',
         // 全局 SCSS 变量和混入
         // 注意：如果项目中没有 variables.scss 文件，请注释掉此行
         // additionalData: `@use "@/styles/variables.scss" as *;`,

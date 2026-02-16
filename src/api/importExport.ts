@@ -4,6 +4,7 @@
  */
 import { http, ApiResponse } from './http';
 import { logger } from '@/utils/logger';
+import { downloadTemplateEnhanced } from './importExport-enhanced';
 
 /**
  * Excel 导入参数接口
@@ -195,59 +196,15 @@ export class ImportExportApi {
   /**
    * 下载导入模板
    * @param params 模板下载参数
-   * @returns 模板文件的下载URL
    */
-  static async downloadTemplate(
-    params: DownloadTemplateParams,
-  ): Promise<ApiResponse<{ fileUrl: string; fileName: string }>> {
-    const startTime = performance.now();
-    logger.info('调用下载导入模板 API - 请求开始', {
-      templateType: params.templateType,
-    });
-
-    logger.debug('下载导入模板 API - 请求参数', {
-      params,
-    });
-
-    try {
-      const response = await http.get<{ fileUrl: string; fileName: string }>(
-        '/import-export/template',
-        {
-          params: {
-            templateType: params.templateType,
-          },
-        },
-      );
-      const endTime = performance.now();
-      const responseTime = Math.round(endTime - startTime);
-
-      if (response.success) {
-        logger.info('下载导入模板 API - 响应成功', {
-          responseTime: `${responseTime}ms`,
-          templateType: params.templateType,
-          fileName: response.data?.fileName,
-          fileUrl: response.data?.fileUrl,
-        });
-      } else {
-        logger.error('下载导入模板 API - 响应失败', {
-          responseTime: `${responseTime}ms`,
-          templateType: params.templateType,
-          error: response.error || response.message,
-        });
-      }
-
-      return response;
-    } catch (error: any) {
-      const endTime = performance.now();
-      const responseTime = Math.round(endTime - startTime);
-      logger.error('下载导入模板 API - 请求异常', {
-        responseTime: `${responseTime}ms`,
-        templateType: params.templateType,
-        error: error.message,
-      });
-      throw error;
+  /**
+     * 下载导入模板
+     * @param params 模板下载参数
+     */
+    static async downloadTemplate(params: DownloadTemplateParams): Promise<void> {
+      // 使用增强版下载方法，包含完整的文件日志记录
+      return downloadTemplateEnhanced(params);
     }
-  }
 
   /**
    * 触发文件下载

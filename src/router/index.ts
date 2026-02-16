@@ -26,11 +26,47 @@ const routes: RouteRecordRaw[] = [
     },
   },
   {
+    path: '/schedule/generate',
+    name: 'ScheduleGenerate',
+    component: () => import('@/views/Schedule.vue'),
+    meta: {
+      title: '自动排课',
+      requiresAuth: false,
+    },
+  },
+  {
+    path: '/schedule/manual',
+    name: 'ScheduleManual',
+    component: () => import('@/views/Schedule.vue'),
+    meta: {
+      title: '手动调课',
+      requiresAuth: false,
+    },
+  },
+  {
     path: '/teacher',
     name: 'Teacher',
     component: () => import('@/views/Teacher.vue'),
     meta: {
       title: '教师管理',
+      requiresAuth: false,
+    },
+  },
+  {
+    path: '/teacher/preference',
+    name: 'TeacherPreference',
+    component: () => import('@/views/Teacher.vue'),
+    meta: {
+      title: '偏好设置',
+      requiresAuth: false,
+    },
+  },
+  {
+    path: '/teacher/workload',
+    name: 'TeacherWorkload',
+    component: () => import('@/views/Teacher.vue'),
+    meta: {
+      title: '工作量统计',
       requiresAuth: false,
     },
   },

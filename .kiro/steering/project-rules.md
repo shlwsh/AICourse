@@ -13,9 +13,39 @@
   - API 文档
   - 用户手册
 
+## 技术栈规范
+
+### 规则 2：使用 Bun 框架
+
+本项目使用 Bun 作为 JavaScript/TypeScript 运行时和包管理器：
+
+- **包管理**：使用 `bun add`、`bun remove` 等命令管理依赖，禁止使用 `npm` 或 `yarn`
+- **脚本执行**：使用 `bun run` 执行脚本，禁止使用 `npm run`
+- **包执行**：使用 `bunx` 执行包命令，禁止使用 `npx`
+- **测试运行**：使用 `bunx playwright` 运行 Playwright 测试
+
+**实施要求**：
+- 所有 package.json 脚本必须使用 `bun` 命令
+- 所有文档和脚本中的命令示例必须使用 `bun`
+- Shell 脚本中使用 `bunx` 而不是 `npx`
+- 不得在项目中混用 npm/yarn 和 bun
+
+**示例**：
+```bash
+# 正确 ✓
+bun add express
+bun run dev
+bunx playwright test
+
+# 错误 ✗
+npm install express
+npm run dev
+npx playwright test
+```
+
 ## 日志记录规范
 
-### 规则 2：完善的日志记录
+### 规则 3：完善的日志记录
 所有模块必须实现完善的日志记录功能：
 
 - **日志级别**：使用标准日志级别（DEBUG、INFO、WARN、ERROR）
@@ -32,7 +62,7 @@
 
 ## 测试规范
 
-### 规则 3：使用 Playwright 进行前端和集成测试
+### 规则 4：使用 Playwright 进行前端和集成测试
 
 - **前端测试**：使用 Playwright 框架进行 UI 测试
 - **集成测试**：使用 Playwright 框架进行端到端测试
@@ -45,7 +75,7 @@
 - 使用有意义的测试描述
 - 适当使用等待和断言确保测试稳定性
 
-### 规则 4：集成测试执行流程
+### 规则 5：集成测试执行流程
 
 **顺序执行与错误处理**：
 - **按用例顺序执行**：集成测试必须按照预定义的用例顺序依次执行
@@ -64,9 +94,59 @@
 - 修正后必须从失败的用例重新开始执行
 - 不允许跳过失败的用例继续执行后续测试
 
+## 运行环境规范
+
+### 规则 6：双模式兼容
+
+本项目必须同时支持 Tauri 桌面应用和浏览器 Web 应用两种运行模式：
+
+- **Tauri 模式**：通过 `bun run dev` 或 `tauri dev` 启动的桌面应用
+- **浏览器模式**：直接在浏览器中访问 `http://localhost:5173` 的 Web 应用
+
+**实施要求**：
+- 所有功能必须在两种模式下都能正常使用
+- 需要根据运行环境自动适配不同的实现方式
+- 文件操作功能：
+  - Tauri 模式：**避免使用 Tauri 对话框 API（存在阻塞问题）**，使用浏览器标准机制
+  - 浏览器模式：使用浏览器的下载机制和 File API
+- 环境检测：使用 `window.__TAURI__` 判断是否在 Tauri 环境中
+- 日志记录：在环境检测和模式切换时记录详细日志
+
+**重要提示 - Tauri 对话框 API 问题**：
+- Tauri 1.5 的 `dialog.save()` 和 `dialog.open()` API 存在严重的阻塞问题
+- 调用这些 API 会导致应用卡死，对话框无法显示
+- **解决方案**：在 Tauri 环境下也使用浏览器的标准下载机制
+- 文件下载：使用 `<a>` 标签触发下载，文件保存到默认下载目录
+- 文件上传：使用标准 HTML `<input type="file">` 元素
+
+**示例**：
+```typescript
+// 环境检测
+const isTauri = typeof window !== 'undefined' && (window as any).__TAURI__;
+
+if (isTauri) {
+  // Tauri 模式：使用浏览器标准下载（避免对话框 API）
+  const link = document.createElement('a');
+  link.href = url;
+  link.download = 'file.xlsx';
+  link.click();
+} else {
+  // 浏览器模式：使用传统下载
+  const link = document.createElement('a');
+  link.href = url;
+  link.download = 'file.xlsx';
+  link.click();
+}
+```
+
+**测试要求**：
+- 每个功能都需要在两种模式下分别测试
+- 确保用户体验在两种模式下保持一致
+- 特别关注文件上传、下载、本地存储等涉及文件系统的功能
+
 ## 文档规范
 
-### 规则 5：专注代码开发，避免过度文档化
+### 规则 7：专注代码开发，避免过度文档化
 
 - **非必要不生成文档**：除非用户明确要求，否则不要自动生成 Markdown 文档
 - **禁止生成的文档类型**：

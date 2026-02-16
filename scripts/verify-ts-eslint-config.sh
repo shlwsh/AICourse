@@ -44,7 +44,7 @@ echo -e "${BLUE}=== 验证 TypeScript 配置 ===${NC}"
 echo ""
 
 # 使用 tsc 验证配置
-if npx tsc --noEmit --project tsconfig.json 2>&1 | grep -q "error TS"; then
+if bunx tsc --noEmit --project tsconfig.json 2>&1 | grep -q "error TS"; then
   echo -e "${YELLOW}⚠${NC} TypeScript 编译检查发现一些问题（这是正常的，因为项目还在开发中）"
   echo -e "${GREEN}✓${NC} tsconfig.json 配置语法正确"
 else
@@ -56,7 +56,7 @@ echo -e "${BLUE}=== 验证 ESLint 配置 ===${NC}"
 echo ""
 
 # 验证 ESLint 配置语法
-if npx eslint --print-config src/main.ts > /dev/null 2>&1; then
+if bunx eslint --print-config src/main.ts > /dev/null 2>&1; then
   echo -e "${GREEN}✓${NC} ESLint 配置语法正确"
 else
   echo -e "${RED}✗${NC} ESLint 配置有误"

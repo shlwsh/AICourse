@@ -346,20 +346,20 @@ importExportRoutes.get('/template', async (c) => {
   log.start();
 
   try {
-    log.step('调用 Rust 后端生成模板');
-    // TODO: 调用 Tauri 命令
-    // const result = await invoke('download_import_template');
+    log.step('生成 Excel 模板文件');
 
-    // 模拟模板生成结果
-    const result = {
-      success: true,
-      file_path: '/tmp/import_template.xlsx',
-      message: '模板生成功能尚未完全实现，返回模拟结果',
-    };
+    // 生成临时文件路径
+    const tmpDir = '/tmp/course-scheduling';
+    const timestamp = Date.now();
+    const filePath = `${tmpDir}/import_template_${timestamp}.xlsx`;
+
+    // 生成模板
+    const { generateImportTemplate } = await import('../utils/template-generator');
+    await generateImportTemplate(filePath);
 
     const duration = Date.now() - startTime;
     log.success({
-      filePath: result.file_path,
+      filePath,
       duration: `${duration}ms`,
     });
 
@@ -367,7 +367,7 @@ importExportRoutes.get('/template', async (c) => {
     const { handleFileDownload } = await import('../middleware/file-download');
 
     return await handleFileDownload(c, {
-      filePath: result.file_path,
+      filePath,
       downloadName: '排课系统导入模板.xlsx',
       useStreaming: true,
     });

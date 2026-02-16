@@ -15,7 +15,7 @@ import type { ImportResult, ExportResult, TemplateResult, ValidationResult } fro
 
 // Mock Tauri invoke 函数
 const mockInvoke = vi.fn();
-vi.mock('@tauri-apps/api/tauri', () => ({
+vi.mock('@tauri-apps/api/core', () => ({
   invoke: (...args: any[]) => mockInvoke(...args),
 }));
 

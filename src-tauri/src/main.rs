@@ -91,6 +91,11 @@ fn main() {
 
     // 构建 Tauri 应用
     tauri::Builder::default()
+        // 注册 Tauri 2.x 插件
+        .plugin(tauri_plugin_shell::init())
+        .plugin(tauri_plugin_dialog::init())
+        .plugin(tauri_plugin_fs::init())
+        .plugin(tauri_plugin_notification::init())
         // 注册命令
         .invoke_handler(tauri::generate_handler![
             health_check,
@@ -110,7 +115,7 @@ fn main() {
         // 设置应用启动回调
         .setup(|app| {
             info!("Tauri 应用初始化完成");
-            info!("应用标识: {}", app.config().tauri.bundle.identifier);
+            info!("应用标识: {}", app.config().identifier);
 
             // 初始化应用状态（暂时不初始化数据库）
             // 数据库初始化将在后续任务中实现

@@ -40,7 +40,7 @@ config.global.mocks = {
  * 在单元测试中模拟 Tauri 命令调用
  * 避免在测试环境中实际调用 Rust 后端
  */
-vi.mock('@tauri-apps/api/tauri', () => ({
+vi.mock('@tauri-apps/api/core', () => ({
   invoke: vi.fn((cmd: string, args?: any) => {
     console.log(`[Mock] Tauri invoke: ${cmd}`, args);
     return Promise.resolve({});

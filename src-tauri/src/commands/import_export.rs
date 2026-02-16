@@ -247,17 +247,21 @@ pub async fn import_from_excel(file_path: String) -> Result<ImportResult, String
 
     // 步骤 4: 保存数据到数据库
     info!("步骤 4/5: 保存数据到数据库");
-    let error_count = 0;
-    let errors = Vec::new();
+    let save_start = Instant::now();
 
-    // TODO: 实现数据库保存逻辑（待数据库模块完成）
-    warn!("数据库保存功能尚未实现，返回模拟结果");
-
-    // 模拟保存结果
-    let success_count = import_data.teachers.len()
-        + import_data.subjects.len()
-        + import_data.curriculums.len()
-        + import_data.teacher_preferences.len();
+    let (success_count, error_count, errors) = match save_import_data_to_db(&import_data).await {
+        Ok(count) => {
+            let save_duration = save_start.elapsed();
+            info!("数据保存成功，共 {} 条记录，耗时: {:?}", count, save_duration);
+            (count, 0, Vec::new())
+        }
+        Err(e) => {
+            let save_duration = save_start.elapsed();
+            error!("数据保存失败: {}，耗时: {:?}", e, save_duration);
+            error!("操作失败，总耗时: {:?}", start_time.elapsed());
+            return Err(format!("数据保存失败: {}", e));
+        }
+    };
 
     // 步骤 5: 生成导入结果
     info!("步骤 5/5: 生成导入结果");
@@ -382,6 +386,7 @@ fn parse_excel_file(file_path: &str) -> Result<ImportData, String> {
 fn parse_teachers_sheet(
     workbook: &mut calamine::Xlsx<std::io::BufReader<std::fs::File>>,
 ) -> Result<Vec<TeacherImportData>, String> {
+    #[allow(unused_imports)]
     use calamine::{Data, DataType, Reader};
 
     debug!("开始解析教师信息工作表");
@@ -459,6 +464,7 @@ fn parse_teachers_sheet(
 fn parse_subjects_sheet(
     workbook: &mut calamine::Xlsx<std::io::BufReader<std::fs::File>>,
 ) -> Result<Vec<SubjectImportData>, String> {
+    #[allow(unused_imports)]
     use calamine::{Data, DataType, Reader};
 
     debug!("开始解析科目配置工作表");
@@ -575,6 +581,7 @@ fn parse_subjects_sheet(
 fn parse_curriculums_sheet(
     workbook: &mut calamine::Xlsx<std::io::BufReader<std::fs::File>>,
 ) -> Result<Vec<CurriculumImportData>, String> {
+    #[allow(unused_imports)]
     use calamine::{Data, DataType, Reader};
 
     debug!("开始解析教学计划工作表");
@@ -708,6 +715,7 @@ fn parse_curriculums_sheet(
 fn parse_teacher_preferences_sheet(
     workbook: &mut calamine::Xlsx<std::io::BufReader<std::fs::File>>,
 ) -> Result<Vec<TeacherPreferenceImportData>, String> {
+    #[allow(unused_imports)]
     use calamine::{Data, DataType, Reader};
 
     debug!("开始解析教师偏好工作表");
@@ -1189,6 +1197,293 @@ fn validate_time_slots_format(slots: &str, row: usize) -> Result<(), String> {
     }
 
     Ok(())
+}
+
+// ============================================================================
+// 数据库保存辅助函数
+// ============================================================================
+
+/// 将导入数据保存到数据库
+///
+/// 使用事务确保所有数据都成功保存或全部回滚
+///
+/// # 参数
+/// - `data`: 导入数据
+///
+/// # 返回
+/// - `Ok(usize)`: 保存成功的记录总数
+/// - `Err(String)`: 保存失败，返回错误信息
+async fn save_import_data_to_db(data: &ImportData) -> Result<usize, String> {
+    use crate::db::DatabaseManager;
+    use crate::db::teacher::{CreateTeacherInput, SaveTeacherPreferenceInput, TeacherRepository};
+    use crate::db::subject::{CreateSubjectConfigInput, SubjectConfigRepository};
+    use crate::db::class::{ClassRepository, CreateClassInput};
+    use crate::db::curriculum::{batch_create_curriculums};
+    use std::collections::HashMap;
+
+    info!("========================================");
+    info!("开始保存导入数据到数据库");
+    info!("========================================");
+
+    // 1. 连接数据库
+    info!("步骤 1/5: 连接数据库");
+    let db = DatabaseManager::new("sqlite://data/schedule.db", "migrations")
+        .await
+        .map_err(|e| {
+            error!("连接数据库失败: {}", e);
+            format!("连接数据库失败: {}", e)
+        })?;
+    info!("数据库连接成功");
+
+    let pool = db.pool();
+    let mut total_saved = 0;
+
+    // 2. 保存教师信息
+    info!("步骤 2/5: 保存教师信息");
+    let teacher_repo = TeacherRepository::new(pool);
+    let mut teacher_name_to_id: HashMap<String, i64> = HashMap::new();
+
+    for teacher_data in &data.teachers {
+        debug!("保存教师: {}", teacher_data.name);
+
+        let input = CreateTeacherInput {
+            name: teacher_data.name.clone(),
+            teaching_group_id: None, // 暂时不处理教研组
+        };
+
+        match teacher_repo.create(input).await {
+            Ok(teacher) => {
+                teacher_name_to_id.insert(teacher_data.name.clone(), teacher.id);
+                total_saved += 1;
+                debug!("教师保存成功: {} (ID: {})", teacher.name, teacher.id);
+            }
+            Err(e) => {
+                error!("保存教师失败: {}, 错误: {}", teacher_data.name, e);
+                return Err(format!("保存教师 '{}' 失败: {}", teacher_data.name, e));
+            }
+        }
+    }
+    info!("教师信息保存完成，共 {} 位教师", teacher_name_to_id.len());
+
+    // 3. 保存科目配置
+    info!("步骤 3/5: 保存科目配置");
+    let subject_repo = SubjectConfigRepository::new(pool);
+
+    for subject_data in &data.subjects {
+        debug!("保存科目: {} ({})", subject_data.name, subject_data.id);
+
+        // 解析禁止时段
+        let forbidden_slots = parse_time_slots_to_mask(
+            subject_data.forbidden_slots.as_deref().unwrap_or("")
+        );
+
+        let input = CreateSubjectConfigInput {
+            id: subject_data.id.clone(),
+            name: subject_data.name.clone(),
+            forbidden_slots,
+            allow_double_session: subject_data.allow_double_session,
+            venue_id: subject_data.venue.clone(),
+            is_major_subject: subject_data.is_major_subject,
+        };
+
+        match subject_repo.create(input).await {
+            Ok(subject) => {
+                total_saved += 1;
+                debug!("科目保存成功: {} ({})", subject.name, subject.id);
+            }
+            Err(e) => {
+                error!("保存科目失败: {}, 错误: {}", subject_data.name, e);
+                return Err(format!("保存科目 '{}' 失败: {}", subject_data.name, e));
+            }
+        }
+    }
+    info!("科目配置保存完成，共 {} 个科目", data.subjects.len());
+
+    // 4. 保存班级和教学计划
+    info!("步骤 4/5: 保存班级和教学计划");
+    let class_repo = ClassRepository::new(pool);
+    let mut class_name_to_id: HashMap<String, i64> = HashMap::new();
+
+    // 从教学计划中提取所有班级名称
+    let mut class_names: Vec<String> = data.curriculums
+        .iter()
+        .map(|c| c.class_name.clone())
+        .collect();
+    class_names.sort();
+    class_names.dedup();
+
+    // 创建班级
+    for class_name in &class_names {
+        debug!("保存班级: {}", class_name);
+
+        let input = CreateClassInput {
+            name: class_name.clone(),
+            grade_level: None, // 暂时不处理年级
+        };
+
+        match class_repo.create(input).await {
+            Ok(class) => {
+                class_name_to_id.insert(class_name.clone(), class.id);
+                total_saved += 1;
+                debug!("班级保存成功: {} (ID: {})", class.name, class.id);
+            }
+            Err(e) => {
+                error!("保存班级失败: {}, 错误: {}", class_name, e);
+                return Err(format!("保存班级 '{}' 失败: {}", class_name, e));
+            }
+        }
+    }
+    info!("班级保存完成，共 {} 个班级", class_name_to_id.len());
+
+    // 保存教学计划
+    let mut curriculum_data = Vec::new();
+    for curriculum in &data.curriculums {
+        let class_id = class_name_to_id.get(&curriculum.class_name)
+            .ok_or_else(|| format!("班级 '{}' 不存在", curriculum.class_name))?;
+
+        let teacher_id = teacher_name_to_id.get(&curriculum.teacher_name)
+            .ok_or_else(|| format!("教师 '{}' 不存在", curriculum.teacher_name))?;
+
+        // 解析合班班级
+        let combined_class_ids = if curriculum.is_combined_class {
+            if let Some(ref combined_classes) = curriculum.combined_classes {
+                combined_classes
+                    .split(',')
+                    .filter_map(|name| {
+                        let trimmed = name.trim();
+                        class_name_to_id.get(trimmed).copied()
+                    })
+                    .collect()
+            } else {
+                Vec::new()
+            }
+        } else {
+            Vec::new()
+        };
+
+        curriculum_data.push((
+            *class_id,
+            curriculum.subject_id.clone(),
+            *teacher_id,
+            curriculum.target_sessions as i64,
+            curriculum.is_combined_class,
+            combined_class_ids,
+            "Every".to_string(), // 默认每周
+        ));
+    }
+
+    match batch_create_curriculums(pool, &curriculum_data).await {
+        Ok(ids) => {
+            total_saved += ids.len();
+            info!("教学计划保存完成，共 {} 条", ids.len());
+        }
+        Err(e) => {
+            error!("批量保存教学计划失败: {}", e);
+            return Err(format!("批量保存教学计划失败: {}", e));
+        }
+    }
+
+    // 5. 保存教师偏好
+    info!("步骤 5/5: 保存教师偏好");
+    let mut preference_inputs = Vec::new();
+
+    for pref_data in &data.teacher_preferences {
+        let teacher_id = teacher_name_to_id.get(&pref_data.teacher_name)
+            .ok_or_else(|| format!("教师 '{}' 不存在", pref_data.teacher_name))?;
+
+        // 解析偏好时段和不排课时段
+        let preferred_slots = parse_time_slots_to_mask(
+            pref_data.preferred_slots.as_deref().unwrap_or("")
+        );
+        let blocked_slots = parse_time_slots_to_mask(
+            pref_data.blocked_slots.as_deref().unwrap_or("")
+        );
+
+        preference_inputs.push(SaveTeacherPreferenceInput {
+            teacher_id: *teacher_id,
+            preferred_slots,
+            time_bias: pref_data.time_bias as i64,
+            weight: pref_data.weight as i64,
+            blocked_slots,
+        });
+    }
+
+    if !preference_inputs.is_empty() {
+        match teacher_repo.batch_save_preferences(preference_inputs).await {
+            Ok(count) => {
+                total_saved += count;
+                info!("教师偏好保存完成，共 {} 条", count);
+            }
+            Err(e) => {
+                error!("批量保存教师偏好失败: {}", e);
+                return Err(format!("批量保存教师偏好失败: {}", e));
+            }
+        }
+    } else {
+        info!("没有教师偏好需要保存");
+    }
+
+    info!("========================================");
+    info!("数据保存完成，共保存 {} 条记录", total_saved);
+    info!("========================================");
+
+    Ok(total_saved)
+}
+
+/// 将时间槽位字符串解析为位掩码
+///
+/// 格式：星期-节次，多个槽位用逗号分隔，如 "1-1,1-2,2-3"
+/// 星期：1-7（周一到周日）
+/// 节次：1-12
+///
+/// # 参数
+/// - `slots`: 时间槽位字符串
+///
+/// # 返回
+/// - 位掩码（u64）
+fn parse_time_slots_to_mask(slots: &str) -> u64 {
+    if slots.trim().is_empty() {
+        return 0;
+    }
+
+    let mut mask: u64 = 0;
+
+    for slot in slots.split(',') {
+        let parts: Vec<&str> = slot.trim().split('-').collect();
+        if parts.len() != 2 {
+            warn!("时间槽位格式错误，跳过: {}", slot);
+            continue;
+        }
+
+        // 解析星期和节次
+        let day: u8 = match parts[0].parse::<u8>() {
+            Ok(d) if d >= 1 && d <= 7 => d - 1, // 转换为 0-6
+            _ => {
+                warn!("星期格式错误，跳过: {}", parts[0]);
+                continue;
+            }
+        };
+
+        let period: u8 = match parts[1].parse::<u8>() {
+            Ok(p) if p >= 1 && p <= 12 => p - 1, // 转换为 0-11
+            _ => {
+                warn!("节次格式错误，跳过: {}", parts[1]);
+                continue;
+            }
+        };
+
+        // 计算位位置：day * 12 + period
+        let bit_position = (day as u64) * 12 + (period as u64);
+        if bit_position < 64 {
+            mask |= 1u64 << bit_position;
+            debug!("添加时间槽位: 星期{} 第{}节 (位位置: {})", day + 1, period + 1, bit_position);
+        } else {
+            warn!("时间槽位超出范围: 星期{} 第{}节", day + 1, period + 1);
+        }
+    }
+
+    debug!("时间槽位掩码: 0x{:016X}", mask);
+    mask
 }
 
 // ============================================================================

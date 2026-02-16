@@ -28,7 +28,7 @@
  * ```
  */
 
-import { invoke } from '@tauri-apps/api/tauri';
+import { invoke } from '@tauri-apps/api/core';
 import { createLogger } from '../utils/logger';
 
 // 创建服务专用日志记录器

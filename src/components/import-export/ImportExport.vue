@@ -395,6 +395,17 @@ const exportResult = ref<ExportResult | null>(null);
  */
 const triggerFileSelect = () => {
   logger.info('用户触发文件选择');
+
+  // 检查是否在 Tauri 环境中
+  const isTauri = typeof window !== 'undefined' && (window as any).__TAURI__;
+
+  if (isTauri) {
+    logger.info('Tauri 环境：使用标准 HTML file input');
+  } else {
+    logger.info('浏览器环境：使用标准 HTML file input');
+  }
+
+  // 统一使用标准的 HTML file input，避免 Tauri 对话框 API 卡死问题
   uploadRef.value?.$el.querySelector('input[type="file"]')?.click();
 };
 
@@ -451,26 +462,29 @@ const formatFileSize = (bytes: number): string => {
  * 下载导入模板
  */
 const handleDownloadTemplate = async () => {
-  logger.info('用户下载导入模板');
+  logger.info('用户点击下载导入模板');
   downloadingTemplate.value = true;
 
   try {
-    const response = await ImportExportApi.downloadTemplate({
+    await ImportExportApi.downloadTemplate({
       templateType: 'all',
     });
 
-    if (response.success && response.data) {
-      // 触发文件下载
-      ImportExportApi.triggerDownload(response.data.fileUrl, response.data.fileName);
-      ElMessage.success('模板下载成功');
-      logger.info('模板下载成功', { fileName: response.data.fileName });
-    } else {
-      ElMessage.error(response.message || '模板下载失败');
-      logger.error('模板下载失败', { error: response.message });
-    }
+    ElMessage.success('模板下载成功');
+    logger.info('模板下载成功');
   } catch (error: any) {
-    ElMessage.error('模板下载失败：' + error.message);
-    logger.error('模板下载异常', { error: error.message });
+    // 如果是用户取消保存，不显示错误提示
+    if (error.message === '用户取消保存') {
+      logger.info('用户取消保存模板');
+      return;
+    }
+
+    const errorMessage = error.message || '模板下载失败';
+    ElMessage.error('模板下载失败：' + errorMessage);
+    logger.error('模板下载异常', {
+      error: errorMessage,
+      stack: error.stack,
+    });
   } finally {
     downloadingTemplate.value = false;
   }

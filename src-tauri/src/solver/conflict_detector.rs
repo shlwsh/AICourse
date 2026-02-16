@@ -15,10 +15,13 @@
 // 3. 生成课表后验证课表的有效性
 // ============================================================================
 
+// 允许未使用的导入警告（这些类型在测试代码中使用）
+#[allow(unused_imports)]
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 use tracing::{debug, info, trace};
 
+#[allow(unused_imports)]
 use crate::algorithm::types::{
     ClassCurriculum, Schedule, ScheduleEntry, ScheduleMetadata, SubjectConfig,
     TeacherMutualExclusion, TeacherPreference, TimeSlot, Venue, WeekType,

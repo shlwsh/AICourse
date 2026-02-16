@@ -17,11 +17,11 @@ import { ScheduleService } from './schedule-service';
 import type { Schedule, TimeSlot, SwapOption, ConflictInfo } from './schedule-service';
 
 // Mock Tauri invoke 函数
-vi.mock('@tauri-apps/api/tauri', () => ({
+vi.mock('@tauri-apps/api/core', () => ({
   invoke: vi.fn(),
 }));
 
-import { invoke } from '@tauri-apps/api/tauri';
+import { invoke } from '@tauri-apps/api/core';
 
 const mockInvoke = invoke as Mock;
 
