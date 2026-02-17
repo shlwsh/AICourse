@@ -85,11 +85,21 @@
                     @dragstart="handleDragStart($event, entity.id, day, period)"
                     @dragend="handleDragEnd"
                   >
-                    <div class="course-subject">
-                      {{ getCellEntry(entity.id, day, period)?.subjectId }}
-                    </div>
-                    <div class="course-teacher">
-                      {{ getTeacherName(getCellEntry(entity.id, day, period)?.teacherId) }}
+                    <div class="course-content">
+                      <div class="course-subject">
+                        {{ dataStore.getSubjectName(getCellEntry(entity.id, day, period)?.subjectId || '') }}
+                      </div>
+                      <div class="course-info">
+                        <span v-if="currentViewMode === 'class'" class="course-teacher">
+                          {{ getTeacherName(getCellEntry(entity.id, day, period)?.teacherId) }}
+                        </span>
+                        <span v-else-if="currentViewMode === 'teacher'" class="course-class">
+                          {{ getClassName(getCellEntry(entity.id, day, period)?.classId) }}
+                        </span>
+                        <span v-else-if="currentViewMode === 'venue'" class="course-class">
+                          {{ getClassName(getCellEntry(entity.id, day, period)?.classId) }}
+                        </span>
+                      </div>
                     </div>
                     <el-icon v-if="getCellEntry(entity.id, day, period)?.isFixed" class="fixed-icon">
                       <Lock />
@@ -130,6 +140,7 @@ import { ref, computed, onMounted, watch } from 'vue';
 import { ElMessage } from 'element-plus';
 import { Refresh, Lock, Loading } from '@element-plus/icons-vue';
 import { useScheduleStore } from '@/stores/scheduleStore';
+import { useDataStore } from '@/stores/dataStore';
 import { logger } from '@/utils/logger';
 import type { ScheduleEntry, TimeSlot } from '@/stores/scheduleStore';
 
@@ -159,6 +170,7 @@ const emit = defineEmits<{
 
 // ========== Store ==========
 const scheduleStore = useScheduleStore();
+const dataStore = useDataStore();
 
 // ========== 状态 ==========
 const isLoading = ref(false);
@@ -194,28 +206,48 @@ const periods = computed(() => {
 
 /** 实体列表（班级/教师/场地） */
 const entities = computed(() => {
-  // TODO: 根据视图模式从 store 获取对应的实体列表
-  // 这里先返回模拟数据
   componentLogger.debug('获取实体列表', { viewMode: currentViewMode.value });
 
+  if (!scheduleStore.schedule) {
+    return [];
+  }
+
+  const entries = scheduleStore.schedule.entries;
+
   if (currentViewMode.value === 'class') {
-    return [
-      { id: 1, name: '一年级1班' },
-      { id: 2, name: '一年级2班' },
-      { id: 3, name: '二年级1班' },
-    ];
+    // 从课表条目中提取所有班级ID，并使用 dataStore 获取名称
+    const classIds = new Set(entries.map(e => e.classId));
+    return Array.from(classIds).sort((a, b) => a - b).map(id => ({
+      id,
+      name: dataStore.getClassName(id),
+    }));
   } else if (currentViewMode.value === 'teacher') {
-    return [
-      { id: 101, name: '张老师' },
-      { id: 102, name: '李老师' },
-      { id: 103, name: '王老师' },
-    ];
+    // 从课表条目中提取所有教师ID，并使用 dataStore 获取名称
+    const teacherIds = new Set(entries.map(e => e.teacherId));
+    return Array.from(teacherIds).sort((a, b) => a - b).map(id => ({
+      id,
+      name: dataStore.getTeacherName(id),
+    }));
   } else {
-    return [
-      { id: 201, name: '操场' },
-      { id: 202, name: '微机室' },
-      { id: 203, name: '音乐室' },
-    ];
+    // 场地视图：从科目配置中获取场地信息
+    const venueIds = new Set<string>();
+
+    // 遍历所有科目，收集使用场地的科目
+    dataStore.subjects.forEach(subject => {
+      if (subject.venue_id) {
+        venueIds.add(subject.venue_id);
+      }
+    });
+
+    if (venueIds.size === 0) {
+      componentLogger.warn('没有配置场地的科目');
+      return [];
+    }
+
+    return Array.from(venueIds).sort().map(id => ({
+      id: id as any, // 场地ID是字符串，但为了统一接口使用 any
+      name: dataStore.getVenueName(id),
+    }));
   }
 });
 
@@ -235,7 +267,7 @@ const getDayLabel = (day: number): string => {
 /**
  * 获取单元格的课程条目
  */
-const getCellEntry = (entityId: number, day: number, period: number): ScheduleEntry | null => {
+const getCellEntry = (entityId: number | string, day: number, period: number): ScheduleEntry | null => {
   if (!scheduleStore.schedule) {
     return null;
   }
@@ -246,8 +278,11 @@ const getCellEntry = (entityId: number, day: number, period: number): ScheduleEn
       return e.classId === entityId && e.timeSlot.day === day && e.timeSlot.period === period;
     } else if (currentViewMode.value === 'teacher') {
       return e.teacherId === entityId && e.timeSlot.day === day && e.timeSlot.period === period;
+    } else if (currentViewMode.value === 'venue') {
+      // 场地视图：通过科目的场地ID匹配
+      const subject = dataStore.subjectMap.get(e.subjectId);
+      return subject?.venue_id === entityId && e.timeSlot.day === day && e.timeSlot.period === period;
     }
-    // TODO: 场地视图需要额外的场地信息
     return false;
   });
 
@@ -261,8 +296,19 @@ const getTeacherName = (teacherId: number | undefined): string => {
   if (!teacherId) {
     return '';
   }
-  // TODO: 从 teacherStore 获取教师姓名
-  return `教师${teacherId}`;
+
+  return dataStore.getTeacherName(teacherId);
+};
+
+/**
+ * 获取班级名称
+ */
+const getClassName = (classId: number | undefined): string => {
+  if (!classId) {
+    return '';
+  }
+
+  return dataStore.getClassName(classId);
 };
 
 /**
@@ -693,7 +739,12 @@ const loadScheduleData = async (): Promise<void> => {
   isLoading.value = true;
 
   try {
+    // 先加载基础数据
+    await dataStore.loadAllData();
+
+    // 再加载课表数据
     await scheduleStore.loadSchedule();
+
     componentLogger.info('课表数据加载成功', {
       entryCount: scheduleStore.entryCount,
       cost: scheduleStore.scheduleCost,
@@ -841,14 +892,15 @@ watch(
     padding: 4px;
     text-align: center;
     vertical-align: middle;
-    min-height: 60px;
-    height: 60px;
+    min-height: 80px;
+    height: 80px;
     position: relative;
     cursor: pointer;
     transition: all 0.2s ease;
 
     &.has-entry {
       background-color: #fff;
+      padding: 3px;
     }
 
     &.empty-entry {
@@ -860,7 +912,7 @@ watch(
     }
 
     &.fixed-entry {
-      background-color: #e6f7ff;
+      background-color: #fff8e1;
     }
 
     &.selected {
@@ -922,38 +974,53 @@ watch(
     flex-direction: column;
     justify-content: center;
     align-items: center;
-    padding: 4px;
+    padding: 8px 6px;
     border-radius: 4px;
-    background-color: #fff;
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: #fff;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
     cursor: move;
     transition: all 0.2s ease;
     position: relative;
     height: 100%;
+    min-height: 68px;
 
     &:hover {
-      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
-      transform: translateY(-1px);
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+      transform: translateY(-2px);
+    }
+
+    .course-content {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 4px;
+      width: 100%;
     }
 
     .course-subject {
-      font-size: 13px;
-      font-weight: 500;
-      color: #303133;
-      margin-bottom: 2px;
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
+      font-size: 14px;
+      font-weight: 600;
+      color: #fff;
+      text-align: center;
+      line-height: 1.4;
+      word-break: break-word;
       max-width: 100%;
     }
 
-    .course-teacher {
-      font-size: 11px;
-      color: #909399;
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
-      max-width: 100%;
+    .course-info {
+      font-size: 12px;
+      color: rgba(255, 255, 255, 0.95);
+      text-align: center;
+      line-height: 1.3;
+
+      .course-teacher,
+      .course-class {
+        display: inline-block;
+        padding: 1px 4px;
+        background: rgba(255, 255, 255, 0.2);
+        border-radius: 2px;
+      }
     }
 
     .fixed-icon {
@@ -961,7 +1028,8 @@ watch(
       top: 2px;
       right: 2px;
       font-size: 12px;
-      color: #409eff;
+      color: #ffd700;
+      filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.3));
     }
   }
 
@@ -1027,11 +1095,14 @@ watch(
     }
 
     .course-card {
+      padding: 4px 3px;
+      min-height: 42px;
+
       .course-subject {
         font-size: 12px;
       }
 
-      .course-teacher {
+      .course-info {
         font-size: 10px;
       }
     }
@@ -1072,13 +1143,14 @@ watch(
     }
 
     .course-card {
-      padding: 2px;
+      padding: 3px 2px;
+      min-height: 36px;
 
       .course-subject {
         font-size: 11px;
       }
 
-      .course-teacher {
+      .course-info {
         font-size: 9px;
       }
     }

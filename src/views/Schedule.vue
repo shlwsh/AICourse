@@ -198,6 +198,7 @@ import ConflictIndicator from '@/components/schedule/ConflictIndicator.vue';
 import SwapSuggestion from '@/components/schedule/SwapSuggestion.vue';
 import FixedCourseConfig from '@/components/schedule/FixedCourseConfig.vue';
 import { useScheduleStore } from '@/stores/scheduleStore';
+import { useDataStore } from '@/stores/dataStore';
 import type { ScheduleEntry, TimeSlot } from '@/stores/scheduleStore';
 import { logger } from '@/utils/logger';
 
@@ -206,6 +207,7 @@ const componentLogger = logger;
 
 // ========== Store ==========
 const scheduleStore = useScheduleStore();
+const dataStore = useDataStore();
 
 // ========== 状态 ==========
 
@@ -293,6 +295,9 @@ const handleGenerate = async (): Promise<void> => {
         type: 'warning',
       });
     }
+
+    // 先加载基础数据（确保数据是最新的）
+    await dataStore.loadAllData();
 
     // 生成课表
     await scheduleStore.generateSchedule();

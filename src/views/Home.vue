@@ -226,12 +226,14 @@ import {
   DataAnalysis,
 } from '@element-plus/icons-vue';
 import { useScheduleStore } from '@/stores/scheduleStore';
+import { useDataStore } from '@/stores/dataStore';
 import { useTeacherStore } from '@/stores/teacherStore';
 import { logger } from '@/utils/logger';
 
 // ========== 路由和状态管理 ==========
 const router = useRouter();
 const scheduleStore = useScheduleStore();
+const dataStore = useDataStore();
 const teacherStore = useTeacherStore();
 
 // ========== 响应式数据 ==========
@@ -350,6 +352,9 @@ const handleGenerateSchedule = async () => {
 
     logger.info('用户确认生成课表');
     addActivity('生成课表', '开始生成新课表', 'warning');
+
+    // 先加载基础数据（确保数据是最新的）
+    await dataStore.loadAllData();
 
     await scheduleStore.generateSchedule();
 
