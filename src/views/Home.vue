@@ -353,8 +353,10 @@ const handleGenerateSchedule = async () => {
     logger.info('用户确认生成课表');
     addActivity('生成课表', '开始生成新课表', 'warning');
 
-    // 先加载基础数据（确保数据是最新的）
-    await dataStore.loadAllData();
+    // 先加载基础数据（如果还没加载）
+    if (!dataStore.isLoaded) {
+      await dataStore.loadAllData();
+    }
 
     await scheduleStore.generateSchedule();
 

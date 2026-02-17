@@ -739,8 +739,10 @@ const loadScheduleData = async (): Promise<void> => {
   isLoading.value = true;
 
   try {
-    // 先加载基础数据
-    await dataStore.loadAllData();
+    // 先加载基础数据（如果还没加载）
+    if (!dataStore.isLoaded) {
+      await dataStore.loadAllData();
+    }
 
     // 再加载课表数据
     await scheduleStore.loadSchedule();

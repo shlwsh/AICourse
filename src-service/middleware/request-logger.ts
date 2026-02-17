@@ -121,24 +121,13 @@ export async function requestLogger(c: Context, next: Next) {
   const userAgent = c.req.header('user-agent') || 'unknown';
 
   // 记录请求开始
-  logger.info('📥 API 请求开始', {
+  logger.info('[BACKEND] 📥 收到请求', {
     requestId,
     method,
     path,
     query: Object.keys(query).length > 0 ? query : undefined,
     clientIp,
-    userAgent,
     timestamp: startDate.toISOString(),
-  });
-
-  // 记录请求头（排除敏感信息）
-  const safeHeaders = { ...headers };
-  delete safeHeaders['authorization'];
-  delete safeHeaders['cookie'];
-
-  logger.debug('📋 请求头', {
-    requestId,
-    headers: safeHeaders,
   });
 
   // 记录请求体（仅对 POST/PUT/PATCH 请求）
@@ -147,13 +136,13 @@ export async function requestLogger(c: Context, next: Next) {
       const body = await formatRequestBody(c);
 
       if (body) {
-        logger.debug('📦 请求体', {
+        logger.debug('[BACKEND] 📦 请求体详情', {
           requestId,
           body,
         });
       }
     } catch (error) {
-      logger.warn('⚠️ 无法读取请求体', {
+      logger.warn('[BACKEND] ⚠️ 无法读取请求体', {
         requestId,
         error: error instanceof Error ? error.message : String(error),
       });
@@ -173,24 +162,17 @@ export async function requestLogger(c: Context, next: Next) {
     const responseHeaders = Object.fromEntries(c.res.headers.entries());
 
     // 记录响应
-    logger.info('📤 API 请求完成', {
+    logger.info('[BACKEND] 📤 返回响应', {
       requestId,
       method,
       path,
       status,
       duration: `${duration}ms`,
-      timestamp: new Date().toISOString(),
-    });
-
-    // 记录响应头
-    logger.debug('📋 响应头', {
-      requestId,
-      headers: responseHeaders,
     });
 
     // 如果是错误响应，记录详细信息
     if (status >= 400) {
-      logger.warn('⚠️ 请求返回错误状态', {
+      logger.error('[BACKEND] ❌ 错误响应', {
         requestId,
         method,
         path,
@@ -200,8 +182,8 @@ export async function requestLogger(c: Context, next: Next) {
     }
 
     // 性能警告
-    if (duration > 3000) {
-      logger.warn('🐌 请求处理时间过长', {
+    if (duration > 1000) {
+      logger.warn('[BACKEND] 🐌 响应时间过长', {
         requestId,
         method,
         path,
@@ -215,7 +197,7 @@ export async function requestLogger(c: Context, next: Next) {
     const duration = Math.round(endTime - startTime);
 
     // 记录错误
-    logger.error('❌ API 请求异常', {
+    logger.error('[BACKEND] ❌ 请求异常', {
       requestId,
       method,
       path,
@@ -225,7 +207,6 @@ export async function requestLogger(c: Context, next: Next) {
         message: error.message,
         stack: error.stack,
       } : String(error),
-      timestamp: new Date().toISOString(),
     });
 
     // 重新抛出错误，让错误处理中间件处理

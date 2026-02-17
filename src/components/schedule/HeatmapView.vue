@@ -714,7 +714,8 @@ watch(
   () => {
     if (isEnabled.value) {
       componentLogger.debug('课表数据变化，重新计算热力图');
-      calculateHeatmapData();
+      // 使用防抖，避免频繁计算
+      debounceCalculate();
     }
   }
 );
@@ -727,10 +728,26 @@ watch(
   () => {
     if (isEnabled.value) {
       componentLogger.debug('视图模式变化，重新计算热力图');
-      calculateHeatmapData();
+      // 使用防抖，避免频繁计算
+      debounceCalculate();
     }
   }
 );
+
+/**
+ * 防抖计算热力图
+ */
+const debounceCalculate = (() => {
+  let timer: ReturnType<typeof setTimeout> | null = null;
+  return () => {
+    if (timer) {
+      clearTimeout(timer);
+    }
+    timer = setTimeout(() => {
+      calculateHeatmapData();
+    }, 500); // 500ms 防抖
+  };
+})();
 
 /**
  * 监听热力图启用状态

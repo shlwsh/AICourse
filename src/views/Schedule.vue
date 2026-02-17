@@ -268,16 +268,14 @@ const showSwapSuggestion = computed(() => swapSuggestions.value.length > 0);
  * 获取班级名称
  */
 const getClassName = (classId: number): string => {
-  // TODO: 从 classStore 获取班级名称
-  return `班级${classId}`;
+  return dataStore.getClassName(classId);
 };
 
 /**
  * 获取教师姓名
  */
 const getTeacherName = (teacherId: number): string => {
-  // TODO: 从 teacherStore 获取教师姓名
-  return `教师${teacherId}`;
+  return dataStore.getTeacherName(teacherId);
 };
 
 /**
@@ -296,8 +294,10 @@ const handleGenerate = async (): Promise<void> => {
       });
     }
 
-    // 先加载基础数据（确保数据是最新的）
-    await dataStore.loadAllData();
+    // 先加载基础数据（如果还没加载）
+    if (!dataStore.isLoaded) {
+      await dataStore.loadAllData();
+    }
 
     // 生成课表
     await scheduleStore.generateSchedule();
@@ -564,12 +564,25 @@ const handleBatchRemoveFixedCourse = async (entries: ScheduleEntry[]): Promise<v
 };
 
 // ========== 生命周期 ==========
-onMounted(() => {
+onMounted(async () => {
   componentLogger.info('课表页面挂载');
 
-  // 加载课表数据
+  // 先加载基础数据（如果还没加载）
+  if (!dataStore.isLoaded) {
+    try {
+      await dataStore.loadAllData();
+    } catch (error) {
+      componentLogger.error('加载基础数据失败', { error });
+    }
+  }
+
+  // 加载课表数据（如果有课表）
   if (hasSchedule.value) {
-    scheduleStore.loadSchedule();
+    try {
+      await scheduleStore.loadSchedule();
+    } catch (error) {
+      componentLogger.error('加载课表失败', { error });
+    }
   }
 });
 </script>

@@ -78,7 +78,7 @@ export class DatabaseLogger {
       all: (params?: any[]) => {
         const startTime = performance.now();
 
-        logger.debug('🔍 执行查询 (all)', {
+        logger.info('[DATABASE] 🔍 执行查询', {
           requestId: this.requestId,
           sql: formattedSql,
           params: formatParams(params || []),
@@ -90,16 +90,25 @@ export class DatabaseLogger {
 
           const duration = Math.round(performance.now() - startTime);
 
-          logger.debug('✅ 查询完成', {
+          logger.info('[DATABASE] ✅ 查询成功', {
             requestId: this.requestId,
             sql: formattedSql,
             rowCount: Array.isArray(results) ? results.length : 0,
             duration: `${duration}ms`,
           });
 
+          // 记录查询结果详情（DEBUG 级别）
+          if (Array.isArray(results) && results.length > 0) {
+            logger.debug('[DATABASE] 查询结果详情', {
+              requestId: this.requestId,
+              firstRow: results[0],
+              totalRows: results.length,
+            });
+          }
+
           // 慢查询警告
           if (duration > SLOW_QUERY_THRESHOLD) {
-            logger.warn('🐌 慢查询检测', {
+            logger.warn('[DATABASE] 🐌 慢查询', {
               requestId: this.requestId,
               sql: formattedSql,
               duration: `${duration}ms`,
@@ -111,7 +120,7 @@ export class DatabaseLogger {
         } catch (error) {
           const duration = Math.round(performance.now() - startTime);
 
-          logger.error('❌ 查询失败', {
+          logger.error('[DATABASE] ❌ 查询失败', {
             requestId: this.requestId,
             sql: formattedSql,
             params: formatParams(params || []),
@@ -126,7 +135,7 @@ export class DatabaseLogger {
       get: (params?: any[]) => {
         const startTime = performance.now();
 
-        logger.debug('🔍 执行查询 (get)', {
+        logger.info('[DATABASE] 🔍 执行查询 (单条)', {
           requestId: this.requestId,
           sql: formattedSql,
           params: formatParams(params || []),
@@ -138,16 +147,24 @@ export class DatabaseLogger {
 
           const duration = Math.round(performance.now() - startTime);
 
-          logger.debug('✅ 查询完成', {
+          logger.info('[DATABASE] ✅ 查询成功', {
             requestId: this.requestId,
             sql: formattedSql,
             hasResult: result !== null,
             duration: `${duration}ms`,
           });
 
+          // 记录查询结果详情（DEBUG 级别）
+          if (result) {
+            logger.debug('[DATABASE] 查询结果详情', {
+              requestId: this.requestId,
+              result,
+            });
+          }
+
           // 慢查询警告
           if (duration > SLOW_QUERY_THRESHOLD) {
-            logger.warn('🐌 慢查询检测', {
+            logger.warn('[DATABASE] 🐌 慢查询', {
               requestId: this.requestId,
               sql: formattedSql,
               duration: `${duration}ms`,
@@ -159,7 +176,7 @@ export class DatabaseLogger {
         } catch (error) {
           const duration = Math.round(performance.now() - startTime);
 
-          logger.error('❌ 查询失败', {
+          logger.error('[DATABASE] ❌ 查询失败', {
             requestId: this.requestId,
             sql: formattedSql,
             params: formatParams(params || []),
@@ -180,7 +197,7 @@ export class DatabaseLogger {
     const startTime = performance.now();
     const formattedSql = formatSql(sql);
 
-    logger.debug('⚡ 执行 SQL', {
+    logger.info('[DATABASE] ⚡ 执行 SQL', {
       requestId: this.requestId,
       sql: formattedSql,
       params: formatParams(params),
@@ -192,7 +209,7 @@ export class DatabaseLogger {
 
       const duration = Math.round(performance.now() - startTime);
 
-      logger.debug('✅ SQL 执行完成', {
+      logger.info('[DATABASE] ✅ SQL 执行成功', {
         requestId: this.requestId,
         sql: formattedSql,
         changes: result.changes,

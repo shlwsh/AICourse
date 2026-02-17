@@ -464,11 +464,27 @@ watch(
   () => [props.targetClass, props.targetTeacher, props.desiredSlot],
   () => {
     if (props.autoLoad) {
-      loadSuggestions();
+      // 使用防抖，避免频繁请求
+      debounceLoadSuggestions();
     }
   },
   { deep: true }
 );
+
+/**
+ * 防抖加载建议
+ */
+const debounceLoadSuggestions = (() => {
+  let timer: ReturnType<typeof setTimeout> | null = null;
+  return () => {
+    if (timer) {
+      clearTimeout(timer);
+    }
+    timer = setTimeout(() => {
+      loadSuggestions();
+    }, 300); // 300ms 防抖
+  };
+})();
 </script>
 
 <style scoped lang="scss">

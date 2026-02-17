@@ -33,7 +33,11 @@ dataRoutes.get('/teachers', async (c) => {
   try {
     const dbLogger = createDatabaseLogger(getDatabase(), requestId);
     const teachers = TeacherRepository.findAll(dbLogger);
-    log.success({ count: teachers.length });
+    
+    log.success({ 
+      count: teachers.length,
+      data: teachers,
+    });
 
     return c.json({
       success: true,
@@ -67,7 +71,11 @@ dataRoutes.get('/classes', async (c) => {
   try {
     const dbLogger = createDatabaseLogger(getDatabase(), requestId);
     const classes = ClassRepository.findAll(dbLogger);
-    log.success({ count: classes.length });
+    
+    log.success({ 
+      count: classes.length,
+      data: classes,
+    });
 
     return c.json({
       success: true,
@@ -101,7 +109,11 @@ dataRoutes.get('/subjects', async (c) => {
   try {
     const dbLogger = createDatabaseLogger(getDatabase(), requestId);
     const subjects = SubjectRepository.findAll(dbLogger);
-    log.success({ count: subjects.length });
+    
+    log.success({ 
+      count: subjects.length,
+      data: subjects,
+    });
 
     return c.json({
       success: true,
@@ -135,7 +147,11 @@ dataRoutes.get('/curriculums', async (c) => {
   try {
     const dbLogger = createDatabaseLogger(getDatabase(), requestId);
     const curriculums = CurriculumRepository.findAll(dbLogger);
-    log.success({ count: curriculums.length });
+    
+    log.success({ 
+      count: curriculums.length,
+      data: curriculums,
+    });
 
     return c.json({
       success: true,
@@ -169,7 +185,11 @@ dataRoutes.get('/venues', async (c) => {
   try {
     const dbLogger = createDatabaseLogger(getDatabase(), requestId);
     const venues = VenueRepository.findAll(dbLogger);
-    log.success({ count: venues.length });
+    
+    log.success({ 
+      count: venues.length,
+      data: venues,
+    });
 
     return c.json({
       success: true,
@@ -203,7 +223,11 @@ dataRoutes.get('/teaching-groups', async (c) => {
   try {
     const dbLogger = createDatabaseLogger(getDatabase(), requestId);
     const groups = TeachingGroupRepository.findAll(dbLogger);
-    log.success({ count: groups.length });
+    
+    log.success({ 
+      count: groups.length,
+      data: groups,
+    });
 
     return c.json({
       success: true,

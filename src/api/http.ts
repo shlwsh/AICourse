@@ -62,23 +62,17 @@ class HttpClient {
     // 拦截器 1：添加请求日志记录
     this.addRequestInterceptor((config) => {
       try {
-        logger.info('请求拦截器 - 记录请求信息', {
-          url: config.url,
+        logger.info('[FRONTEND] 发送请求', {
           method: config.method,
+          url: config.url,
+          params: config.params,
           hasBody: !!config.body,
-          hasParams: !!config.params,
-          headers: config.headers,
         });
 
-        // 记录请求参数详情（DEBUG 级别）
-        if (config.params) {
-          logger.debug('请求拦截器 - 查询参数', {
-            params: config.params,
-          });
-        }
-
+        // 记录请求体详情（DEBUG 级别）
         if (config.body) {
-          logger.debug('请求拦截器 - 请求体', {
+          logger.debug('[FRONTEND] 请求体详情', {
+            url: config.url,
             body: config.body,
           });
         }
@@ -160,35 +154,24 @@ class HttpClient {
     // 拦截器 1：响应日志记录和响应时间统计
     this.addResponseInterceptor((response) => {
       try {
-        // 记录响应基本信息（INFO 级别）
-        logger.info('响应拦截器 - 记录响应信息', {
+        // 记录响应信息
+        logger.info('[FRONTEND] 收到响应', {
           success: response.success,
-          hasData: !!response.data,
-          hasMessage: !!response.message,
-          hasError: !!response.error,
+          dataCount: Array.isArray(response.data) ? response.data.length : (response.data ? 1 : 0),
+          message: response.message,
         });
 
         // 记录响应数据详情（DEBUG 级别）
         if (response.data) {
-          logger.debug('响应拦截器 - 响应数据', {
-            dataType: typeof response.data,
-            dataKeys: typeof response.data === 'object' && response.data !== null
-              ? Object.keys(response.data)
-              : undefined,
+          logger.debug('[FRONTEND] 响应数据详情', {
+            data: response.data,
           });
         }
 
-        // 记录错误信息（如果存在）
+        // 记录错误信息
         if (response.error) {
-          logger.warn('响应拦截器 - 响应包含错误信息', {
+          logger.error('[FRONTEND] 响应错误', {
             error: response.error,
-            message: response.message,
-          });
-        }
-
-        // 记录消息信息（如果存在）
-        if (response.message) {
-          logger.debug('响应拦截器 - 响应消息', {
             message: response.message,
           });
         }
