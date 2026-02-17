@@ -49,14 +49,19 @@ const configStore = useConfigStore();
 // 当前激活的标签页
 const activeTab = ref('system');
 
-// 组件挂载时加载配置
+// 组件挂载时检查配置是否已加载
 onMounted(async () => {
-  logger.info('加载系统配置');
-  try {
-    await configStore.loadConfig();
-    logger.info('系统配置加载成功');
-  } catch (error) {
-    logger.error('系统配置加载失败', { error });
+  // 如果配置尚未加载，则加载配置
+  if (!configStore.isConfigLoaded) {
+    logger.info('配置未加载，开始加载系统配置');
+    try {
+      await configStore.loadConfig();
+      logger.info('系统配置加载成功');
+    } catch (error) {
+      logger.error('系统配置加载失败', { error });
+    }
+  } else {
+    logger.info('配置已加载，跳过重复加载');
   }
 });
 </script>

@@ -34,8 +34,7 @@
         "alwaysOnTop": false,
         "skipTaskbar": false,
         "visible": true,
-        "transparent": false,
-        "fileDropEnabled": true
+        "transparent": false
       }
     ],
     "security": {
@@ -50,19 +49,6 @@
   "plugins": {
     "shell": {
       "open": true
-    },
-    "dialog": {
-      "open": true,
-      "save": true,
-      "message": true,
-      "ask": true,
-      "confirm": true
-    },
-    "fs": {
-      "scope": ["$APPDATA/*", "$APPDATA/**", "$RESOURCE/*", "$RESOURCE/**"]
-    },
-    "notification": {
-      "all": true
     }
   }
 }

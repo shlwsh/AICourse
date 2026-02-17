@@ -94,59 +94,71 @@ npx playwright test
 - 修正后必须从失败的用例重新开始执行
 - 不允许跳过失败的用例继续执行后续测试
 
-## 运行环境规范
+## 架构规范
 
-### 规则 6：双模式兼容
+### 规则 6：前后端分离架构
 
-本项目必须同时支持 Tauri 桌面应用和浏览器 Web 应用两种运行模式：
+本项目采用前后端分离架构，所有业务逻辑通过 Hono 后端服务实现：
 
-- **Tauri 模式**：通过 `bun run dev` 或 `tauri dev` 启动的桌面应用
-- **浏览器模式**：直接在浏览器中访问 `http://localhost:5173` 的 Web 应用
+**架构原则**：
+- **前端**：Vue 3 + TypeScript，负责 UI 展示和用户交互
+- **后端**：Bun + Hono，负责所有业务逻辑、数据处理、算法实现
+- **数据库**：SQLite，统一的数据持久化层
+- **Tauri**：仅作为桌面应用打包工具，不实现业务逻辑
 
 **实施要求**：
-- 所有功能必须在两种模式下都能正常使用
-- 需要根据运行环境自动适配不同的实现方式
-- 文件操作功能：
-  - Tauri 模式：**避免使用 Tauri 对话框 API（存在阻塞问题）**，使用浏览器标准机制
-  - 浏览器模式：使用浏览器的下载机制和 File API
-- 环境检测：使用 `window.__TAURI__` 判断是否在 Tauri 环境中
-- 日志记录：在环境检测和模式切换时记录详细日志
+- 所有业务逻辑必须在 Hono 后端服务中实现（`src-service/` 目录）
+- 前端通过 HTTP API 调用后端服务（`src/api/` 目录）
+- Tauri 仅用于桌面应用发布，不包含业务代码
+- `src-tauri/` 目录只保留最小化的 Tauri 配置和启动代码
 
-**重要提示 - Tauri 对话框 API 问题**：
-- Tauri 1.5 的 `dialog.save()` 和 `dialog.open()` API 存在严重的阻塞问题
-- 调用这些 API 会导致应用卡死，对话框无法显示
-- **解决方案**：在 Tauri 环境下也使用浏览器的标准下载机制
-- 文件下载：使用 `<a>` 标签触发下载，文件保存到默认下载目录
-- 文件上传：使用标准 HTML `<input type="file">` 元素
+**禁止的做法**：
+- ❌ 在 Tauri 命令中实现业务逻辑
+- ❌ 在前端直接操作数据库
+- ❌ 在 Tauri 中实现算法或数据处理
+- ❌ 混合使用 Tauri API 和 HTTP API 实现同一功能
 
-**示例**：
-```typescript
-// 环境检测
-const isTauri = typeof window !== 'undefined' && (window as any).__TAURI__;
+**正确的做法**：
+- ✅ 业务逻辑在 `src-service/` 中实现
+- ✅ 前端通过 `src/api/` 调用后端 API
+- ✅ Tauri 仅作为应用容器，加载前端页面
+- ✅ 所有数据操作通过后端 API 完成
 
-if (isTauri) {
-  // Tauri 模式：使用浏览器标准下载（避免对话框 API）
-  const link = document.createElement('a');
-  link.href = url;
-  link.download = 'file.xlsx';
-  link.click();
-} else {
-  // 浏览器模式：使用传统下载
-  const link = document.createElement('a');
-  link.href = url;
-  link.download = 'file.xlsx';
-  link.click();
+## 运行环境规范
+
+### 规则 7：开发与生产环境
+
+**开发环境**：
+- **默认启动命令**：`bun run dev`
+- **启动内容**：前端开发服务器 + 后端 Hono 服务
+- **前端地址**：http://localhost:5173
+- **后端地址**：http://localhost:3000
+- **Tauri**：开发阶段默认不启动，需要时使用 `bun run tauri dev`
+
+**生产环境**：
+- **浏览器模式**：直接访问部署的 Web 应用
+- **桌面应用模式**：通过 Tauri 打包的桌面应用
+- **数据流**：前端 → Hono 后端 → SQLite 数据库
+
+**实施要求**：
+- 开发时优先使用浏览器模式（更快、更方便调试）
+- Tauri 仅在需要测试桌面应用特性时启动
+- 所有功能必须在浏览器模式下完全可用
+- 桌面应用仅是 Web 应用的打包形式，不增加额外功能
+
+**package.json 脚本规范**：
+```json
+{
+  "dev": "并发启动前端和后端服务",
+  "dev:frontend": "启动前端开发服务器",
+  "dev:service": "启动后端 Hono 服务",
+  "tauri:dev": "启动 Tauri 桌面应用（可选）"
 }
 ```
 
-**测试要求**：
-- 每个功能都需要在两种模式下分别测试
-- 确保用户体验在两种模式下保持一致
-- 特别关注文件上传、下载、本地存储等涉及文件系统的功能
-
 ## 文档规范
 
-### 规则 7：专注代码开发，避免过度文档化
+### 规则 8：专注代码开发，避免过度文档化
 
 - **非必要不生成文档**：除非用户明确要求，否则不要自动生成 Markdown 文档
 - **禁止生成的文档类型**：

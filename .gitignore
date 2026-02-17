@@ -36,8 +36,8 @@ tests/reports/
 src-tauri/target/
 
 # 数据
-data/*.db
-data/*.db-*
+# data/*.db
+# data/*.db-*
 
 # 备份
 backups/*

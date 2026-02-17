@@ -8,9 +8,9 @@
     <div class="utilization-toolbar">
       <div class="toolbar-left">
         <el-radio-group v-model="viewMode" size="default">
-          <el-radio-button label="table">表格视图</el-radio-button>
-          <el-radio-button label="heatmap">热力图</el-radio-button>
-          <el-radio-button label="chart">图表</el-radio-button>
+          <el-radio-button value="table">表格视图</el-radio-button>
+          <el-radio-button value="heatmap">热力图</el-radio-button>
+          <el-radio-button value="chart">图表</el-radio-button>
         </el-radio-group>
       </div>
 
@@ -184,9 +184,9 @@
             <div class="card-header">
               <span>时段利用率分析</span>
               <el-radio-group v-model="chartType" size="small">
-                <el-radio-button label="line">折线图</el-radio-button>
-                <el-radio-button label="bar">柱状图</el-radio-button>
-                <el-radio-button label="scatter">散点图</el-radio-button>
+                <el-radio-button value="line">折线图</el-radio-button>
+                <el-radio-button value="bar">柱状图</el-radio-button>
+                <el-radio-button value="scatter">散点图</el-radio-button>
               </el-radio-group>
             </div>
           </template>

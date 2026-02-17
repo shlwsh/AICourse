@@ -1,247 +1,231 @@
 /**
- * 请求日志中间件
+ * API 请求日志中间件
  *
- * 功能：
- * - 记录所有 HTTP 请求的详细信息
- * - 记录请求参数、响应结果、执行时间
- * - 记录关键业务逻辑的执行过程
- * - 记录错误和异常信息
- * - 支持性能监控和分析
- *
- * 使用示例：
- * ```typescript
- * import { Hono } from 'hono';
- * import { requestLogger } from './middleware/request-logger';
- *
- * const app = new Hono();
- * app.use('*', requestLogger);
- * ```
+ * 功能特性：
+ * - 记录每个 API 请求的完整调用链路
+ * - 记录请求和响应的详细信息（方法、路径、参数、响应状态等）
+ * - 自动生成请求 ID 用于追踪
+ * - 计算请求处理时间
+ * - 过滤敏感信息
+ * - 支持代理服务器时间校正
  */
 
 import type { Context, Next } from 'hono';
-import { logger } from '../utils/logger';
+import { createLogger } from '../utils/logger';
+import { nanoid } from 'nanoid';
+
+const logger = createLogger('RequestLogger');
 
 /**
- * 请求信息接口
+ * 生成唯一的请求 ID
  */
-interface RequestInfo {
-  /** 请求方法 */
-  method: string;
-  /** 请求路径 */
-  path: string;
-  /** 查询参数 */
-  query?: Record<string, string>;
-  /** 请求头 */
-  headers?: Record<string, string>;
-  /** 请求体 */
-  body?: any;
-  /** 客户端 IP */
-  ip?: string;
-  /** User-Agent */
-  userAgent?: string;
+function generateRequestId(): string {
+  return nanoid(10);
 }
 
 /**
- * 响应信息接口
+ * 获取客户端 IP 地址（考虑代理）
  */
-interface ResponseInfo {
-  /** HTTP 状态码 */
-  status: number;
-  /** 响应时间（毫秒） */
-  duration: number;
-  /** 响应体大小（字节） */
-  size?: number;
+function getClientIp(c: Context): string {
+  // 优先从代理头获取真实 IP
+  const forwardedFor = c.req.header('x-forwarded-for');
+  if (forwardedFor) {
+    return forwardedFor.split(',')[0].trim();
+  }
+
+  const realIp = c.req.header('x-real-ip');
+  if (realIp) {
+    return realIp;
+  }
+
+  // 从连接信息获取（Bun 特定）
+  return 'unknown';
 }
 
 /**
- * 获取请求体
- *
- * @param context - Hono 上下文
- * @returns 请求体数据
+ * 获取服务器时间（考虑代理延迟）
  */
-async function getRequestBody(context: Context): Promise<any> {
+function getServerTime(): number {
+  // 使用高精度时间戳
+  return performance.now();
+}
+
+/**
+ * 格式化请求体（限制大小）
+ */
+async function formatRequestBody(c: Context): Promise<any> {
   try {
-    // 只记录 JSON 请求体
-    const contentType = context.req.header('content-type');
-    if (contentType && contentType.includes('application/json')) {
-      // 克隆请求以避免消耗原始请求体
-      const clonedReq = context.req.raw.clone();
-      return await clonedReq.json();
+    const contentType = c.req.header('content-type') || '';
+
+    if (contentType.includes('application/json')) {
+      const body = await c.req.json();
+      return body;
     }
+
+    if (contentType.includes('application/x-www-form-urlencoded')) {
+      const formData = await c.req.parseBody();
+      return formData;
+    }
+
+    if (contentType.includes('multipart/form-data')) {
+      return '[FormData]';
+    }
+
+    return null;
   } catch (error) {
-    // 忽略解析错误
+    return '[解析失败]';
   }
-  return undefined;
 }
 
 /**
- * 获取客户端 IP 地址
- *
- * @param context - Hono 上下文
- * @returns IP 地址
+ * 格式化响应体（限制大小）
  */
-function getClientIP(context: Context): string | undefined {
-  // 尝试从各种头部获取真实 IP
-  const headers = [
-    'x-forwarded-for',
-    'x-real-ip',
-    'cf-connecting-ip',
-    'fastly-client-ip',
-    'x-cluster-client-ip',
-    'x-forwarded',
-    'forwarded-for',
-    'forwarded',
-  ];
+function formatResponseBody(body: any): any {
+  if (!body) return null;
 
-  for (const header of headers) {
-    const value = context.req.header(header);
-    if (value) {
-      // x-forwarded-for 可能包含多个 IP，取第一个
-      return value.split(',')[0].trim();
-    }
-  }
-
-  return undefined;
-}
-
-/**
- * 构建请求信息对象
- *
- * @param context - Hono 上下文
- * @param body - 请求体
- * @returns 请求信息对象
- */
-function buildRequestInfo(context: Context, body?: any): RequestInfo {
-  const info: RequestInfo = {
-    method: context.req.method,
-    path: context.req.path,
-  };
-
-  // 添加查询参数
   try {
-    const query = context.req.query();
-    if (Object.keys(query).length > 0) {
-      info.query = query;
+    const bodyStr = JSON.stringify(body);
+
+    // 如果响应体太大，只记录摘要
+    if (bodyStr.length > 10000) {
+      return {
+        _summary: `[响应体过大: ${bodyStr.length} 字符]`,
+        _preview: bodyStr.substring(0, 200) + '...',
+      };
     }
+
+    return body;
   } catch (error) {
-    // 忽略查询参数解析错误
+    return '[无法序列化]';
   }
-
-  // 添加请求体
-  if (body) {
-    info.body = body;
-  }
-
-  // 添加客户端信息
-  info.ip = getClientIP(context);
-  info.userAgent = context.req.header('user-agent');
-
-  return info;
-}
-
-/**
- * 构建响应信息对象
- *
- * @param context - Hono 上下文
- * @param startTime - 请求开始时间
- * @returns 响应信息对象
- */
-function buildResponseInfo(context: Context, startTime: number): ResponseInfo {
-  const duration = Date.now() - startTime;
-  const status = context.res.status;
-
-  const info: ResponseInfo = {
-    status,
-    duration,
-  };
-
-  // 尝试获取响应体大小
-  try {
-    const contentLength = context.res.headers.get('content-length');
-    if (contentLength) {
-      info.size = parseInt(contentLength, 10);
-    }
-  } catch (error) {
-    // 忽略错误
-  }
-
-  return info;
-}
-
-/**
- * 判断是否应该记录请求体
- *
- * @param context - Hono 上下文
- * @returns 是否应该记录
- */
-function shouldLogRequestBody(context: Context): boolean {
-  const method = context.req.method;
-  // 只记录 POST、PUT、PATCH 请求的请求体
-  return ['POST', 'PUT', 'PATCH'].includes(method);
 }
 
 /**
  * 请求日志中间件
- *
- * 记录所有 HTTP 请求的详细信息，包括：
- * - 请求开始时的基本信息
- * - 请求完成时的响应信息和执行时间
- * - 错误情况下的异常信息
- *
- * @param context - Hono 上下文
- * @param next - 下一个中间件
  */
-export async function requestLogger(context: Context, next: Next): Promise<void> {
-  const startTime = Date.now();
-  const method = context.req.method;
-  const path = context.req.path;
+export async function requestLogger(c: Context, next: Next) {
+  const requestId = generateRequestId();
+  const startTime = getServerTime();
+  const startDate = new Date();
 
-  // 获取请求体（如果需要）
-  let requestBody: any;
-  if (shouldLogRequestBody(context)) {
-    requestBody = await getRequestBody(context);
-  }
+  // 将请求 ID 存储到上下文中，供后续使用
+  c.set('requestId', requestId);
+  c.set('startTime', startTime);
 
-  // 构建请求信息
-  const requestInfo = buildRequestInfo(context, requestBody);
+  // 获取请求信息
+  const method = c.req.method;
+  const path = c.req.path;
+  const query = c.req.query();
+  const headers = Object.fromEntries(c.req.raw.headers.entries());
+  const clientIp = getClientIp(c);
+  const userAgent = c.req.header('user-agent') || 'unknown';
 
   // 记录请求开始
-  logger.info('HTTP 请求开始', requestInfo);
+  logger.info('📥 API 请求开始', {
+    requestId,
+    method,
+    path,
+    query: Object.keys(query).length > 0 ? query : undefined,
+    clientIp,
+    userAgent,
+    timestamp: startDate.toISOString(),
+  });
 
-  try {
-    // 执行下一个中间件/路由处理器
-    await next();
+  // 记录请求头（排除敏感信息）
+  const safeHeaders = { ...headers };
+  delete safeHeaders['authorization'];
+  delete safeHeaders['cookie'];
 
-    // 构建响应信息
-    const responseInfo = buildResponseInfo(context, startTime);
+  logger.debug('📋 请求头', {
+    requestId,
+    headers: safeHeaders,
+  });
 
-    // 根据状态码选择日志级别
-    if (responseInfo.status >= 500) {
-      // 服务器错误
-      logger.error('HTTP 请求完成（服务器错误）', {
-        request: requestInfo,
-        response: responseInfo,
-      });
-    } else if (responseInfo.status >= 400) {
-      // 客户端错误
-      logger.warn('HTTP 请求完成（客户端错误）', {
-        request: requestInfo,
-        response: responseInfo,
-      });
-    } else {
-      // 成功响应
-      logger.info('HTTP 请求完成', {
-        request: requestInfo,
-        response: responseInfo,
+  // 记录请求体（仅对 POST/PUT/PATCH 请求）
+  if (['POST', 'PUT', 'PATCH'].includes(method)) {
+    try {
+      const body = await formatRequestBody(c);
+
+      if (body) {
+        logger.debug('📦 请求体', {
+          requestId,
+          body,
+        });
+      }
+    } catch (error) {
+      logger.warn('⚠️ 无法读取请求体', {
+        requestId,
+        error: error instanceof Error ? error.message : String(error),
       });
     }
+  }
+
+  try {
+    // 执行后续中间件和路由处理
+    await next();
+
+    // 计算处理时间
+    const endTime = getServerTime();
+    const duration = Math.round(endTime - startTime);
+
+    // 获取响应信息
+    const status = c.res.status;
+    const responseHeaders = Object.fromEntries(c.res.headers.entries());
+
+    // 记录响应
+    logger.info('📤 API 请求完成', {
+      requestId,
+      method,
+      path,
+      status,
+      duration: `${duration}ms`,
+      timestamp: new Date().toISOString(),
+    });
+
+    // 记录响应头
+    logger.debug('📋 响应头', {
+      requestId,
+      headers: responseHeaders,
+    });
+
+    // 如果是错误响应，记录详细信息
+    if (status >= 400) {
+      logger.warn('⚠️ 请求返回错误状态', {
+        requestId,
+        method,
+        path,
+        status,
+        duration: `${duration}ms`,
+      });
+    }
+
+    // 性能警告
+    if (duration > 3000) {
+      logger.warn('🐌 请求处理时间过长', {
+        requestId,
+        method,
+        path,
+        duration: `${duration}ms`,
+      });
+    }
+
   } catch (error) {
-    // 记录异常
-    const duration = Date.now() - startTime;
-    logger.error('HTTP 请求处理异常', {
-      request: requestInfo,
-      error: error instanceof Error ? error.message : String(error),
-      duration,
+    // 计算处理时间
+    const endTime = getServerTime();
+    const duration = Math.round(endTime - startTime);
+
+    // 记录错误
+    logger.error('❌ API 请求异常', {
+      requestId,
+      method,
+      path,
+      duration: `${duration}ms`,
+      error: error instanceof Error ? {
+        name: error.name,
+        message: error.message,
+        stack: error.stack,
+      } : String(error),
+      timestamp: new Date().toISOString(),
     });
 
     // 重新抛出错误，让错误处理中间件处理
@@ -250,57 +234,77 @@ export async function requestLogger(context: Context, next: Next): Promise<void>
 }
 
 /**
+ * 响应日志中间件（记录响应体）
+ */
+export async function responseLogger(c: Context, next: Next) {
+  await next();
+
+  const requestId = c.get('requestId');
+  const startTime = c.get('startTime');
+
+  if (!requestId || !startTime) {
+    return;
+  }
+
+  try {
+    // 获取响应体
+    const responseBody = await c.res.clone().json().catch(() => null);
+
+    if (responseBody) {
+      const formattedBody = formatResponseBody(responseBody);
+
+      logger.debug('📦 响应体', {
+        requestId,
+        body: formattedBody,
+      });
+    }
+  } catch (error) {
+    // 忽略响应体读取错误
+  }
+}
+
+/**
  * 创建路由级别的日志记录器
  *
- * 用于在路由处理器中记录详细的业务逻辑执行过程
- *
- * @param routeName - 路由名称
- * @returns 日志记录函数
- *
- * @example
- * ```typescript
- * const log = createRouteLogger('生成课表');
- *
- * log.start({ params: data });
- * // ... 业务逻辑
- * log.success({ result: schedule });
- * ```
+ * 用于在路由处理函数中记录业务逻辑的执行步骤
  */
 export function createRouteLogger(routeName: string) {
+  const routeLogger = createLogger(routeName);
+
   return {
     /**
      * 记录路由处理开始
      */
-    start(data?: any): void {
-      logger.info(`[${routeName}] 开始处理`, data);
+    start(params?: any) {
+      routeLogger.info(`开始处理: ${routeName}`, params);
     },
 
     /**
      * 记录业务逻辑步骤
      */
-    step(stepName: string, data?: any): void {
-      logger.debug(`[${routeName}] ${stepName}`, data);
+    step(stepName: string, data?: any) {
+      routeLogger.debug(`步骤: ${stepName}`, data);
     },
 
     /**
      * 记录成功结果
      */
-    success(data?: any): void {
-      logger.info(`[${routeName}] 处理成功`, data);
+    success(data?: any) {
+      routeLogger.info(`处理成功: ${routeName}`, data);
     },
 
     /**
      * 记录警告信息
      */
-    warn(message: string, data?: any): void {
-      logger.warn(`[${routeName}] ${message}`, data);
+    warn(message: string, data?: any) {
+      routeLogger.warn(`${routeName} - ${message}`, data);
     },
 
     /**
      * 记录错误信息
      */
-    error(message: string, data?: any): void {
-      logger.error(`[${routeName}] ${message}`, data);
+    error(message: string, data?: any) {
+      routeLogger.error(`${routeName} - ${message}`, data);
     },
   };
 }

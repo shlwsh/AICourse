@@ -61,6 +61,19 @@
               >
                 选择文件导入
               </el-button>
+
+              <el-dropdown @command="handleClearData" :disabled="importing">
+                <el-button type="danger" :disabled="importing">
+                  清除数据<el-icon class="el-icon--right"><arrow-down /></el-icon>
+                </el-button>
+                <template #dropdown>
+                  <el-dropdown-menu>
+                    <el-dropdown-item command="dictionaries">清除字典数据</el-dropdown-item>
+                    <el-dropdown-item command="business">清除业务数据</el-dropdown-item>
+                    <el-dropdown-item command="all" divided>清除所有数据</el-dropdown-item>
+                  </el-dropdown-menu>
+                </template>
+              </el-dropdown>
             </div>
 
             <!-- 文件上传区域（支持拖拽） -->
@@ -140,8 +153,8 @@
             <!-- 导入结果 -->
             <div v-if="importResult" class="import-result">
               <el-result
-                :icon="importResult.success ? 'success' : 'warning'"
-                :title="importResult.success ? '导入成功' : '导入完成（部分失败）'"
+                :icon="importResult.failureCount === 0 ? 'success' : 'warning'"
+                :title="importResult.failureCount === 0 ? '导入成功' : '导入完成（部分失败）'"
               >
                 <template #sub-title>
                   <div class="result-summary">
@@ -322,9 +335,16 @@ import {
   Document,
   Delete,
   UploadFilled,
+  ArrowDown,
 } from '@element-plus/icons-vue';
 import { ImportExportApi, type ImportResult, type ExportResult, type ImportError } from '@/api/importExport';
+import { fetchDataStats, clearDictionaries, clearBusinessData, clearAllData, type DataStats } from '@/api/data';
 import { logger } from '@/utils/logger';
+import { useDictionaryStore } from '@/stores/dictionaryStore';
+import { useConfigStore } from '@/stores/configStore';
+import { useTeacherStore } from '@/stores/teacherStore';
+import { useClassStore } from '@/stores/classStore';
+import { useCurriculumStore } from '@/stores/curriculumStore';
 
 /**
  * 组件属性
@@ -338,6 +358,14 @@ const props = withDefaults(defineProps<Props>(), {
   classList: () => [],
   teacherList: () => [],
 });
+
+// ==================== Store ====================
+
+const dictionaryStore = useDictionaryStore();
+const configStore = useConfigStore();
+const teacherStore = useTeacherStore();
+const classStore = useClassStore();
+const curriculumStore = useCurriculumStore();
 
 // ==================== 状态管理 ====================
 
@@ -551,6 +579,17 @@ const handleImport = async () => {
       importResult.value = response.data;
       importErrors.value = response.data.errors || [];
 
+      // 保存导入的数据到 store
+      if (response.data.importedData) {
+        await dictionaryStore.setImportedData(response.data.importedData);
+        logger.info('导入数据已保存到 store', {
+          teachers: response.data.importedData.teachers?.length || 0,
+          classes: response.data.importedData.classes?.length || 0,
+          subjects: response.data.importedData.subjects?.length || 0,
+          curriculums: response.data.importedData.curriculums?.length || 0,
+        });
+      }
+
       if (response.data.failureCount === 0) {
         ElMessage.success(`导入成功！共导入 ${response.data.successCount} 条记录`);
         logger.info('导入成功', {
@@ -627,6 +666,143 @@ const exportErrors = () => {
 
   ElMessage.success('错误报告已导出');
   logger.info('错误报告导出成功');
+};
+
+/**
+ * 处理清除数据命令
+ */
+const handleClearData = async (command: 'dictionaries' | 'business' | 'all') => {
+  logger.info('用户选择清除数据', { command });
+
+  try {
+    // 获取数据统计信息
+    const stats = await fetchDataStats();
+
+    // 根据命令类型构建确认消息
+    let confirmMessage = '';
+    let confirmTitle = '';
+    let clearCount = 0;
+
+    if (command === 'dictionaries') {
+      confirmTitle = '清除字典数据';
+      clearCount =
+        stats.dictionaries.teachers.count +
+        stats.dictionaries.classes.count +
+        stats.dictionaries.subjects.count +
+        stats.dictionaries.venues.count +
+        stats.dictionaries.teachingGroups.count;
+
+      confirmMessage = `
+        <p>即将清除以下字典数据：</p>
+        <ul style="text-align: left; margin: 10px 0;">
+          <li>教师：${stats.dictionaries.teachers.count} 条</li>
+          <li>班级：${stats.dictionaries.classes.count} 条</li>
+          <li>科目：${stats.dictionaries.subjects.count} 条</li>
+          <li>场地：${stats.dictionaries.venues.count} 条</li>
+          <li>教研组：${stats.dictionaries.teachingGroups.count} 条</li>
+        </ul>
+        <p><strong>共计 ${clearCount} 条记录</strong></p>
+        <p style="color: #f56c6c;">此操作不可恢复，确定要继续吗？</p>
+      `;
+    } else if (command === 'business') {
+      confirmTitle = '清除业务数据';
+      clearCount =
+        stats.business.curriculums.count +
+        stats.business.fixedCourses.count +
+        stats.business.scheduleEntries.count +
+        stats.business.invigilations.count;
+
+      confirmMessage = `
+        <p>即将清除以下业务数据：</p>
+        <ul style="text-align: left; margin: 10px 0;">
+          <li>教学计划：${stats.business.curriculums.count} 条</li>
+          <li>固定课程：${stats.business.fixedCourses.count} 条</li>
+          <li>课表记录：${stats.business.scheduleEntries.count} 条</li>
+          <li>监考安排：${stats.business.invigilations.count} 条</li>
+        </ul>
+        <p><strong>共计 ${clearCount} 条记录</strong></p>
+        <p style="color: #f56c6c;">此操作不可恢复，确定要继续吗？</p>
+      `;
+    } else {
+      confirmTitle = '清除所有数据';
+      const dictCount =
+        stats.dictionaries.teachers.count +
+        stats.dictionaries.classes.count +
+        stats.dictionaries.subjects.count +
+        stats.dictionaries.venues.count +
+        stats.dictionaries.teachingGroups.count;
+      const bizCount =
+        stats.business.curriculums.count +
+        stats.business.fixedCourses.count +
+        stats.business.scheduleEntries.count +
+        stats.business.invigilations.count;
+      clearCount = dictCount + bizCount;
+
+      confirmMessage = `
+        <p>即将清除所有数据：</p>
+        <ul style="text-align: left; margin: 10px 0;">
+          <li><strong>字典数据：</strong>${dictCount} 条</li>
+          <li><strong>业务数据：</strong>${bizCount} 条</li>
+        </ul>
+        <p><strong>共计 ${clearCount} 条记录</strong></p>
+        <p style="color: #f56c6c; font-weight: bold;">此操作将清除所有数据且不可恢复，确定要继续吗？</p>
+      `;
+    }
+
+    // 如果没有数据，提示用户
+    if (clearCount === 0) {
+      ElMessage.info('当前没有需要清除的数据');
+      return;
+    }
+
+    // 二次确认
+    await ElMessageBox.confirm(confirmMessage, confirmTitle, {
+      confirmButtonText: '确定清除',
+      cancelButtonText: '取消',
+      type: 'warning',
+      dangerouslyUseHTMLString: true,
+      distinguishCancelAndClose: true,
+    });
+
+    // 执行清除操作
+    logger.info('用户确认清除数据', { command });
+
+    let response;
+    if (command === 'dictionaries') {
+      response = await clearDictionaries();
+    } else if (command === 'business') {
+      response = await clearBusinessData();
+    } else {
+      response = await clearAllData();
+    }
+
+    if (response.success) {
+      ElMessage.success(`成功清除 ${clearCount} 条记录`);
+      logger.info('数据清除成功', { command, count: clearCount });
+
+      // 刷新页面数据
+      await Promise.all([
+        configStore.loadConfig(),
+        teacherStore.loadTeachers(),
+        classStore.loadClasses(),
+        curriculumStore.loadCurriculums(),
+      ]);
+      logger.info('数据重新加载完成');
+    } else {
+      ElMessage.error(response.message || '清除数据失败');
+      logger.error('数据清除失败', { error: response.message });
+    }
+  } catch (error: any) {
+    // 用户取消操作
+    if (error === 'cancel' || error === 'close') {
+      logger.info('用户取消清除数据');
+      return;
+    }
+
+    const errorMessage = error.message || '清除数据失败';
+    ElMessage.error(errorMessage);
+    logger.error('清除数据异常', { error: errorMessage });
+  }
 };
 
 // ==================== 导出功能 ====================

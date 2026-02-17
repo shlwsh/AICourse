@@ -160,9 +160,9 @@
           <div class="card-header">
             <span>课表质量分析</span>
             <el-radio-group v-model="chartType" size="small">
-              <el-radio-button label="bar">柱状图</el-radio-button>
-              <el-radio-button label="line">折线图</el-radio-button>
-              <el-radio-button label="radar">雷达图</el-radio-button>
+              <el-radio-button value="bar">柱状图</el-radio-button>
+              <el-radio-button value="line">折线图</el-radio-button>
+              <el-radio-button value="radar">雷达图</el-radio-button>
             </el-radio-group>
           </div>
         </template>

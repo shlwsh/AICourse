@@ -16,9 +16,9 @@
         </el-select>
 
         <el-radio-group v-model="chartType" size="default">
-          <el-radio-button label="pie">饼图</el-radio-button>
-          <el-radio-button label="bar">柱状图</el-radio-button>
-          <el-radio-button label="line">折线图</el-radio-button>
+          <el-radio-button value="pie">饼图</el-radio-button>
+          <el-radio-button value="bar">柱状图</el-radio-button>
+          <el-radio-button value="line">折线图</el-radio-button>
         </el-radio-group>
       </div>
 

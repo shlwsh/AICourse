@@ -52,6 +52,22 @@ export interface VenueConfig {
   name: string;
   /** 容量（同时容纳的班级数） */
   capacity: number;
+  /** 类型（可选） */
+  type?: string;
+  /** 创建时间 */
+  createdAt: string;
+}
+
+/**
+ * 教研组配置接口
+ */
+export interface TeachingGroupConfig {
+  /** 教研组ID */
+  id: number;
+  /** 教研组名称 */
+  name: string;
+  /** 描述 */
+  description?: string;
   /** 创建时间 */
   createdAt: string;
 }
@@ -141,6 +157,9 @@ export const useConfigStore = defineStore(
   // 场地配置列表
   const venueConfigs = ref<VenueConfig[]>([]);
 
+  // 教研组配置列表
+  const teachingGroupConfigs = ref<TeachingGroupConfig[]>([]);
+
   // 固定课程配置列表
   const fixedCourseConfigs = ref<FixedCourseConfig[]>([]);
 
@@ -163,6 +182,9 @@ export const useConfigStore = defineStore(
 
   // 场地配置数量
   const venueCount = computed(() => venueConfigs.value.length);
+
+  // 教研组配置数量
+  const teachingGroupCount = computed(() => teachingGroupConfigs.value.length);
 
   // 固定课程数量
   const fixedCourseCount = computed(() => fixedCourseConfigs.value.length);
@@ -206,6 +228,15 @@ export const useConfigStore = defineStore(
     return map;
   });
 
+  // 教研组配置映射（按ID索引）
+  const teachingGroupConfigMap = computed(() => {
+    const map = new Map<number, TeachingGroupConfig>();
+    teachingGroupConfigs.value.forEach((config) => {
+      map.set(config.id, config);
+    });
+    return map;
+  });
+
   // ========== 操作方法 ==========
 
   /**
@@ -216,34 +247,52 @@ export const useConfigStore = defineStore(
       logger.info('开始加载系统配置');
       isLoading.value = true;
 
-      // TODO: 调用 Tauri 命令或 API 获取配置
-      // 这里需要实现多个并行请求来获取不同的配置数据
+      // 从后端 API 获取配置数据
+      const { fetchSubjects, fetchVenues, fetchTeachingGroups } = await import('@/api/data');
 
-      // 示例：
-      // const [subjects, classes, venues, fixedCourses, exclusions, cycle] = await Promise.all([
-      //   invoke<SubjectConfig[]>('get_subject_configs'),
-      //   invoke<ClassConfig[]>('get_class_configs'),
-      //   invoke<VenueConfig[]>('get_venue_configs'),
-      //   invoke<FixedCourseConfig[]>('get_fixed_courses'),
-      //   invoke<TeacherMutualExclusionConfig[]>('get_mutual_exclusions'),
-      //   invoke<ScheduleCycleConfig>('get_cycle_config'),
-      // ]);
-      //
-      // subjectConfigs.value = subjects;
-      // classConfigs.value = classes;
-      // venueConfigs.value = venues;
-      // fixedCourseConfigs.value = fixedCourses;
-      // mutualExclusionConfigs.value = exclusions;
-      // cycleConfig.value = cycle;
+      const [subjects, venues, teachingGroups] = await Promise.all([
+        fetchSubjects(),
+        fetchVenues(),
+        fetchTeachingGroups(),
+      ]);
+
+      // 转换数据格式并更新状态
+      if (subjects && Array.isArray(subjects)) {
+        subjectConfigs.value = subjects.map((s: any) => ({
+          id: s.id,
+          name: s.name,
+          forbiddenSlots: s.forbidden_slots || '0',
+          allowDoubleSession: Boolean(s.allow_double_session),
+          venueId: s.venue_id,
+          isMajorSubject: Boolean(s.is_major_subject),
+        }));
+      }
+
+      if (venues && Array.isArray(venues)) {
+        venueConfigs.value = venues.map((v: any) => ({
+          id: v.id,
+          name: v.name,
+          capacity: v.capacity || 1,
+          type: v.type,
+          createdAt: v.created_at || new Date().toISOString(),
+        }));
+      }
+
+      if (teachingGroups && Array.isArray(teachingGroups)) {
+        teachingGroupConfigs.value = teachingGroups.map((tg: any) => ({
+          id: tg.id,
+          name: tg.name,
+          description: tg.description,
+          createdAt: tg.created_at || new Date().toISOString(),
+        }));
+      }
 
       isConfigLoaded.value = true;
 
       logger.info('系统配置加载成功', {
         subjectCount: subjectCount.value,
-        classCount: classCount.value,
         venueCount: venueCount.value,
-        fixedCourseCount: fixedCourseCount.value,
-        mutualExclusionCount: mutualExclusionCount.value,
+        teachingGroupCount: teachingGroupCount.value,
       });
     } catch (error) {
       logger.error('加载系统配置失败', { error });
@@ -477,6 +526,71 @@ export const useConfigStore = defineStore(
       logger.info('场地配置删除成功', { venueId });
     } catch (error) {
       logger.error('删除场地配置失败', { error, venueId });
+      throw error;
+    }
+  };
+
+  /**
+   * 保存教研组配置
+   */
+  const saveTeachingGroupConfig = async (config: TeachingGroupConfig): Promise<void> => {
+    try {
+      logger.info('保存教研组配置', { groupId: config.id });
+
+      // TODO: 调用 Tauri 命令或 API 保存配置
+      // await invoke('save_teaching_group_config', { config });
+
+      // 更新本地状态
+      const index = teachingGroupConfigs.value.findIndex((c) => c.id === config.id);
+      if (index >= 0) {
+        teachingGroupConfigs.value[index] = { ...config };
+      } else {
+        teachingGroupConfigs.value.push({ ...config });
+      }
+
+      logger.info('教研组配置保存成功', { groupId: config.id });
+    } catch (error) {
+      logger.error('保存教研组配置失败', { error, groupId: config.id });
+      throw error;
+    }
+  };
+
+  /**
+   * 批量保存教研组配置
+   */
+  const batchSaveTeachingGroupConfigs = async (configs: TeachingGroupConfig[]): Promise<void> => {
+    try {
+      logger.info('批量保存教研组配置', { count: configs.length });
+
+      // TODO: 调用 Tauri 命令或 API 批量保存配置
+      // await invoke('batch_save_teaching_group_configs', { configs });
+
+      // 更新本地状态
+      teachingGroupConfigs.value = [...configs];
+
+      logger.info('批量保存教研组配置成功', { count: configs.length });
+    } catch (error) {
+      logger.error('批量保存教研组配置失败', { error, count: configs.length });
+      throw error;
+    }
+  };
+
+  /**
+   * 删除教研组配置
+   */
+  const deleteTeachingGroupConfig = async (groupId: number): Promise<void> => {
+    try {
+      logger.info('删除教研组配置', { groupId });
+
+      // TODO: 调用 Tauri 命令或 API 删除配置
+      // await invoke('delete_teaching_group_config', { groupId });
+
+      // 更新本地状态
+      teachingGroupConfigs.value = teachingGroupConfigs.value.filter((c) => c.id !== groupId);
+
+      logger.info('教研组配置删除成功', { groupId });
+    } catch (error) {
+      logger.error('删除教研组配置失败', { error, groupId });
       throw error;
     }
   };
@@ -769,6 +883,7 @@ export const useConfigStore = defineStore(
     subjectConfigs,
     classConfigs,
     venueConfigs,
+    teachingGroupConfigs,
     fixedCourseConfigs,
     mutualExclusionConfigs,
     isLoading,
@@ -778,12 +893,14 @@ export const useConfigStore = defineStore(
     subjectCount,
     classCount,
     venueCount,
+    teachingGroupCount,
     fixedCourseCount,
     mutualExclusionCount,
     hasConfig,
     subjectConfigMap,
     classConfigMap,
     venueConfigMap,
+    teachingGroupConfigMap,
 
     // 方法
     loadConfig,
@@ -797,6 +914,9 @@ export const useConfigStore = defineStore(
     saveVenueConfig,
     batchSaveVenueConfigs,
     deleteVenueConfig,
+    saveTeachingGroupConfig,
+    batchSaveTeachingGroupConfigs,
+    deleteTeachingGroupConfig,
     saveFixedCourseConfig,
     batchSaveFixedCourseConfigs,
     deleteFixedCourseConfig,
@@ -821,6 +941,7 @@ export const useConfigStore = defineStore(
         'subjectConfigs',
         'classConfigs',
         'venueConfigs',
+        'teachingGroupConfigs',
         'fixedCourseConfigs',
         'mutualExclusionConfigs',
         'isConfigLoaded',

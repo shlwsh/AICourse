@@ -63,7 +63,7 @@ import { useDraggableCourseList } from '@/composables/useDraggableSchedule';
 import { logger } from '@/utils/logger';
 
 // 组件日志
-const componentLogger = logger.child({ component: 'DraggableCourseList' });
+const componentLogger = logger;
 
 // Props
 interface Course {

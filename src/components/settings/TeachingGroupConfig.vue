@@ -148,10 +148,11 @@
 </template>
 
 <script setup lang="ts">
-import { ref, reactive, computed } from 'vue';
+import { ref, reactive, computed, onMounted } from 'vue';
 import { ElMessage, ElMessageBox, type FormInstance, type FormRules } from 'element-plus';
 import { Plus, Refresh, MoreFilled } from '@element-plus/icons-vue';
 import { useTeacherStore } from '@/stores/teacherStore';
+import { useConfigStore } from '@/stores/configStore';
 import { logger } from '@/utils/logger';
 
 // 教研组接口定义
@@ -164,6 +165,7 @@ interface TeachingGroup {
 
 // 状态管理
 const teacherStore = useTeacherStore();
+const configStore = useConfigStore();
 
 // 表单引用
 const formRef = ref<FormInstance>();
@@ -181,27 +183,8 @@ const isSaving = ref(false);
 // 选中的教研组
 const selectedGroup = ref<TeachingGroup | null>(null);
 
-// 教研组列表（模拟数据，实际应从 store 获取）
-const teachingGroups = ref<TeachingGroup[]>([
-  {
-    id: 1,
-    name: '数学组',
-    description: '负责数学学科的教学和研究',
-    createdAt: new Date().toISOString(),
-  },
-  {
-    id: 2,
-    name: '语文组',
-    description: '负责语文学科的教学和研究',
-    createdAt: new Date().toISOString(),
-  },
-  {
-    id: 3,
-    name: '英语组',
-    description: '负责英语学科的教学和研究',
-    createdAt: new Date().toISOString(),
-  },
-]);
+// 教研组列表（从 configStore 获取）
+const teachingGroups = computed(() => configStore.teachingGroupConfigs);
 
 // 表单数据
 const formData = reactive<Partial<TeachingGroup>>({
@@ -297,11 +280,8 @@ const handleDelete = async (group: TeachingGroup) => {
 
     logger.info('删除教研组', { groupId: group.id });
 
-    // TODO: 调用 API 删除教研组
-    const index = teachingGroups.value.findIndex((g) => g.id === group.id);
-    if (index >= 0) {
-      teachingGroups.value.splice(index, 1);
-    }
+    // 调用 configStore 删除教研组
+    await configStore.deleteTeachingGroupConfig(group.id);
 
     ElMessage.success('删除成功');
   } catch (error) {
@@ -333,26 +313,15 @@ const handleSubmit = async () => {
     logger.info('保存教研组配置', { name: formData.name });
     isSaving.value = true;
 
-    // TODO: 调用 API 保存教研组
-    if (isEditing.value) {
-      // 更新现有教研组
-      const index = teachingGroups.value.findIndex((g) => g.id === formData.id);
-      if (index >= 0) {
-        teachingGroups.value[index] = {
-          ...teachingGroups.value[index],
-          ...formData,
-        } as TeachingGroup;
-      }
-    } else {
-      // 添加新教研组
-      const newGroup: TeachingGroup = {
-        id: Date.now(), // 临时ID，实际应由后端生成
-        name: formData.name!,
-        description: formData.description,
-        createdAt: new Date().toISOString(),
-      };
-      teachingGroups.value.push(newGroup);
-    }
+    // 调用 configStore 保存教研组
+    const groupData = {
+      id: isEditing.value ? formData.id! : Date.now(),
+      name: formData.name!,
+      description: formData.description,
+      createdAt: isEditing.value ? formData.createdAt! : new Date().toISOString(),
+    };
+
+    await configStore.saveTeachingGroupConfig(groupData);
 
     ElMessage.success(isEditing.value ? '修改成功' : '添加成功');
     dialogVisible.value = false;
@@ -372,14 +341,30 @@ const handleSubmit = async () => {
 const handleRefresh = async () => {
   logger.info('刷新教研组列表');
   try {
-    // TODO: 调用 API 刷新教研组列表
-    await teacherStore.loadTeachers();
+    // 重新加载配置数据
+    await configStore.loadConfig();
     ElMessage.success('刷新成功');
   } catch (error) {
     logger.error('刷新教研组列表失败', { error });
     ElMessage.error('刷新失败');
   }
 };
+
+/**
+ * 组件挂载时加载数据
+ */
+onMounted(async () => {
+  logger.info('教研组配置组件挂载');
+
+  // 如果配置未加载，则加载配置
+  if (!configStore.isConfigLoaded) {
+    try {
+      await configStore.loadConfig();
+    } catch (error) {
+      logger.error('加载教研组配置失败', { error });
+    }
+  }
+});
 
 /**
  * 重置表单

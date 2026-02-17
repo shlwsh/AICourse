@@ -10,11 +10,13 @@
  * - 执行交换
  */
 
+import '../types/hono'; // 导入类型扩展
 import { Hono } from 'hono';
 import { zValidator } from '@hono/zod-validator';
 import { z } from 'zod';
 import { logger } from '../utils/logger';
 import { createRouteLogger } from '../middleware/request-logger';
+import { ScheduleService } from '../services/schedule-service';
 
 // 创建路由实例
 const scheduleRoutes = new Hono();
@@ -67,43 +69,24 @@ const executeSwapSchema = z.object({
  */
 scheduleRoutes.post('/generate', async (c) => {
   const log = createRouteLogger('生成课表');
+  const requestId = c.get('requestId');
   const startTime = Date.now();
 
   log.start();
 
   try {
-    log.step('验证系统配置');
-    // TODO: 验证教师、班级、课程配置是否完整
+    log.step('初始化排课服务');
+    const scheduleService = new ScheduleService();
 
-    log.step('加载排课数据');
-    // TODO: 从数据库加载所有必要的配置数据
-    // - 教学计划
-    // - 课程配置
-    // - 教师偏好
-    // - 场地信息
-    // - 固定课程
-    // - 教师互斥关系
+    // 设置请求 ID
+    if (requestId) {
+      scheduleService.setRequestId(requestId);
+    }
 
-    log.step('调用约束求解器');
-    // TODO: 调用 Tauri 命令生成课表
-    // const schedule = await invoke('generate_schedule');
-
-    // 模拟数据
-    const schedule = {
-      entries: [],
-      cost: 0,
-      metadata: {
-        cycleDays: 5,
-        periodsPerDay: 8,
-        generatedAt: new Date().toISOString(),
-        version: 1,
-      },
-    };
+    log.step('调用约束求解器生成课表');
+    const schedule = await scheduleService.generateSchedule();
 
     const duration = Date.now() - startTime;
-    log.step('保存课表到数据库');
-    // TODO: 保存生成的课表
-
     log.success({
       cost: schedule.cost,
       entryCount: schedule.entries.length,
@@ -139,17 +122,22 @@ scheduleRoutes.post('/generate', async (c) => {
  */
 scheduleRoutes.get('/active', async (c) => {
   const log = createRouteLogger('获取活动课表');
+  const requestId = c.get('requestId');
   const startTime = Date.now();
 
   log.start();
 
   try {
-    log.step('查询数据库');
-    // TODO: 调用 Tauri 命令获取活动课表
-    // const schedule = await invoke('get_active_schedule');
+    log.step('初始化排课服务');
+    const scheduleService = new ScheduleService();
 
-    // 模拟数据
-    const schedule = null;
+    // 设置请求 ID
+    if (requestId) {
+      scheduleService.setRequestId(requestId);
+    }
+
+    log.step('查询活动课表');
+    const schedule = await scheduleService.getActiveSchedule();
 
     if (!schedule) {
       const duration = Date.now() - startTime;
@@ -166,8 +154,8 @@ scheduleRoutes.get('/active', async (c) => {
 
     const duration = Date.now() - startTime;
     log.success({
-      scheduleId: (schedule as any).id,
-      entryCount: (schedule as any).entries?.length || 0,
+      entryCount: schedule.entries.length,
+      cost: schedule.cost,
       duration: `${duration}ms`,
     });
 

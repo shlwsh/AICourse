@@ -267,6 +267,10 @@ export default defineConfig({
       'pinia',
       'element-plus',
       '@tauri-apps/api',
+      '@tauri-apps/plugin-dialog',
+      '@tauri-apps/plugin-fs',
+      '@tauri-apps/plugin-notification',
+      '@tauri-apps/plugin-shell',
     ],
 
     // 排除预构建的依赖

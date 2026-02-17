@@ -4,7 +4,7 @@
  * 功能：
  * - 封装排课相关的业务逻辑
  * - 实现课表生成、获取、移动、冲突检测、交换建议等方法
- * - 调用 Tauri 命令与 Rust 后端交互
+ * - 使用 TypeScript 实现的排课算法
  * - 实现数据验证和业务规则检查
  * - 添加完善的日志记录
  *
@@ -22,8 +22,10 @@
  * ```
  */
 
-import { invoke } from '@tauri-apps/api/core';
 import { createLogger } from '../utils/logger';
+import { Scheduler } from '../algorithm/scheduler';
+import type { Schedule, ScheduleEntry, TimeSlot } from '../algorithm/scheduler';
+import { getDatabase } from '../db/database';
 
 // 创建服务专用日志记录器
 const logger = createLogger('ScheduleService');
@@ -32,59 +34,8 @@ const logger = createLogger('ScheduleService');
 // 类型定义
 // ============================================================================
 
-/**
- * 时间槽位
- */
-export interface TimeSlot {
-  /** 星期（0-29，支持1-30天周期） */
-  day: number;
-  /** 节次（0-11，支持1-12节） */
-  period: number;
-}
-
-/**
- * 课表条目
- */
-export interface ScheduleEntry {
-  /** 班级ID */
-  classId: number;
-  /** 科目ID */
-  subjectId: string;
-  /** 教师ID */
-  teacherId: number;
-  /** 时间槽位 */
-  timeSlot: TimeSlot;
-  /** 是否固定课程 */
-  isFixed: boolean;
-  /** 单双周标记 */
-  weekType: 'Every' | 'Odd' | 'Even';
-}
-
-/**
- * 课表元数据
- */
-export interface ScheduleMetadata {
-  /** 排课周期天数 */
-  cycleDays: number;
-  /** 每天节次数 */
-  periodsPerDay: number;
-  /** 生成时间 */
-  generatedAt: string;
-  /** 版本号 */
-  version: number;
-}
-
-/**
- * 完整课表
- */
-export interface Schedule {
-  /** 课表条目列表 */
-  entries: ScheduleEntry[];
-  /** 代价值 */
-  cost: number;
-  /** 元数据 */
-  metadata: ScheduleMetadata;
-}
+// 重新导出类型
+export type { TimeSlot, ScheduleEntry, Schedule } from '../algorithm/scheduler';
 
 /**
  * 冲突类型
@@ -184,10 +135,19 @@ export interface SwapOption {
  * - 交换执行
  */
 export class ScheduleService {
+  private requestId?: string;
+
+  /**
+   * 设置请求 ID（用于日志追踪）
+   */
+  setRequestId(requestId: string): void {
+    this.requestId = requestId;
+  }
+
   /**
    * 生成课表
    *
-   * 调用 Rust 后端的约束求解器生成满足所有约束的课表。
+   * 使用 TypeScript 实现的约束求解器生成满足所有约束的课表。
    *
    * @returns 生成的课表
    * @throws 如果生成失败则抛出错误
@@ -199,16 +159,28 @@ export class ScheduleService {
    * ```
    */
   async generateSchedule(): Promise<Schedule> {
-    logger.info('开始生成课表');
+    logger.info('开始生成课表', { requestId: this.requestId });
 
     try {
-      // 调用 Tauri 命令生成课表
-      const schedule = await invoke<Schedule>('generate_schedule');
+      // 创建排课器实例
+      const scheduler = new Scheduler();
+
+      // 设置请求 ID
+      if (this.requestId) {
+        scheduler.setRequestId(this.requestId);
+      }
+
+      // 生成课表
+      const schedule = await scheduler.generate();
 
       // 验证返回的课表数据
       this.validateSchedule(schedule);
 
+      // 保存课表到数据库
+      await this.saveSchedule(schedule);
+
       logger.info('课表生成成功', {
+        requestId: this.requestId,
         entryCount: schedule.entries.length,
         cost: schedule.cost,
         cycleDays: schedule.metadata.cycleDays,
@@ -218,6 +190,7 @@ export class ScheduleService {
       return schedule;
     } catch (error) {
       logger.error('生成课表失败', {
+        requestId: this.requestId,
         error: error instanceof Error ? error.message : String(error),
       });
       throw new Error(`生成课表失败: ${error instanceof Error ? error.message : String(error)}`);
@@ -243,17 +216,44 @@ export class ScheduleService {
     logger.info('获取活动课表');
 
     try {
-      const schedule = await invoke<Schedule | null>('get_active_schedule');
+      const db = getDatabase();
 
-      if (schedule) {
-        this.validateSchedule(schedule);
-        logger.info('成功获取活动课表', {
-          entryCount: schedule.entries.length,
-          cost: schedule.cost,
-        });
-      } else {
+      // 查询课表条目
+      const entries = db.query(`
+        SELECT class_id, subject_id, teacher_id, day, period, is_fixed, week_type
+        FROM schedule_entries
+        ORDER BY day, period
+      `).all() as any[];
+
+      if (entries.length === 0) {
         logger.warn('未找到活动课表');
+        return null;
       }
+
+      // 转换为 Schedule 格式
+      const schedule: Schedule = {
+        entries: entries.map(e => ({
+          classId: e.class_id,
+          subjectId: e.subject_id,
+          teacherId: e.teacher_id,
+          timeSlot: { day: e.day, period: e.period },
+          isFixed: e.is_fixed === 1,
+          weekType: e.week_type as 'Every' | 'Odd' | 'Even',
+        })),
+        cost: 0, // TODO: 从数据库读取或重新计算
+        metadata: {
+          cycleDays: 5,
+          periodsPerDay: 8,
+          generatedAt: new Date().toISOString(),
+          version: 1,
+        },
+      };
+
+      this.validateSchedule(schedule);
+      logger.info('成功获取活动课表', {
+        entryCount: schedule.entries.length,
+        cost: schedule.cost,
+      });
 
       return schedule;
     } catch (error) {
@@ -660,6 +660,60 @@ export class ScheduleService {
   // ============================================================================
   // 私有辅助方法
   // ============================================================================
+
+  /**
+   * 保存课表到数据库
+   *
+   * @param schedule - 课表
+   */
+  private async saveSchedule(schedule: Schedule): Promise<void> {
+    logger.info('保存课表到数据库', { requestId: this.requestId, entryCount: schedule.entries.length });
+
+    try {
+      const db = getDatabase();
+
+      // 开始事务
+      db.run('BEGIN TRANSACTION');
+
+      try {
+        // 清空现有课表
+        db.run('DELETE FROM schedule_entries');
+
+        // 插入新课表
+        const insertStmt = db.prepare(`
+          INSERT INTO schedule_entries (class_id, subject_id, teacher_id, day, period, is_fixed, week_type)
+          VALUES (?, ?, ?, ?, ?, ?, ?)
+        `);
+
+        for (const entry of schedule.entries) {
+          insertStmt.run(
+            entry.classId,
+            entry.subjectId,
+            entry.teacherId,
+            entry.timeSlot.day,
+            entry.timeSlot.period,
+            entry.isFixed ? 1 : 0,
+            entry.weekType
+          );
+        }
+
+        // 提交事务
+        db.run('COMMIT');
+
+        logger.info('课表保存成功', { requestId: this.requestId });
+      } catch (error) {
+        // 回滚事务
+        db.run('ROLLBACK');
+        throw error;
+      }
+    } catch (error) {
+      logger.error('保存课表失败', {
+        requestId: this.requestId,
+        error: error instanceof Error ? error.message : String(error),
+      });
+      throw new Error(`保存课表失败: ${error instanceof Error ? error.message : String(error)}`);
+    }
+  }
 
   /**
    * 验证课表数据完整性

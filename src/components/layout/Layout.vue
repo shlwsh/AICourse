@@ -37,11 +37,9 @@
 
           <!-- 路由视图 -->
           <div class="content-wrapper">
-            <router-view v-slot="{ Component, route }">
+            <router-view v-slot="{ Component }">
               <transition :name="transitionName" mode="out-in">
-                <keep-alive :include="cachedViews">
-                  <component :is="Component" :key="route.path" />
-                </keep-alive>
+                <component :is="Component" />
               </transition>
             </router-view>
           </div>

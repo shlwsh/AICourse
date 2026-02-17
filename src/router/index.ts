@@ -71,6 +71,15 @@ const routes: RouteRecordRaw[] = [
     },
   },
   {
+    path: '/debug-store',
+    name: 'DebugStore',
+    component: () => import('@/views/DebugStore.vue'),
+    meta: {
+      title: 'Store 调试',
+      requiresAuth: false,
+    },
+  },
+  {
     path: '/settings',
     name: 'Settings',
     component: () => import('@/views/Settings.vue'),
@@ -85,6 +94,24 @@ const routes: RouteRecordRaw[] = [
     component: () => import('@/views/ImportExport.vue'),
     meta: {
       title: '导入导出',
+      requiresAuth: false,
+    },
+  },
+  {
+    path: '/dictionary',
+    name: 'Dictionary',
+    component: () => import('@/views/Dictionary.vue'),
+    meta: {
+      title: '字典管理',
+      requiresAuth: false,
+    },
+  },
+  {
+    path: '/curriculum',
+    name: 'Curriculum',
+    component: () => import('@/views/Curriculum.vue'),
+    meta: {
+      title: '教学计划',
       requiresAuth: false,
     },
   },

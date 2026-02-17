@@ -169,9 +169,9 @@
       <div class="slots-editor">
         <div class="slots-header">
           <el-radio-group v-model="slotEditMode" size="small">
-            <el-radio-button label="prefer">喜欢</el-radio-button>
-            <el-radio-button label="dislike">不喜欢</el-radio-button>
-            <el-radio-button label="forbidden">禁止</el-radio-button>
+            <el-radio-button value="prefer">喜欢</el-radio-button>
+            <el-radio-button value="dislike">不喜欢</el-radio-button>
+            <el-radio-button value="forbidden">禁止</el-radio-button>
           </el-radio-group>
           <el-button size="small" @click="handleClearSlots">清空</el-button>
         </div>

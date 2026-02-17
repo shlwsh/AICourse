@@ -7,9 +7,11 @@ export {}
 
 declare module 'vue' {
   export interface GlobalComponents {
+    ClassDictionary: typeof import('./components/dictionary/ClassDictionary.vue')['default']
     ConflictIndicator: typeof import('./components/schedule/ConflictIndicator.vue')['default']
     CourseCard: typeof import('./components/schedule/CourseCard.vue')['default']
     CourseDistribution: typeof import('./components/statistics/CourseDistribution.vue')['default']
+    CurriculumDictionary: typeof import('./components/dictionary/CurriculumDictionary.vue')['default']
     DraggableCourseList: typeof import('./components/schedule/DraggableCourseList.vue')['default']
     ElAlert: typeof import('element-plus/es')['ElAlert']
     ElAside: typeof import('element-plus/es')['ElAside']
@@ -28,6 +30,9 @@ declare module 'vue' {
     ElDialog: typeof import('element-plus/es')['ElDialog']
     ElDivider: typeof import('element-plus/es')['ElDivider']
     ElDrawer: typeof import('element-plus/es')['ElDrawer']
+    ElDropdown: typeof import('element-plus/es')['ElDropdown']
+    ElDropdownItem: typeof import('element-plus/es')['ElDropdownItem']
+    ElDropdownMenu: typeof import('element-plus/es')['ElDropdownMenu']
     ElEmpty: typeof import('element-plus/es')['ElEmpty']
     ElFooter: typeof import('element-plus/es')['ElFooter']
     ElForm: typeof import('element-plus/es')['ElForm']
@@ -65,6 +70,7 @@ declare module 'vue' {
     ElUpload: typeof import('element-plus/es')['ElUpload']
     FixedCourseConfig: typeof import('./components/schedule/FixedCourseConfig.vue')['default']
     Footer: typeof import('./components/layout/Footer.vue')['default']
+    GradeDictionary: typeof import('./components/dictionary/GradeDictionary.vue')['default']
     Header: typeof import('./components/layout/Header.vue')['default']
     HeatmapView: typeof import('./components/schedule/HeatmapView.vue')['default']
     HistoryPanel: typeof import('./components/schedule/HistoryPanel.vue')['default']
@@ -78,12 +84,19 @@ declare module 'vue' {
     ScheduleStatistics: typeof import('./components/statistics/ScheduleStatistics.vue')['default']
     Sidebar: typeof import('./components/layout/Sidebar.vue')['default']
     SubjectConfig: typeof import('./components/settings/SubjectConfig.vue')['default']
+    SubjectDictionary: typeof import('./components/dictionary/SubjectDictionary.vue')['default']
     SwapSuggestion: typeof import('./components/schedule/SwapSuggestion.vue')['default']
     SystemConfig: typeof import('./components/settings/SystemConfig.vue')['default']
+    TeacherDictionary: typeof import('./components/dictionary/TeacherDictionary.vue')['default']
     TeacherPreference: typeof import('./components/teacher/TeacherPreference.vue')['default']
     TeachingGroupConfig: typeof import('./components/settings/TeachingGroupConfig.vue')['default']
+    TeachingGroupDictionary: typeof import('./components/dictionary/TeachingGroupDictionary.vue')['default']
     TimeSlotUtilization: typeof import('./components/statistics/TimeSlotUtilization.vue')['default']
     VenueConfig: typeof import('./components/settings/VenueConfig.vue')['default']
+    VenueDictionary: typeof import('./components/dictionary/VenueDictionary.vue')['default']
     WorkloadStatistics: typeof import('./components/teacher/WorkloadStatistics.vue')['default']
+  }
+  export interface ComponentCustomProperties {
+    vLoading: typeof import('element-plus/es')['ElLoadingDirective']
   }
 }

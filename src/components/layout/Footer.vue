@@ -18,7 +18,7 @@
       <!-- 中间：快捷链接 -->
       <div class="footer-center">
         <el-link
-          :underline="false"
+          underline="never"
           @click="goToHelp"
           class="footer-link"
         >
@@ -27,7 +27,7 @@
         </el-link>
         <el-divider direction="vertical" />
         <el-link
-          :underline="false"
+          underline="never"
           @click="showAbout"
           class="footer-link"
         >
@@ -36,7 +36,7 @@
         </el-link>
         <el-divider direction="vertical" />
         <el-link
-          :underline="false"
+          underline="never"
           @click="showFeedback"
           class="footer-link"
         >
@@ -144,7 +144,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed, ref, onMounted } from 'vue';
+import { computed, ref, onMounted, markRaw } from 'vue';
 import { useRouter } from 'vue-router';
 import { ElMessage } from 'element-plus';
 import {
@@ -170,7 +170,7 @@ const currentYear = computed(() => new Date().getFullYear());
 // 系统状态
 const systemStatus = ref({
   type: 'success' as 'success' | 'warning' | 'danger',
-  icon: CircleCheck,
+  icon: markRaw(CircleCheck),
   text: '运行正常',
 });
 
@@ -249,14 +249,14 @@ const checkSystemStatus = async () => {
     logger.debug('Footer: 检查系统状态');
     systemStatus.value = {
       type: 'success',
-      icon: CircleCheck,
+      icon: markRaw(CircleCheck),
       text: '运行正常',
     };
   } catch (error) {
     logger.error('Footer: 系统状态检查失败', { error });
     systemStatus.value = {
       type: 'warning',
-      icon: Warning,
+      icon: markRaw(Warning),
       text: '连接异常',
     };
   }

@@ -10,7 +10,11 @@ import { logger } from '@/utils/logger';
 export interface Teacher {
   id: number;
   name: string;
-  teachingGroupId?: number;
+  teachingGroup?: string; // 教研组名称
+  teachingGroupId?: number; // 教研组 ID（用于排课系统）
+  maxHoursPerDay?: number; // 每天最大课时
+  maxConsecutiveHours?: number; // 最大连续课时
+  unavailableSlots?: string[]; // 不可用时段
   createdAt: string;
   updatedAt: string;
 }
@@ -93,6 +97,21 @@ export const useTeacherStore = defineStore('teacher', () => {
   // ========== 操作方法 ==========
 
   /**
+   * 设置教师列表
+   */
+  const setTeachers = (data: Omit<Teacher, 'id' | 'createdAt' | 'updatedAt'>[]): void => {
+    const timestamp = new Date().toISOString();
+    teachers.value = data.map((item, index) => ({
+      ...item,
+      id: index + 1,
+      createdAt: timestamp,
+      updatedAt: timestamp,
+    }));
+
+    logger.info('[TeacherStore] 设置教师数据', { count: teachers.value.length });
+  };
+
+  /**
    * 加载所有教师
    */
   const loadTeachers = async (): Promise<void> => {
@@ -100,9 +119,23 @@ export const useTeacherStore = defineStore('teacher', () => {
       logger.info('开始加载教师列表');
       isLoading.value = true;
 
-      // TODO: 调用 Tauri 命令获取教师列表
-      // const result = await invoke<Teacher[]>('get_all_teachers');
-      // teachers.value = result;
+      // 从后端 API 获取教师数据
+      const { fetchTeachers } = await import('@/api/data');
+      const result = await fetchTeachers();
+
+      if (result && Array.isArray(result)) {
+        teachers.value = result.map((t: any) => ({
+          id: t.id,
+          name: t.name,
+          teachingGroup: t.teaching_group_name,
+          teachingGroupId: t.teaching_group_id,
+          maxHoursPerDay: t.max_hours_per_day || undefined,
+          maxConsecutiveHours: t.max_consecutive_hours || undefined,
+          unavailableSlots: t.unavailable_slots ? (typeof t.unavailable_slots === 'string' ? JSON.parse(t.unavailable_slots) : t.unavailable_slots) : undefined,
+          createdAt: t.created_at || new Date().toISOString(),
+          updatedAt: t.updated_at || new Date().toISOString(),
+        }));
+      }
 
       logger.info('教师列表加载成功', { count: teacherCount.value });
     } catch (error) {
@@ -232,6 +265,63 @@ export const useTeacherStore = defineStore('teacher', () => {
   };
 
   /**
+   * 从字典 store 同步教师数据
+   */
+  const syncFromDictionary = (teacherData: Teacher[]): void => {
+    logger.info('从字典 store 同步教师数据', { count: teacherData.length });
+    teachers.value = teacherData;
+  };
+
+  /**
+   * 添加教师
+   */
+  const addTeacher = (teacher: Omit<Teacher, 'id' | 'createdAt' | 'updatedAt'>): void => {
+    const timestamp = new Date().toISOString();
+    const newTeacher: Teacher = {
+      ...teacher,
+      id: teachers.value.length + 1,
+      createdAt: timestamp,
+      updatedAt: timestamp,
+    };
+    teachers.value.push(newTeacher);
+
+    logger.info('[TeacherStore] 添加教师', { name: teacher.name });
+  };
+
+  /**
+   * 更新教师
+   */
+  const updateTeacher = (id: number, teacher: Partial<Omit<Teacher, 'id' | 'createdAt'>>): void => {
+    const index = teachers.value.findIndex(t => t.id === id);
+    if (index !== -1) {
+      const current = teachers.value[index];
+      if (current) {
+        teachers.value[index] = {
+          ...current,
+          ...teacher,
+          name: teacher.name ?? current.name,
+          updatedAt: new Date().toISOString(),
+        };
+
+        logger.info('[TeacherStore] 更新教师', { id, name: teacher.name });
+      }
+    }
+  };
+
+  /**
+   * 删除教师
+   */
+  const deleteTeacher = (id: number): void => {
+    const index = teachers.value.findIndex(t => t.id === id);
+    if (index !== -1) {
+      const teacher = teachers.value[index];
+      teachers.value.splice(index, 1);
+
+      logger.info('[TeacherStore] 删除教师', { id, name: teacher?.name });
+    }
+  };
+
+  /**
    * 根据 ID 查找教师
    */
   const findTeacherById = (teacherId: number): Teacher | undefined => {
@@ -275,7 +365,11 @@ export const useTeacherStore = defineStore('teacher', () => {
     busyTeachers,
 
     // 方法
+    setTeachers,
     loadTeachers,
+    addTeacher,
+    updateTeacher,
+    deleteTeacher,
     saveTeacherPreference,
     batchSaveTeacherPreferences,
     queryTeacherStatus,
@@ -284,6 +378,7 @@ export const useTeacherStore = defineStore('teacher', () => {
     selectTeacher,
     findTeacherById,
     filterTeachersByGroup,
+    syncFromDictionary,
     reset,
   };
 });

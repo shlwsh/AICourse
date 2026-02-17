@@ -9,9 +9,9 @@
     <div class="schedule-toolbar">
       <div class="toolbar-left">
         <el-radio-group v-model="currentViewMode" size="default" @change="handleViewModeChange">
-          <el-radio-button label="class">班级视图</el-radio-button>
-          <el-radio-button label="teacher">教师视图</el-radio-button>
-          <el-radio-button label="venue">场地视图</el-radio-button>
+          <el-radio-button value="class">班级视图</el-radio-button>
+          <el-radio-button value="teacher">教师视图</el-radio-button>
+          <el-radio-button value="venue">场地视图</el-radio-button>
         </el-radio-group>
       </div>
 
@@ -134,7 +134,7 @@ import { logger } from '@/utils/logger';
 import type { ScheduleEntry, TimeSlot } from '@/stores/scheduleStore';
 
 // ========== 组件日志 ==========
-const componentLogger = logger.child({ component: 'ScheduleGrid' });
+const componentLogger = logger;
 
 // ========== Props ==========
 interface Props {

@@ -174,9 +174,9 @@
 
         <el-form-item label="周类型" prop="weekType">
           <el-radio-group v-model="formData.weekType">
-            <el-radio label="Every">每周</el-radio>
-            <el-radio label="Odd">单周</el-radio>
-            <el-radio label="Even">双周</el-radio>
+            <el-radio value="Every">每周</el-radio>
+            <el-radio value="Odd">单周</el-radio>
+            <el-radio value="Even">双周</el-radio>
           </el-radio-group>
         </el-form-item>
       </el-form>

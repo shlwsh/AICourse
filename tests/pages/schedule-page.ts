@@ -21,21 +21,21 @@ export class SchedulePage extends BasePage {
   // 页面元素选择器
   private readonly selectors = {
     // 主要容器
-    scheduleGrid: '[data-testid="schedule-grid"]',
-    scheduleCell: '[data-testid="schedule-cell"]',
-    courseCard: '[data-testid="course-card"]',
+    scheduleGrid: '.schedule-card',
+    scheduleCell: '.schedule-cell',
+    courseCard: '.course-card',
 
     // 操作按钮
-    generateButton: '[data-testid="generate-schedule-button"]',
-    detectConflictsButton: '[data-testid="detect-conflicts-button"]',
-    suggestSwapsButton: '[data-testid="suggest-swaps-button"]',
-    exportButton: '[data-testid="export-button"]',
+    generateButton: 'button:has-text("自动排课")',
+    detectConflictsButton: 'button:has-text("检测冲突")',
+    suggestSwapsButton: 'button:has-text("建议交换")',
+    exportButton: 'button:has-text("导出")',
 
     // 视图切换
-    viewModeSelector: '[data-testid="view-mode-selector"]',
-    classViewButton: '[data-testid="class-view-button"]',
-    teacherViewButton: '[data-testid="teacher-view-button"]',
-    venueViewButton: '[data-testid="venue-view-button"]',
+    viewModeSelector: '.el-radio-group',
+    classViewButton: '.el-radio-button:has-text("班级视图")',
+    teacherViewButton: '.el-radio-button:has-text("教师视图")',
+    venueViewButton: '.el-radio-button:has-text("场地视图")',
 
     // 筛选器
     classFilter: '[data-testid="class-filter"]',
@@ -43,21 +43,21 @@ export class SchedulePage extends BasePage {
     subjectFilter: '[data-testid="subject-filter"]',
 
     // 冲突指示器
-    conflictIndicator: '[data-testid="conflict-indicator"]',
-    conflictList: '[data-testid="conflict-list"]',
+    conflictIndicator: '.el-tag:has-text("冲突")',
+    conflictList: '.conflicts-list',
 
     // 交换建议
-    swapSuggestionPanel: '[data-testid="swap-suggestion-panel"]',
-    swapSuggestionItem: '[data-testid="swap-suggestion-item"]',
-    executeSwapButton: '[data-testid="execute-swap-button"]',
+    swapSuggestionPanel: '.swap-suggestion-panel',
+    swapSuggestionItem: '.swap-suggestion-item',
+    executeSwapButton: 'button:has-text("执行交换")',
 
     // 热力图
-    heatmapToggle: '[data-testid="heatmap-toggle"]',
-    heatmapView: '[data-testid="heatmap-view"]',
+    heatmapToggle: '.el-switch:has-text("热力图")',
+    heatmapView: '.heatmap-view',
 
     // 加载状态
     loading: '.el-loading-mask',
-    emptyState: '[data-testid="empty-state"]',
+    emptyState: '.empty-card',
   };
 
   constructor(page: Page) {
@@ -73,13 +73,19 @@ export class SchedulePage extends BasePage {
   }
 
   /**
-   * 等待课表网格加载完成
+   * 等待课表页面加载完成（可能是空状态或已有课表）
    */
   async waitForScheduleGridLoaded(): Promise<void> {
-    this.logger.debug('等待课表网格加载');
-    await this.waitForVisible(this.selectors.scheduleGrid, 15000);
+    this.logger.debug('等待课表页面加载');
+
+    // 等待页面加载完成，可能显示空状态或课表网格
+    await this.page.waitForSelector(
+      `${this.selectors.scheduleGrid}, ${this.selectors.emptyState}`,
+      { timeout: 15000 }
+    );
+
     await this.waitForLoadingComplete();
-    this.logger.debug('课表网格加载完成');
+    this.logger.debug('课表页面加载完成');
   }
 
   /**

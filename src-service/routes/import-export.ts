@@ -143,21 +143,179 @@ importExportRoutes.post(
 
       log.step('文件保存成功', { filePath: tempFilePath });
 
-      // 步骤 4: 调用 Tauri 命令导入数据
-      log.step('调用 Rust 后端导入数据');
+      // 步骤 4: 解析 Excel 文件并保存到数据库
+      log.step('解析 Excel 文件');
 
-      // TODO: 调用 Tauri 命令
-      // const result = await invoke('import_from_excel', {
-      //   filePath: tempFilePath,
-      // });
+      const { ExcelParser } = await import('../services/excel-parser');
+      const parseResult = await ExcelParser.parseExcelFile(tempFilePath);
 
-      // 模拟导入结果（待 Tauri 命令实现后替换）
+      log.step('Excel 文件解析完成', {
+        successCount: parseResult.successCount,
+        errorCount: parseResult.errorCount,
+        teachers: parseResult.data?.teachers.length || 0,
+        classes: parseResult.data?.classes.length || 0,
+        subjects: parseResult.data?.subjects.length || 0,
+        curriculums: parseResult.data?.curriculums.length || 0,
+      });
+
+      if (!parseResult.success || !parseResult.data) {
+        throw new Error('Excel 文件解析失败');
+      }
+
+      // 步骤 5: 保存数据到数据库
+      log.step('保存数据到数据库');
+
+      const {
+        TeacherRepository,
+        ClassRepository,
+        SubjectRepository,
+        CurriculumRepository,
+        VenueRepository,
+      } = await import('../db/repositories');
+      const { getDatabase } = await import('../db/database');
+
+      const db = getDatabase();
+      let savedCount = 0;
+
+      // 使用事务保存数据
+      const saveTransaction = db.transaction(() => {
+        // 1. 保存场地（需要在科目之前）
+        if (parseResult.data!.venues && parseResult.data!.venues.length > 0) {
+          for (const venue of parseResult.data!.venues) {
+            try {
+              VenueRepository.create({
+                id: venue.id || `venue-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+                name: venue.name,
+                type: venue.type,
+                capacity: venue.capacity || 1,
+              });
+              savedCount++;
+            } catch (error) {
+              log.warn('保存场地失败', {
+                venue: venue.name,
+                error: error instanceof Error ? error.message : String(error),
+              });
+            }
+          }
+        }
+
+        // 2. 保存教师
+        const teacherNameToId = new Map<string, number>();
+        for (const teacher of parseResult.data!.teachers) {
+          try {
+            const teacherId = TeacherRepository.create({
+              name: teacher.name,
+              teachingGroup: teacher.teachingGroup,
+            });
+            teacherNameToId.set(teacher.name, teacherId);
+            savedCount++;
+          } catch (error) {
+            log.warn('保存教师失败', {
+              teacher: teacher.name,
+              error: error instanceof Error ? error.message : String(error),
+            });
+          }
+        }
+
+        // 3. 保存科目
+        const subjectNameToId = new Map<string, string>();
+        for (const subject of parseResult.data!.subjects) {
+          try {
+            const subjectId = subject.id || `subject-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+            SubjectRepository.create({
+              id: subjectId,
+              name: subject.name,
+              forbiddenSlots: subject.forbiddenSlots,
+              allowDoubleSession: subject.allowDoubleSession !== undefined ? subject.allowDoubleSession : true,
+              venueId: subject.venueId,
+              isMajorSubject: subject.isMajorSubject !== undefined ? subject.isMajorSubject : false,
+            });
+            subjectNameToId.set(subject.name, subjectId);
+            savedCount++;
+          } catch (error) {
+            log.warn('保存科目失败', {
+              subject: subject.name,
+              error: error instanceof Error ? error.message : String(error),
+            });
+          }
+        }
+
+        // 4. 保存班级
+        const classNameToId = new Map<string, number>();
+        const classNames = new Set(parseResult.data!.classes.map(c => c.name));
+
+        for (const className of classNames) {
+          try {
+            const classData = parseResult.data!.classes.find(c => c.name === className);
+            const classId = ClassRepository.create({
+              name: className,
+              grade: classData?.grade,
+            });
+            classNameToId.set(className, classId);
+            savedCount++;
+          } catch (error) {
+            log.warn('保存班级失败', {
+              class: className,
+              error: error instanceof Error ? error.message : String(error),
+            });
+          }
+        }
+
+        // 5. 保存教学计划
+        for (const curriculum of parseResult.data!.curriculums) {
+          try {
+            const classId = classNameToId.get(curriculum.className);
+            const teacherId = teacherNameToId.get(curriculum.teacherName);
+            const subjectId = subjectNameToId.get(curriculum.subjectName);
+
+            if (!classId) {
+              log.warn('班级不存在，跳过教学计划', { className: curriculum.className });
+              continue;
+            }
+
+            if (!teacherId) {
+              log.warn('教师不存在，跳过教学计划', { teacherName: curriculum.teacherName });
+              continue;
+            }
+
+            if (!subjectId) {
+              log.warn('科目不存在，跳过教学计划', { subjectName: curriculum.subjectName });
+              continue;
+            }
+
+            CurriculumRepository.create({
+              classId,
+              subjectId,
+              teacherId,
+              targetSessions: curriculum.hoursPerWeek,
+            });
+            savedCount++;
+          } catch (error) {
+            log.warn('保存教学计划失败', {
+              curriculum: `${curriculum.className}-${curriculum.subjectName}`,
+              error: error instanceof Error ? error.message : String(error),
+            });
+          }
+        }
+      });
+
+      try {
+        saveTransaction();
+        log.step('数据保存成功', { savedCount });
+      } catch (error) {
+        log.error('数据保存失败', {
+          error: error instanceof Error ? error.message : String(error),
+        });
+        throw new Error(`数据保存失败: ${error instanceof Error ? error.message : String(error)}`);
+      }
+
       const result = {
         success: true,
-        success_count: 0,
+        success_count: savedCount,
         error_count: 0,
-        errors: [] as string[],
-        message: '导入功能尚未完全实现，返回模拟结果',
+        errors: [],
+        message: `成功导入 ${savedCount} 条记录到数据库`,
+        data: null, // 不返回详细数据
       };
 
       const duration = Date.now() - startTime;
@@ -194,8 +352,12 @@ importExportRoutes.post(
         success: result.success,
         data: {
           successCount: result.success_count,
-          errorCount: result.error_count,
-          errors: result.errors,
+          failureCount: result.error_count,
+          errors: result.errors.map((errMsg, index) => ({
+            row: index + 1,
+            reason: errMsg,
+          })),
+          importedData: result.data,
         },
         message: result.message,
       });

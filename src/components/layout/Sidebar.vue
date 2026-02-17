@@ -79,6 +79,18 @@
           <template #title>导入导出</template>
         </el-menu-item>
 
+        <!-- 字典管理 -->
+        <el-menu-item index="/dictionary">
+          <el-icon><Notebook /></el-icon>
+          <template #title>字典管理</template>
+        </el-menu-item>
+
+        <!-- 教学计划 -->
+        <el-menu-item index="/curriculum">
+          <el-icon><Document /></el-icon>
+          <template #title>教学计划</template>
+        </el-menu-item>
+
         <!-- 统计分析 -->
         <el-menu-item index="/statistics">
           <el-icon><DataAnalysis /></el-icon>
@@ -120,6 +132,8 @@ import {
   Edit,
   Setting,
   DataLine,
+  Notebook,
+  Document,
 } from '@element-plus/icons-vue';
 import { logger } from '@/utils/logger';
 

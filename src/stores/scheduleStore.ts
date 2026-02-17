@@ -5,6 +5,7 @@
 import { defineStore } from 'pinia';
 import { ref, computed } from 'vue';
 import { logger } from '@/utils/logger';
+import { ScheduleApi } from '@/api/schedule';
 
 // 时间槽位接口
 export interface TimeSlot {
@@ -89,11 +90,15 @@ export const useScheduleStore = defineStore('schedule', () => {
     try {
       logger.info('开始加载课表');
 
-      // TODO: 调用 Tauri 命令获取课表
-      // const result = await invoke<Schedule>('get_active_schedule');
-      // schedule.value = result;
+      const response = await ScheduleApi.getActive();
 
-      logger.info('课表加载成功', { entryCount: entryCount.value });
+      if (response.success && response.data) {
+        schedule.value = response.data;
+        logger.info('课表加载成功', { entryCount: entryCount.value });
+      } else {
+        logger.warn('加载课表失败', { message: response.message });
+        throw new Error(response.message || '加载课表失败');
+      }
     } catch (error) {
       logger.error('加载课表失败', { error });
       throw error;
@@ -108,14 +113,18 @@ export const useScheduleStore = defineStore('schedule', () => {
       logger.info('开始生成课表');
       isGenerating.value = true;
 
-      // TODO: 调用 Tauri 命令生成课表
-      // const result = await invoke<Schedule>('generate_schedule');
-      // schedule.value = result;
+      const response = await ScheduleApi.generate();
 
-      logger.info('课表生成成功', {
-        cost: scheduleCost.value,
-        entryCount: entryCount.value,
-      });
+      if (response.success && response.data) {
+        schedule.value = response.data;
+        logger.info('课表生成成功', {
+          cost: scheduleCost.value,
+          entryCount: entryCount.value,
+        });
+      } else {
+        logger.error('生成课表失败', { message: response.message });
+        throw new Error(response.message || '生成课表失败');
+      }
     } catch (error) {
       logger.error('生成课表失败', { error });
       throw error;
@@ -148,19 +157,22 @@ export const useScheduleStore = defineStore('schedule', () => {
         to: newSlot,
       });
 
-      // TODO: 调用 Tauri 命令移动课程
-      // await invoke('move_schedule_entry', {
-      //   classId: entry.classId,
-      //   subjectId: entry.subjectId,
-      //   teacherId: entry.teacherId,
-      //   fromSlot: entry.timeSlot,
-      //   toSlot: newSlot,
-      // });
+      const response = await ScheduleApi.moveEntry(
+        entry.classId,
+        entry.subjectId,
+        entry.teacherId,
+        entry.timeSlot,
+        newSlot
+      );
 
-      // 重新加载课表
-      await loadSchedule();
-
-      logger.info('课程移动成功');
+      if (response.success) {
+        // 重新加载课表
+        await loadSchedule();
+        logger.info('课程移动成功');
+      } else {
+        logger.error('移动课程失败', { message: response.message });
+        throw new Error(response.message || '移动课程失败');
+      }
     } catch (error) {
       logger.error('移动课程失败', { error });
       throw error;
@@ -174,19 +186,22 @@ export const useScheduleStore = defineStore('schedule', () => {
     try {
       logger.debug('检测冲突', { entry });
 
-      // TODO: 调用 Tauri 命令检测冲突
-      // const result = await invoke<Record<string, ConflictInfo>>('detect_conflicts', {
-      //   classId: entry.classId,
-      //   subjectId: entry.subjectId,
-      //   teacherId: entry.teacherId,
-      // });
+      const response = await ScheduleApi.detectConflicts(
+        entry.classId,
+        entry.subjectId,
+        entry.teacherId
+      );
 
-      // conflicts.value = new Map(Object.entries(result));
-
-      logger.debug('冲突检测完成', { conflictCount: conflicts.value.size });
+      if (response.success && response.data) {
+        conflicts.value = new Map(Object.entries(response.data));
+        logger.debug('冲突检测完成', { conflictCount: conflicts.value.size });
+      } else {
+        logger.warn('检测冲突失败', { message: response.message });
+        conflicts.value.clear();
+      }
     } catch (error) {
       logger.error('检测冲突失败', { error });
-      throw error;
+      conflicts.value.clear();
     }
   };
 
@@ -213,19 +228,22 @@ export const useScheduleStore = defineStore('schedule', () => {
     try {
       logger.info('设置固定课程', { entry });
 
-      // TODO: 调用 Tauri 命令设置固定课程
-      // await invoke('set_fixed_course', {
-      //   classId: entry.classId,
-      //   subjectId: entry.subjectId,
-      //   teacherId: entry.teacherId,
-      //   timeSlot: entry.timeSlot,
-      //   weekType: entry.weekType,
-      // });
+      const response = await ScheduleApi.setFixedCourse(
+        entry.classId,
+        entry.subjectId,
+        entry.teacherId,
+        entry.timeSlot,
+        entry.weekType
+      );
 
-      // 重新加载课表
-      await loadSchedule();
-
-      logger.info('固定课程设置成功');
+      if (response.success) {
+        // 重新加载课表
+        await loadSchedule();
+        logger.info('固定课程设置成功');
+      } else {
+        logger.error('设置固定课程失败', { message: response.message });
+        throw new Error(response.message || '设置固定课程失败');
+      }
     } catch (error) {
       logger.error('设置固定课程失败', { error });
       throw error;
@@ -239,18 +257,21 @@ export const useScheduleStore = defineStore('schedule', () => {
     try {
       logger.info('解除固定课程', { entry });
 
-      // TODO: 调用 Tauri 命令解除固定课程
-      // await invoke('unset_fixed_course', {
-      //   classId: entry.classId,
-      //   subjectId: entry.subjectId,
-      //   teacherId: entry.teacherId,
-      //   timeSlot: entry.timeSlot,
-      // });
+      const response = await ScheduleApi.unsetFixedCourse(
+        entry.classId,
+        entry.subjectId,
+        entry.teacherId,
+        entry.timeSlot
+      );
 
-      // 重新加载课表
-      await loadSchedule();
-
-      logger.info('固定课程解除成功');
+      if (response.success) {
+        // 重新加载课表
+        await loadSchedule();
+        logger.info('固定课程解除成功');
+      } else {
+        logger.error('解除固定课程失败', { message: response.message });
+        throw new Error(response.message || '解除固定课程失败');
+      }
     } catch (error) {
       logger.error('解除固定课程失败', { error });
       throw error;
@@ -264,21 +285,24 @@ export const useScheduleStore = defineStore('schedule', () => {
     try {
       logger.info('批量设置固定课程', { count: entries.length });
 
-      // TODO: 调用 Tauri 命令批量设置固定课程
-      // await invoke('batch_set_fixed_courses', {
-      //   entries: entries.map(e => ({
-      //     classId: e.classId,
-      //     subjectId: e.subjectId,
-      //     teacherId: e.teacherId,
-      //     timeSlot: e.timeSlot,
-      //     weekType: e.weekType,
-      //   })),
-      // });
+      const response = await ScheduleApi.batchSetFixedCourses(
+        entries.map(e => ({
+          classId: e.classId,
+          subjectId: e.subjectId,
+          teacherId: e.teacherId,
+          timeSlot: e.timeSlot,
+          weekType: e.weekType,
+        }))
+      );
 
-      // 重新加载课表
-      await loadSchedule();
-
-      logger.info('批量设置固定课程成功');
+      if (response.success) {
+        // 重新加载课表
+        await loadSchedule();
+        logger.info('批量设置固定课程成功');
+      } else {
+        logger.error('批量设置固定课程失败', { message: response.message });
+        throw new Error(response.message || '批量设置固定课程失败');
+      }
     } catch (error) {
       logger.error('批量设置固定课程失败', { error });
       throw error;
@@ -292,20 +316,23 @@ export const useScheduleStore = defineStore('schedule', () => {
     try {
       logger.info('批量解除固定课程', { count: entries.length });
 
-      // TODO: 调用 Tauri 命令批量解除固定课程
-      // await invoke('batch_unset_fixed_courses', {
-      //   entries: entries.map(e => ({
-      //     classId: e.classId,
-      //     subjectId: e.subjectId,
-      //     teacherId: e.teacherId,
-      //     timeSlot: e.timeSlot,
-      //   })),
-      // });
+      const response = await ScheduleApi.batchUnsetFixedCourses(
+        entries.map(e => ({
+          classId: e.classId,
+          subjectId: e.subjectId,
+          teacherId: e.teacherId,
+          timeSlot: e.timeSlot,
+        }))
+      );
 
-      // 重新加载课表
-      await loadSchedule();
-
-      logger.info('批量解除固定课程成功');
+      if (response.success) {
+        // 重新加载课表
+        await loadSchedule();
+        logger.info('批量解除固定课程成功');
+      } else {
+        logger.error('批量解除固定课程失败', { message: response.message });
+        throw new Error(response.message || '批量解除固定课程失败');
+      }
     } catch (error) {
       logger.error('批量解除固定课程失败', { error });
       throw error;
